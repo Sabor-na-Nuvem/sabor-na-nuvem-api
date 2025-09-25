@@ -14,3 +14,5 @@ pnpm-debug.log
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+/src/generated/prisma

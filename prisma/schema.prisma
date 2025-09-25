@@ -1,0 +1,234 @@
+// --- CONFIGURACAO INICIAL ---
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- MODELOS PRINCIPAIS ---
+
+model Telefone {
+  id        Int    @id @default(autoincrement()) @map("idTelefone")
+  ddd       String @db.VarChar(2)
+  numero    String @db.VarChar(9)
+  usuarioId Int?
+  lojaId    Int?
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], map: "telefone_usuario_fk")
+  loja    Loja?    @relation(fields: [lojaId], references: [id], map: "telefone_loja_fk")
+
+  @@unique([ddd, numero])
+  @@map("telefone")
+}
+
+model Endereco {
+  id          Int     @id @default(autoincrement()) @map("idEndereco")
+  cep         String  @db.VarChar(9)
+  estado      String
+  cidade      String
+  bairro      String
+  rua         String
+  casa        String  @db.VarChar(10)
+  complemento String?
+
+  usuario Usuario?
+  loja    Loja?
+
+  @@map("endereco")
+}
+
+model Loja {
+  id                   Int      @id @default(autoincrement()) @map("idLoja")
+  nome                 String   @unique @map("nomeLoja")
+  cnpj                 String   @unique @db.VarChar(14)
+  enderecoId           Int      @unique
+  latitude             Decimal  @db.Decimal(9, 6)
+  longitude            Decimal  @db.Decimal(9, 6)
+  horarioFuncionamento String
+  ofereceDelivery      Boolean
+  raioEntregaKm        Decimal?
+
+  Pedido                 Pedido[]
+  funcionarios           Usuario[]
+  telefones              Telefone[]
+  produtosEmEstoque      ProdutosEmLoja[]
+  modificadoresEmEstoque ModificadorEmLoja[]
+
+  endereco Endereco @relation(fields: [enderecoId], references: [id], map: "loja_endereco_fk")
+
+  @@map("loja")
+}
+
+model Usuario {
+  id                Int     @id @default(autoincrement()) @map("idUsuario")
+  nome              String  @map("nomeUsuario") @db.VarChar(50)
+  email             String  @unique @db.VarChar(30)
+  senha             String
+  isFuncionario     Boolean
+  isAdmin           Boolean
+  enderecoId        Int?    @unique
+  funcionarioLojaId Int?
+
+  Pedido    Pedido[]
+  telefones Telefone[]
+  cupons    CupomDesconto[]
+  relatorio RelatorioUsuario?
+
+  endereco Endereco? @relation(fields: [enderecoId], references: [id], map: "usuario_endereco_fk")
+  loja     Loja?     @relation(fields: [funcionarioLojaId], references: [id], map: "usuario_loja_fk")
+
+  @@map("usuario")
+}
+
+model RelatorioUsuario {
+  usuarioId        Int     @id
+  gastosTotais     Decimal @db.Decimal(10, 2)
+  gastosMensais    Decimal @db.Decimal(10, 2)
+  qtdTotalPedidos  Int
+  qtdMensalPedidos Int
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], map: "relatorio_usuario_fk")
+
+  @@map("relatorioUsuario")
+}
+
+model CupomDesconto {
+  id        Int      @id @default(autoincrement()) @map("idCupomDesconto")
+  codCupom  String   @unique
+  validade  DateTime
+  qtdUsos   Int
+  usuarioId Int?
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], map: "cupom_usuario_fk")
+
+  @@map("cupomDesconto")
+}
+
+model CategoriaProduto {
+  id        Int    @id @default(autoincrement()) @map("idCategoria")
+  nome      String @map("nomeCategoria")
+  descricao String @map("descricaoCategoria")
+
+  produtosNaCategoria Produto[]
+
+  @@map("categoriaProduto")
+}
+
+model Produto {
+  id          Int    @id @default(autoincrement()) @map("idProduto")
+  imagemUrl   String
+  nome        String @map("nomeProduto")
+  descricao   String @map("descricaoProduto")
+  categoriaId Int
+
+  vendidoNosPedidos ItemPedido[]
+  personalizacao    Personalizavel[]
+  lojasQueVendem    ProdutosEmLoja[]
+
+  categoria CategoriaProduto @relation(fields: [categoriaId], references: [id], map: "produto_categoria_fk")
+
+  @@map("produto")
+}
+
+model ProdutosEmLoja {
+  lojaId           Int
+  produtoId        Int
+  disponivel       Boolean
+  valorBase        Decimal  @db.Decimal(5, 2)
+  emPromocao       Boolean
+  descontoPromocao Int
+  validadePromocao DateTime
+
+  loja    Loja    @relation(fields: [lojaId], references: [id], map: "lojaProduto_loja_fk")
+  produto Produto @relation(fields: [produtoId], references: [id], map: "lojaProduto_produto_fk")
+
+  @@id([lojaId, produtoId])
+  @@map("produtosEmLoja ")
+}
+
+model Personalizavel {
+  id            Int    @id @default(autoincrement()) @map("idPersonalizavel")
+  nome          String @map("nomePersonalizavel")
+  produtoId     Int
+  selecaoMinima Int
+  selecaoMaxima Int
+
+  modificadores Modificador[]
+
+  produto Produto @relation(fields: [produtoId], references: [id], map: "personalizavel_produto_fk")
+
+  @@map("personalizavel")
+}
+
+model Modificador {
+  id               Int    @id @default(autoincrement()) @map("idModificador")
+  nome             String @map("nomeModificador")
+  personalizavelId Int
+
+  lojasQueDisponibilizam ModificadorEmLoja[]
+
+  personalizavel Personalizavel @relation(fields: [personalizavelId], references: [id], map: "modificador_personalizavel_fk")
+
+  @@map("modificador")
+}
+
+model ModificadorEmLoja {
+  lojaId         Int
+  modificadorId  Int
+  disponivel     Boolean
+  valorAdicional Decimal @db.Decimal(4, 2)
+
+  loja        Loja        @relation(fields: [lojaId], references: [id], map: "lojaMod_loja_fk")
+  modificador Modificador @relation(fields: [modificadorId], references: [id], map: "lojaMod_modificador_fk")
+
+  @@id([lojaId, modificadorId])
+  @@map("modificadorEmLoja")
+}
+
+model Pedido {
+  id           Int          @id @default(autoincrement()) @map("idPedido")
+  clienteId    Int
+  lojaId       Int
+  dataHora     DateTime     @map("dataHoraPedido")
+  valorBase    Decimal      @db.Decimal(7, 2)
+  valorCobrado Decimal      @db.Decimal(7, 2)
+  cupomUsadoId Int?
+  observacoes  String?      @map("observacoesPedido")
+  status       StatusPedido
+
+  itensNoPedido ItemPedido[]
+
+  cliente Usuario @relation(fields: [clienteId], references: [id], map: "pedido_usuario_fk")
+  loja    Loja    @relation(fields: [lojaId], references: [id], map: "pedido_loja_fk")
+
+  @@map("pedido")
+}
+
+model ItemPedido {
+  pedidoId           Int
+  produtoId          Int
+  qtdProduto         Int
+  valorTotalProdutos Decimal @map("valorTotalProdutos") @db.Decimal(7, 2)
+
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], map: "itemPedido_pedido_fk")
+  produto Produto @relation(fields: [produtoId], references: [id], map: "itemPedido_produto_fk")
+
+  @@id([pedidoId, produtoId])
+  @@map("itemPedido")
+}
+
+// --- ENUMs ---
+
+enum StatusPedido {
+  CANCELADO
+  AGUARDANDO_PAGAMENTO
+  PENDENTE
+  EM_PREPARO
+  PRONTO_PARA_ENTREGA
+  PRONTO_PARA_RETIRADA
+  EM_ENTREGA
+  REALIZADO
+}

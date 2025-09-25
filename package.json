@@ -1,10 +1,12 @@
 {
   "name": "sabor-na-nuvem-api",
   "version": "1.0.0",
+  "type": "module",
   "description": "Repositório utilizado para o Backend do projeto Sabor na Nuvem.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +18,14 @@
   "bugs": {
     "url": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api/issues"
   },
-  "homepage": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api#readme"
+  "homepage": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api#readme",
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prisma": "^6.16.2"
+  }
 }
