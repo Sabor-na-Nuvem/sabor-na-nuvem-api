@@ -1,0 +1,20 @@
+{
+  "name": "sabor-na-nuvem-api",
+  "version": "1.0.0",
+  "description": "Repositório utilizado para o Backend do projeto Sabor na Nuvem.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api/issues"
+  },
+  "homepage": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api#readme"
+}

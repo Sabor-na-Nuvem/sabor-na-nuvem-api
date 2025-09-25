@@ -1,0 +1,16 @@
+# Dependências e Pacotes
+/node_modules
+
+# Variáveis de Ambiente e Segredos
+.env
+
+# Logs
+npm-debug.log*
+yarn-error.log
+pnpm-debug.log
+
+# Arquivos de Editor de Código e IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
