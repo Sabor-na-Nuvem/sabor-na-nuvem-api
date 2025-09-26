@@ -1,6 +1,33 @@
-const categoriaProdutoRoutes = {
-  // TODO:
-  // getAll: (req, res) => { ... }
-};
+import express from 'express';
+import categoriaProdutoController from './categoria-produto.controller.js';
 
-export default categoriaProdutoRoutes;
+const categoriaProdutoRouter = express.Router();
+
+// MÉTODO: GET, Endpoint: /api/categoria-produto/
+categoriaProdutoRouter.get(
+  '/',
+  categoriaProdutoController.buscarTodasAsCategorias,
+);
+
+// MÉTODO: GET, Endpoint: /api/categoria-produto/:id
+categoriaProdutoRouter.get(
+  '/:id',
+  categoriaProdutoController.buscarCategoriaPorId,
+);
+
+// MÉTODO: POST, Endpoint: /api/categoria-produto/
+categoriaProdutoRouter.post('/', categoriaProdutoController.criarCategoria);
+
+// MÉTODO: PUT, Endpoint: /api/categoria-produto/:id
+categoriaProdutoRouter.put(
+  '/:id',
+  categoriaProdutoController.atualizarCategoria,
+);
+
+// MÉTODO: DELETE, Endpoint: /api/categoria-produto/:id
+categoriaProdutoRouter.delete(
+  '/:id',
+  categoriaProdutoController.deletarCategoria,
+);
+
+export default categoriaProdutoRouter;

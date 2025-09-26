@@ -1,0 +1,40 @@
+# Variáveis - Defina o URL base aqui para reutilizar
+@baseUrl = http://localhost:3000/api
+@apiCategoriaProdutos = {{baseUrl}}/categoria-produto
+
+###
+# CREATE - Criar uma nova categoria
+# @name createCategoria
+POST {{apiCategoriaProdutos}}
+Content-Type: application/json
+
+{
+  "nome": "Sanduíche",
+  "descricao": "Feitos no tamanho ideal para quem está com fome."
+}
+
+###
+# Captura o ID da categoria recém-criada para usar nas próximas requisições
+@categoriaId = {{createCategoria.response.body.$.id}}
+
+###
+# READ (ONE) - Buscar a categoria pelo ID capturado
+GET {{apiCategoriaProdutos}}/{{categoriaId}}
+
+###
+# READ (ALL) - Buscar todos as categorias
+GET {{apiCategoriaProdutos}}
+
+###
+# UPDATE - Atualizar a categoria
+PUT {{apiCategoriaProdutos}}/{{categoriaId}}
+Content-Type: application/json
+
+{
+  "nome": "Bebida",
+  "descricao": "Ótimas escolhas para aliviar a sede!"
+}
+
+###
+# DELETE - Deletar a categoria
+DELETE {{apiCategoriaProdutos}}/{{categoriaId}}
