@@ -5,8 +5,10 @@
   "description": "Repositório utilizado para o Backend do projeto Sabor na Nuvem.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified yet\" && exit 1",
+    "lint": "echo \"No linter configured yet\" && exit 0"
   },
   "repository": {
     "type": "git",
