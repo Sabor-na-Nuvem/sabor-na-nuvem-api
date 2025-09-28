@@ -25,14 +25,17 @@ model Telefone {
 }
 
 model Endereco {
-  id          Int     @id @default(autoincrement()) @map("idEndereco")
-  cep         String  @db.VarChar(9)
-  estado      String
-  cidade      String
-  bairro      String
-  rua         String
-  casa        String  @db.VarChar(10)
-  complemento String?
+  id              Int     @id @default(autoincrement()) @map("idEndereco")
+  cep             String  @db.VarChar(9)
+  estado          String
+  cidade          String
+  bairro          String
+  rua             String
+  casa            String  @db.VarChar(10)
+  complemento     String?
+  pontoReferencia String
+  latitude        Decimal @db.Decimal(9, 6)
+  longitude       Decimal @db.Decimal(9, 6)
 
   usuario Usuario?
   loja    Loja?
@@ -45,8 +48,6 @@ model Loja {
   nome                 String   @unique @map("nomeLoja")
   cnpj                 String   @unique @db.VarChar(14)
   enderecoId           Int      @unique
-  latitude             Decimal  @db.Decimal(9, 6)
-  longitude            Decimal  @db.Decimal(9, 6)
   horarioFuncionamento String
   ofereceDelivery      Boolean
   raioEntregaKm        Decimal?
@@ -63,16 +64,19 @@ model Loja {
 }
 
 model Usuario {
-  id                Int     @id @default(autoincrement()) @map("idUsuario")
-  nome              String  @map("nomeUsuario") @db.VarChar(50)
-  email             String  @unique @db.VarChar(30)
-  senha             String
-  isFuncionario     Boolean
-  isAdmin           Boolean
-  enderecoId        Int?    @unique
-  funcionarioLojaId Int?
+  id                        Int       @id @default(autoincrement()) @map("idUsuario")
+  nome                      String    @map("nomeUsuario") @db.VarChar(50)
+  email                     String    @unique @db.VarChar(30)
+  senha                     String
+  isFuncionario             Boolean
+  isAdmin                   Boolean
+  enderecoId                Int?      @unique
+  funcionarioLojaId         Int?
+  resetPasswordToken        String?   @unique
+  resetPasswordTokenExpires DateTime?
 
   Pedido    Pedido[]
+  carrinho  Carrinho?
   telefones Telefone[]
   cupons    CupomDesconto[]
   relatorio RelatorioUsuario?
@@ -109,7 +113,7 @@ model CupomDesconto {
 
 model CategoriaProduto {
   id        Int    @id @default(autoincrement()) @map("idCategoria")
-  nome      String @map("nomeCategoria")
+  nome      String @unique @map("nomeCategoria")
   descricao String @map("descricaoCategoria")
 
   produtosNaCategoria Produto[]
@@ -125,6 +129,7 @@ model Produto {
   categoriaId Int
 
   vendidoNosPedidos ItemPedido[]
+  estaNosCarrinhos  ItemCarrinho[]
   personalizacao    Personalizavel[]
   lojasQueVendem    ProdutosEmLoja[]
 
@@ -196,6 +201,7 @@ model Pedido {
   valorBase    Decimal      @db.Decimal(7, 2)
   valorCobrado Decimal      @db.Decimal(7, 2)
   cupomUsadoId Int?
+  paraEntrega  Boolean
   observacoes  String?      @map("observacoesPedido")
   status       StatusPedido
 
@@ -211,13 +217,38 @@ model ItemPedido {
   pedidoId           Int
   produtoId          Int
   qtdProduto         Int
-  valorTotalProdutos Decimal @map("valorTotalProdutos") @db.Decimal(7, 2)
+  valorTotalProdutos Decimal @db.Decimal(7, 2)
 
   pedido  Pedido  @relation(fields: [pedidoId], references: [id], map: "itemPedido_pedido_fk")
   produto Produto @relation(fields: [produtoId], references: [id], map: "itemPedido_produto_fk")
 
   @@id([pedidoId, produtoId])
   @@map("itemPedido")
+}
+
+model Carrinho {
+  id          Int     @id @map("idCarrinho")
+  paraEntrega Boolean
+  valorBase   Decimal @db.Decimal(7, 2)
+
+  itensNoCarrinho ItemCarrinho[]
+
+  cliente Usuario @relation(fields: [id], references: [id], map: "carrinho_usuario_fk")
+
+  @@map("carrinho")
+}
+
+model ItemCarrinho {
+  carrinhoId         Int
+  produtoId          Int
+  qtdProduto         Int
+  valorTotalProdutos Decimal @db.Decimal(7, 2)
+
+  carrinho Carrinho @relation(fields: [carrinhoId], references: [id], map: "itemCarrinho_carrinho_fk")
+  produto  Produto  @relation(fields: [produtoId], references: [id], map: "itemCarrinho_produto_fk")
+
+  @@id([carrinhoId, produtoId])
+  @@map("itemCarrinho")
 }
 
 // --- ENUMs ---
