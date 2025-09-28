@@ -15,6 +15,12 @@ categoriaProdutoRouter.get(
   categoriaProdutoController.buscarCategoriaPorId,
 );
 
+// MÉTODO: GET, Endpoint: /api/categoria-produto/nome
+categoriaProdutoRouter.get(
+  '/nome',
+  categoriaProdutoController.buscarCategoriaPorNome,
+);
+
 // MÉTODO: POST, Endpoint: /api/categoria-produto/
 categoriaProdutoRouter.post('/', categoriaProdutoController.criarCategoria);
 

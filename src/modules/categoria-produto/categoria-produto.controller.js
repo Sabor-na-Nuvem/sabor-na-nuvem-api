@@ -30,6 +30,23 @@ const categoriaProdutoController = {
     }
   },
 
+  async buscarCategoriaPorNome(req, res) {
+    try {
+      const nome = req.body;
+
+      const categoria =
+        await categoriaProdutoService.buscarCategoriaPorId(nome);
+
+      if (!categoria) {
+        return res.status(404).json({ message: 'Categoria não encontrada.' });
+      }
+
+      return res.status(200).json(categoria);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  },
+
   async criarCategoria(req, res) {
     try {
       const dadosCategoria = req.body;

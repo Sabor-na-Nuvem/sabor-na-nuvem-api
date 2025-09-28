@@ -30,6 +30,24 @@ const categoriaProdutoServices = {
     }
   },
 
+  async buscarCategoriaPorNome(nomeCategoria) {
+    try {
+      const categoria = await prisma.categoriaProduto.findUnique({
+        where: {
+          nome: nomeCategoria,
+        },
+      });
+
+      return categoria;
+    } catch (error) {
+      console.error(
+        `Erro ao buscar a categoria com nome ${nomeCategoria}: `,
+        error,
+      );
+      throw new Error('Não foi possível buscar a categoria.');
+    }
+  },
+
   async criarCategoria(dadosCategoria) {
     try {
       const novaCategoria = await prisma.categoriaProduto.create({
