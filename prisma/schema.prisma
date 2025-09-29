@@ -11,11 +11,14 @@ datasource db {
 // --- MODELOS PRINCIPAIS ---
 
 model Telefone {
-  id        Int    @id @default(autoincrement()) @map("idTelefone")
-  ddd       String @db.VarChar(2)
-  numero    String @db.VarChar(9)
+  id        Int      @id @default(autoincrement()) @map("idTelefone")
+  ddd       String   @db.VarChar(2)
+  numero    String   @db.VarChar(9)
   usuarioId Int?
   lojaId    Int?
+  // Timestamps
+  createdAt DateTime @default(now()) @map("criadoEm")
+  updatedAt DateTime @updatedAt @map("atualizadoEm")
 
   usuario Usuario? @relation(fields: [usuarioId], references: [id], map: "telefone_usuario_fk")
   loja    Loja?    @relation(fields: [lojaId], references: [id], map: "telefone_loja_fk")
@@ -25,14 +28,20 @@ model Telefone {
 }
 
 model Endereco {
-  id          Int     @id @default(autoincrement()) @map("idEndereco")
-  cep         String  @db.VarChar(9)
-  estado      String
-  cidade      String
-  bairro      String
-  rua         String
-  casa        String  @db.VarChar(10)
-  complemento String?
+  id              Int      @id @default(autoincrement()) @map("idEndereco")
+  cep             String   @db.VarChar(9)
+  estado          String
+  cidade          String
+  bairro          String
+  rua             String
+  casa            String   @db.VarChar(10)
+  complemento     String?
+  pontoReferencia String
+  latitude        Decimal  @db.Decimal(9, 6)
+  longitude       Decimal  @db.Decimal(9, 6)
+  // Timestamps
+  createdAt       DateTime @default(now()) @map("criadoEm")
+  updatedAt       DateTime @updatedAt @map("atualizadoEm")
 
   usuario Usuario?
   loja    Loja?
@@ -45,11 +54,12 @@ model Loja {
   nome                 String   @unique @map("nomeLoja")
   cnpj                 String   @unique @db.VarChar(14)
   enderecoId           Int      @unique
-  latitude             Decimal  @db.Decimal(9, 6)
-  longitude            Decimal  @db.Decimal(9, 6)
   horarioFuncionamento String
   ofereceDelivery      Boolean
   raioEntregaKm        Decimal?
+  // Timestamps
+  createdAt            DateTime @default(now()) @map("criadoEm")
+  updatedAt            DateTime @updatedAt @map("atualizadoEm")
 
   Pedido                 Pedido[]
   funcionarios           Usuario[]
@@ -63,16 +73,22 @@ model Loja {
 }
 
 model Usuario {
-  id                Int     @id @default(autoincrement()) @map("idUsuario")
-  nome              String  @map("nomeUsuario") @db.VarChar(50)
-  email             String  @unique @db.VarChar(30)
-  senha             String
-  isFuncionario     Boolean
-  isAdmin           Boolean
-  enderecoId        Int?    @unique
-  funcionarioLojaId Int?
+  id                        Int       @id @default(autoincrement()) @map("idUsuario")
+  nome                      String    @map("nomeUsuario") @db.VarChar(50)
+  email                     String    @unique @db.VarChar(30)
+  senha                     String
+  isFuncionario             Boolean
+  isAdmin                   Boolean
+  enderecoId                Int?      @unique
+  funcionarioLojaId         Int?
+  resetPasswordToken        String?   @unique
+  resetPasswordTokenExpires DateTime?
+  // Timestamps
+  createdAt                 DateTime  @default(now()) @map("criadoEm")
+  updatedAt                 DateTime  @updatedAt @map("atualizadoEm")
 
   Pedido    Pedido[]
+  carrinho  Carrinho?
   telefones Telefone[]
   cupons    CupomDesconto[]
   relatorio RelatorioUsuario?
@@ -84,11 +100,14 @@ model Usuario {
 }
 
 model RelatorioUsuario {
-  usuarioId        Int     @id
-  gastosTotais     Decimal @db.Decimal(10, 2)
-  gastosMensais    Decimal @db.Decimal(10, 2)
+  usuarioId        Int      @id
+  gastosTotais     Decimal  @db.Decimal(10, 2)
+  gastosMensais    Decimal  @db.Decimal(10, 2)
   qtdTotalPedidos  Int
   qtdMensalPedidos Int
+  // Timestamps
+  createdAt        DateTime @default(now()) @map("criadoEm")
+  updatedAt        DateTime @updatedAt @map("atualizadoEm")
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], map: "relatorio_usuario_fk")
 
@@ -101,6 +120,9 @@ model CupomDesconto {
   validade  DateTime
   qtdUsos   Int
   usuarioId Int?
+  // Timestamps
+  createdAt DateTime @default(now()) @map("criadoEm")
+  updatedAt DateTime @updatedAt @map("atualizadoEm")
 
   usuario Usuario? @relation(fields: [usuarioId], references: [id], map: "cupom_usuario_fk")
 
@@ -108,9 +130,12 @@ model CupomDesconto {
 }
 
 model CategoriaProduto {
-  id        Int    @id @default(autoincrement()) @map("idCategoria")
-  nome      String @map("nomeCategoria")
-  descricao String @map("descricaoCategoria")
+  id        Int      @id @default(autoincrement()) @map("idCategoria")
+  nome      String   @unique @map("nomeCategoria")
+  descricao String   @map("descricaoCategoria")
+  // Timestamps
+  createdAt DateTime @default(now()) @map("criadoEm")
+  updatedAt DateTime @updatedAt @map("atualizadoEm")
 
   produtosNaCategoria Produto[]
 
@@ -118,13 +143,17 @@ model CategoriaProduto {
 }
 
 model Produto {
-  id          Int    @id @default(autoincrement()) @map("idProduto")
+  id          Int      @id @default(autoincrement()) @map("idProduto")
   imagemUrl   String
-  nome        String @map("nomeProduto")
-  descricao   String @map("descricaoProduto")
+  nome        String   @map("nomeProduto")
+  descricao   String   @map("descricaoProduto")
   categoriaId Int
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("criadoEm")
+  updatedAt   DateTime @updatedAt @map("atualizadoEm")
 
   vendidoNosPedidos ItemPedido[]
+  estaNosCarrinhos  ItemCarrinho[]
   personalizacao    Personalizavel[]
   lojasQueVendem    ProdutosEmLoja[]
 
@@ -141,6 +170,9 @@ model ProdutosEmLoja {
   emPromocao       Boolean
   descontoPromocao Int
   validadePromocao DateTime
+  // Timestamps
+  createdAt        DateTime @default(now()) @map("criadoEm")
+  updatedAt        DateTime @updatedAt @map("atualizadoEm")
 
   loja    Loja    @relation(fields: [lojaId], references: [id], map: "lojaProduto_loja_fk")
   produto Produto @relation(fields: [produtoId], references: [id], map: "lojaProduto_produto_fk")
@@ -150,11 +182,14 @@ model ProdutosEmLoja {
 }
 
 model Personalizavel {
-  id            Int    @id @default(autoincrement()) @map("idPersonalizavel")
-  nome          String @map("nomePersonalizavel")
+  id            Int      @id @default(autoincrement()) @map("idPersonalizavel")
+  nome          String   @map("nomePersonalizavel")
   produtoId     Int
   selecaoMinima Int
   selecaoMaxima Int
+  // Timestamps
+  createdAt     DateTime @default(now()) @map("criadoEm")
+  updatedAt     DateTime @updatedAt @map("atualizadoEm")
 
   modificadores Modificador[]
 
@@ -164,9 +199,12 @@ model Personalizavel {
 }
 
 model Modificador {
-  id               Int    @id @default(autoincrement()) @map("idModificador")
-  nome             String @map("nomeModificador")
+  id               Int      @id @default(autoincrement()) @map("idModificador")
+  nome             String   @map("nomeModificador")
   personalizavelId Int
+  // Timestamps
+  createdAt        DateTime @default(now()) @map("criadoEm")
+  updatedAt        DateTime @updatedAt @map("atualizadoEm")
 
   lojasQueDisponibilizam ModificadorEmLoja[]
 
@@ -179,7 +217,10 @@ model ModificadorEmLoja {
   lojaId         Int
   modificadorId  Int
   disponivel     Boolean
-  valorAdicional Decimal @db.Decimal(4, 2)
+  valorAdicional Decimal  @db.Decimal(4, 2)
+  // Timestamps
+  createdAt      DateTime @default(now()) @map("criadoEm")
+  updatedAt      DateTime @updatedAt @map("atualizadoEm")
 
   loja        Loja        @relation(fields: [lojaId], references: [id], map: "lojaMod_loja_fk")
   modificador Modificador @relation(fields: [modificadorId], references: [id], map: "lojaMod_modificador_fk")
@@ -196,8 +237,12 @@ model Pedido {
   valorBase    Decimal      @db.Decimal(7, 2)
   valorCobrado Decimal      @db.Decimal(7, 2)
   cupomUsadoId Int?
+  paraEntrega  Boolean
   observacoes  String?      @map("observacoesPedido")
   status       StatusPedido
+  // Timestamps
+  createdAt    DateTime     @default(now()) @map("criadoEm")
+  updatedAt    DateTime     @updatedAt @map("atualizadoEm")
 
   itensNoPedido ItemPedido[]
 
@@ -211,13 +256,47 @@ model ItemPedido {
   pedidoId           Int
   produtoId          Int
   qtdProduto         Int
-  valorTotalProdutos Decimal @map("valorTotalProdutos") @db.Decimal(7, 2)
+  valorTotalProdutos Decimal  @db.Decimal(7, 2)
+  // Timestamps
+  createdAt          DateTime @default(now()) @map("criadoEm")
+  updatedAt          DateTime @updatedAt @map("atualizadoEm")
 
   pedido  Pedido  @relation(fields: [pedidoId], references: [id], map: "itemPedido_pedido_fk")
   produto Produto @relation(fields: [produtoId], references: [id], map: "itemPedido_produto_fk")
 
   @@id([pedidoId, produtoId])
   @@map("itemPedido")
+}
+
+model Carrinho {
+  id          Int      @id @map("idCarrinho")
+  paraEntrega Boolean
+  valorBase   Decimal  @db.Decimal(7, 2)
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("criadoEm")
+  updatedAt   DateTime @updatedAt @map("atualizadoEm")
+
+  itensNoCarrinho ItemCarrinho[]
+
+  cliente Usuario @relation(fields: [id], references: [id], map: "carrinho_usuario_fk")
+
+  @@map("carrinho")
+}
+
+model ItemCarrinho {
+  carrinhoId         Int
+  produtoId          Int
+  qtdProduto         Int
+  valorTotalProdutos Decimal  @db.Decimal(7, 2)
+  // Timestamps
+  createdAt          DateTime @default(now()) @map("criadoEm")
+  updatedAt          DateTime @updatedAt @map("atualizadoEm")
+
+  carrinho Carrinho @relation(fields: [carrinhoId], references: [id], map: "itemCarrinho_carrinho_fk")
+  produto  Produto  @relation(fields: [produtoId], references: [id], map: "itemCarrinho_produto_fk")
+
+  @@id([carrinhoId, produtoId])
+  @@map("itemCarrinho")
 }
 
 // --- ENUMs ---
