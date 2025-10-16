@@ -32,10 +32,16 @@ const categoriaProdutoController = {
 
   async buscarCategoriaPorNome(req, res) {
     try {
-      const nome = req.body;
+      const { nome } = req.query;
+
+      if (!nome) {
+        return res
+          .status(400)
+          .json({ message: 'O parâmetro "nome" na query é obrigatório.' });
+      }
 
       const categoria =
-        await categoriaProdutoService.buscarCategoriaPorId(nome);
+        await categoriaProdutoService.buscarCategoriaPorNome(nome);
 
       if (!categoria) {
         return res.status(404).json({ message: 'Categoria não encontrada.' });

@@ -56,6 +56,10 @@ docker compose exec api npx prisma migrate dev --name init
 
 Pronto! Sua API está rodando e acessível em `http://localhost:3000`
 
+### Swagger
+
+Para este projeto, as rotas foram documentadas através do **Swagger**. A documentação se torna disponível para acesso em `http://localhost:3000/api-docs`, após colocar o projeto para rodar (veja o passo a passo da seção anterior).
+
 ## 📄 Licença
 
 © 2025 [João Matheus de Oliveira Schmitz]. Todos os direitos reservados.
