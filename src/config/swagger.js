@@ -6,7 +6,8 @@ const options = {
     info: {
       title: 'Sabor na Nuvem - API',
       version: '1.0.0',
-      description: 'API para a plataforma white label de fast food Sabor na Nuvem.',
+      description:
+        'API para a plataforma white label de fast food Sabor na Nuvem.',
     },
     servers: [
       {

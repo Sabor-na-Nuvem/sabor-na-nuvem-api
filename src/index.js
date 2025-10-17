@@ -7,7 +7,6 @@ import swaggerSpec from './config/swagger.js';
 import categoriaProdutoRouter from './modules/categoria-produto/categoria-produto.routes.js';
 // import usuarioRoutes from './modules/usuario/usuario.routes.js';
 
-
 dotenv.config();
 const app = express();
 app.use(express.json());
