@@ -63,6 +63,55 @@ const produtoServices = {
     }
   },
 
+  async buscarLojasPorProduto(produtoId, somenteDisponiveis = false) {
+    try {
+      const whereClause = {
+        // eslint-disable-next-line object-shorthand
+        produtoId: produtoId,
+      };
+      if (somenteDisponiveis) {
+        whereClause.disponivel = true;
+      }
+
+      const produtosEmLojas = await prisma.produtosEmLoja.findMany({
+        where: whereClause,
+        select: {
+          lojaId: true,
+          valorBase: true,
+          disponivel: true,
+          emPromocao: true,
+          descontoPromocao: true,
+          validadePromocao: true,
+          loja: {
+            select: {
+              nome: true,
+              // Adicionar outros campos da loja aqui se precisar
+              // ex: id: true, latitude: true, longitude: true
+            },
+          },
+        },
+      });
+
+      const resultadoFormatado = produtosEmLojas.map((item) => ({
+        lojaId: item.lojaId,
+        nomeLoja: item.loja.nome,
+        valorBase: item.valorBase,
+        disponivel: item.disponivel,
+        emPromocao: item.emPromocao,
+        descontoPromocao: item.descontoPromocao,
+        validadePromocao: item.validadePromocao,
+      }));
+
+      return resultadoFormatado;
+    } catch (error) {
+      console.error(
+        `Erro ao buscar lojas para o produto com ID ${produtoId}: `,
+        error,
+      );
+      throw new Error('Não foi possível buscar as lojas para este produto.');
+    }
+  },
+
   async criarProduto(dadosProduto) {
     try {
       const novoProduto = await prisma.produto.create({
@@ -106,7 +155,7 @@ const produtoServices = {
       return produtoDeletado;
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new Error(`Produto com ID ${idProduto} não encontrada.`);
+        throw new Error(`Produto com ID ${idProduto} não encontrado.`);
       }
       console.error(`Erro ao deletar o produto com ID ${idProduto}: `, error);
       throw new Error('Não foi possível deletar o produto.');

@@ -4,6 +4,8 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
 
 // Variaveis de rota
+import produtoRoutes from './modules/produto/produto.routes.js';
+import produtosEmLojaRoutes from './modules/produtos-em-loja/produtos-em-loja.routes.js';
 import categoriaProdutoRouter from './modules/categoria-produto/categoria-produto.routes.js';
 // import usuarioRoutes from './modules/usuario/usuario.routes.js';
 
@@ -15,7 +17,9 @@ const PORT = process.env.PORT || 3000;
 
 // --- ROTAS DA APLICACAO ---
 // app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/produto', produtoRoutes);
 app.use('/api/categoria-produto', categoriaProdutoRouter);
+app.use('/api/lojas/:lojaId/produtos-loja', produtosEmLojaRoutes);
 
 // --- ROTA DA DOCUMENTACAO SWAGGER ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

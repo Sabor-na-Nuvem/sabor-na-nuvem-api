@@ -44,7 +44,7 @@ const produtoController = {
       const produto = await produtoServices.buscarProdutoPorId(Number(id));
 
       if (!produto) {
-        return res.status(404).json({ message: 'Produto não encontrada.' });
+        return res.status(404).json({ message: 'Produto não encontrado.' });
       }
 
       return res.status(200).json(produto);
@@ -75,6 +75,35 @@ const produtoController = {
     }
   },
 
+  async buscarLojasPorProduto(req, res) {
+    try {
+      const { produtoId } = req.params;
+      const idProdutoNumerico = Number(produtoId);
+      const somenteDisponiveis = req.query.somenteDisponiveis === 'true';
+
+      if (Number.isNaN(idProdutoNumerico)) {
+        return res
+          .status(400)
+          .json({ message: 'O ID do produto deve ser um número.' });
+      }
+
+      const produtoExiste =
+        await produtoServices.buscarProdutoPorId(idProdutoNumerico);
+      if (!produtoExiste) {
+        return res.status(404).json({ message: 'Produto não encontrado.' });
+      }
+
+      const lojas = await produtoServices.buscarLojasPorProduto(
+        idProdutoNumerico,
+        somenteDisponiveis,
+      );
+
+      return res.status(200).json(lojas);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  },
+
   async criarProduto(req, res) {
     try {
       const dadosProduto = req.body;
@@ -97,12 +126,12 @@ const produtoController = {
           .json({ message: 'O ID do produto deve ser um número.' });
       }
 
-      const ProdutoAtualizado = await produtoServices.atualizarProduto(
+      const produtoAtualizado = await produtoServices.atualizarProduto(
         Number(id),
         novosDados,
       );
 
-      return res.status(200).json(ProdutoAtualizado);
+      return res.status(200).json(produtoAtualizado);
     } catch (error) {
       if (error.message.includes('não encontrado')) {
         return res.status(404).json({ message: error.message });

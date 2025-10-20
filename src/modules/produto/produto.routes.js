@@ -65,6 +65,41 @@ const produtoRouter = express.Router();
  *         descricao: "Pão, carne, queijo e salada."
  *         imagemUrl: "http://example.com/burger.jpg"
  *         categoriaId: 1
+ *
+ *     ProdutoEmLojaDetalhado:
+ *       type: object
+ *       properties:
+ *         lojaId:
+ *           type: integer
+ *           description: ID da loja
+ *         nomeLoja:
+ *           type: string
+ *           description: Nome da loja
+ *         valorBase:
+ *           type: number
+ *           format: float
+ *           description: Valor base do produto na loja
+ *         disponivel:
+ *           type: boolean
+ *           description: Indica se o produto está disponível na loja
+ *         emPromocao:
+ *           type: boolean
+ *           description: Indica se o produto está em promoção
+ *         descontoPromocao:
+ *           type: integer
+ *           description: Percentual de desconto aplicado (se houver)
+ *         validadePromocao:
+ *           type: string
+ *           format: date-time
+ *           description: Data e hora de validade da promoção
+ *       example:
+ *         lojaId: 3
+ *         nomeLoja: "Sabor nas Nuvens - Asa Sul"
+ *         valorBase: 25.50
+ *         disponivel: true
+ *         emPromocao: true
+ *         descontoPromocao: 15
+ *         validadePromocao: "2025-12-31T23:59:59Z"
  */
 
 /**
@@ -141,6 +176,39 @@ produtoRouter.get('/:id', produtoController.buscarProdutoPorId);
  *         description: Produto não encontrado.
  */
 produtoRouter.get('/buscar/por-nome', produtoController.buscarProdutoPorNome);
+
+/**
+ * @swagger
+ * /api/produtos/{produtoId}/lojas:
+ *   get:
+ *     summary: Lista todas as lojas que possuem um determinado produto
+ *     description: Retorna as lojas nas quais um produto específico está disponível, incluindo informações sobre preço, disponibilidade e promoção.
+ *     tags: [Produtos]
+ *     parameters:
+ *       - in: path
+ *         name: produtoId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: O ID do produto
+ *       - in: query
+ *         name: somenteDisponiveis
+ *         schema:
+ *           type: boolean
+ *         description: Se verdadeiro, retorna apenas lojas onde o produto está disponível.
+ *     responses:
+ *       200:
+ *         description: Lista de lojas que vendem o produto.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ProdutoEmLojaDetalhado'
+ *       404:
+ *         description: Produto não encontrado ou não disponível em nenhuma loja.
+ */
+produtoRouter.get('/:produtoId/lojas', produtoController.buscarLojasPorProduto);
 
 /**
  * @swagger
