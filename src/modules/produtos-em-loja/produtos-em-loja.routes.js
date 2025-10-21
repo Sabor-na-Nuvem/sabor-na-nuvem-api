@@ -33,10 +33,7 @@ const produtosEmLojaRouter = express.Router({ mergeParams: true });
  *               items:
  *                 $ref: '#/components/schemas/ProdutosEmLojaDetalhado'
  */
-produtosEmLojaRouter.get(
-  '/', // Corresponde a GET /api/lojas/:lojaId/produtos-loja
-  produtosEmLojaController.listarProdutosDaLoja,
-);
+produtosEmLojaRouter.get('/', produtosEmLojaController.listarProdutosDaLoja);
 
 /**
  * @swagger

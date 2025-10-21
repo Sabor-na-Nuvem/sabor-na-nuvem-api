@@ -46,9 +46,7 @@ const produtosEmLojaServices = {
         `Erro ao buscar os produtos da loja com ID ${idLoja}: `,
         error,
       );
-      throw new Error(
-        `Não foi possível buscar os produtos da loja com ID ${idLoja}: `,
-      );
+      throw new Error(`Não foi possível buscar os produtos da loja.`);
     }
   },
 
@@ -100,7 +98,7 @@ const produtosEmLojaServices = {
         error,
       );
       throw new Error(
-        `Não foi possível buscar o produto com ID ${idProduto} na loja com ID ${idLoja}: `,
+        `Não foi possível buscar o produto especificado na loja.`,
       );
     }
   },
@@ -130,7 +128,7 @@ const produtosEmLojaServices = {
         error,
       );
       throw new Error(
-        `Não foi possível adicionar o produto com ID ${dadosProdutoEmLoja.produtoId} na loja com ID ${idLoja}: `,
+        `Não foi possível adicionar o produto especificado na loja.`,
       );
     }
   },
@@ -159,7 +157,7 @@ const produtosEmLojaServices = {
         error,
       );
       throw new Error(
-        `Não foi possível atualizar o produto com ID ${idProduto} na loja com ID ${idLoja}: `,
+        `Não foi possível atualizar o produto especificado na loja.`,
       );
     }
   },

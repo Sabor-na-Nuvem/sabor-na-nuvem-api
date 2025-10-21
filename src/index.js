@@ -5,6 +5,8 @@ import swaggerSpec from './config/swagger.js';
 
 // Variaveis de rota
 import produtoRoutes from './modules/produto/produto.routes.js';
+import enderecoRoutes from './modules/endereco/endereco.routes.js';
+import telefoneRoutes from './modules/telefone/telefone.routes.js';
 import produtosEmLojaRoutes from './modules/produtos-em-loja/produtos-em-loja.routes.js';
 import categoriaProdutoRouter from './modules/categoria-produto/categoria-produto.routes.js';
 // import usuarioRoutes from './modules/usuario/usuario.routes.js';
@@ -16,10 +18,23 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 // --- ROTAS DA APLICACAO ---
+
+// Rotas Principais
+// app.use('/api/lojas', lojaRoutes);
 // app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/produto', produtoRoutes);
 app.use('/api/categoria-produto', categoriaProdutoRouter);
+
+// Rotas aninhadas para ProdutoEmLoja
 app.use('/api/lojas/:lojaId/produtos-loja', produtosEmLojaRoutes);
+
+// Rotas aninhandas para Endereco
+app.use('/api/lojas/:lojaId/endereco', enderecoRoutes);
+app.use('/api/usuarios/:usuarioId/endereco', enderecoRoutes);
+
+// Rotas aninhandas para Telefone
+app.use('/api/lojas/:lojaId/telefone', telefoneRoutes);
+app.use('/api/usuarios/:usuarioId/telefone', telefoneRoutes);
 
 // --- ROTA DA DOCUMENTACAO SWAGGER ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
