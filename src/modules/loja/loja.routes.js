@@ -11,6 +11,9 @@ lojaRouter.get('/', lojaController.buscarTodasAsLojas);
 // GET / -> Busca uma loja
 lojaRouter.get('/:id', lojaController.buscarLoja);
 
+// GET / -> Busca as lojas próximas ao usuário
+lojaRouter.get('/proximas', lojaController.buscarLojasProximas);
+
 // POST / -> Cria uma nova loja
 lojaRouter.post('/', lojaController.criarLoja);
 

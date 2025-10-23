@@ -29,6 +29,37 @@ const lojaController = {
     }
   },
 
+  async buscarLojasProximas(req, res) {
+    try {
+      const latitude = parseFloat(req.query.latitude);
+      const longitude = parseFloat(req.query.longitude);
+      const raioKm = req.query.raioKm
+        ? parseFloat(req.query.raioKm)
+        : undefined;
+
+      if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+        return res.status(400).json({
+          message: 'Latitude e longitude são obrigatórias e devem ser números.',
+        });
+      }
+      if (raioKm !== undefined && Number.isNaN(raioKm)) {
+        return res
+          .status(400)
+          .json({ message: 'Raio (raioKm) deve ser um número.' });
+      }
+
+      const lojasProximas = await lojaServices.buscarLojasProximas(
+        latitude,
+        longitude,
+        raioKm,
+      );
+
+      return res.status(200).json(lojasProximas);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  },
+
   async criarLoja(req, res) {
     try {
       const dadosLoja = req.body;

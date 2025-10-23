@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import prisma from '../../config/prisma.js';
 
 const lojaServices = {
@@ -20,6 +21,57 @@ const lojaServices = {
     } catch (error) {
       console.error(`Erro ao buscar a loja com ID ${lojaId}: `, error);
       throw new Error('Não foi possível buscar a loja.');
+    }
+  },
+
+  async buscarLojasProximas(latitude, longitude, raioKm = 5) {
+    if (
+      typeof latitude !== 'number' ||
+      typeof longitude !== 'number' ||
+      typeof raioKm !== 'number'
+    ) {
+      throw new Error('Latitude, longitude e raio devem ser números.');
+    }
+
+    const raioMetros = raioKm * 1000;
+
+    try {
+      const lojasProximas = await prisma.$queryRaw(Prisma.sql`
+        SELECT
+          l.id,
+          l.nome,
+          l."horarioFuncionamento", -- Use aspas se o nome da coluna tiver maiúsculas
+          l."ofereceDelivery",
+          l."raioEntregaKm",
+          e.bairro,
+          e.logradouro,
+          e.numero,
+          ST_Distance(
+            ST_MakePoint(e.longitude::double precision, e.latitude::double precision)::geography, -- Ponto da loja
+            ST_MakePoint(${longitude}, ${latitude})::geography                                    -- Ponto do usuário
+          ) / 1000 AS distancia_km
+        FROM "loja" AS l
+        INNER JOIN "endereco" AS e ON l."enderecoId" = e.id
+        WHERE
+          ST_DWithin(
+            ST_MakePoint(e.longitude::double precision, e.latitude::double precision)::geography, -- Ponto da loja
+            ST_MakePoint(${longitude}, ${latitude})::geography,                                   -- Ponto do usuário
+            ${raioMetros}
+          )
+        ORDER BY
+          distancia_km ASC;
+      `);
+
+      return lojasProximas.map((loja) => ({
+        ...loja,
+        distancia_km: parseFloat(loja.distancia_km),
+        raioEntregaKm: loja.raioEntregaKm
+          ? parseFloat(loja.raioEntregaKm)
+          : null,
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar lojas próximas:', error);
+      throw new Error('Não foi possível buscar lojas próximas.');
     }
   },
 
