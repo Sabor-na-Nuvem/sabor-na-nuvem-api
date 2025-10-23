@@ -2,11 +2,7 @@
 name: CI - API Sabor na Nuvem
 
 # Define os gatilhos para rodar este workflow
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 # Define os trabalhos (jobs) que serão executados
 jobs:
