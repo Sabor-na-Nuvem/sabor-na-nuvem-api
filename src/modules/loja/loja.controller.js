@@ -62,12 +62,57 @@ const lojaController = {
 
   async criarLoja(req, res) {
     try {
-      const dadosLoja = req.body;
-      const novaLoja = await lojaServices.criarLoja(dadosLoja);
+      const {
+        nome,
+        cnpj,
+        horarioFuncionamento,
+        ofereceDelivery,
+        raioEntregaKm,
+        cep,
+        estado,
+        cidade,
+        bairro,
+        logradouro,
+        numero,
+        complemento,
+        pontoReferencia,
+        latitude,
+        longitude,
+      } = req.body;
+
+      const dadosCompletos = {
+        loja: {
+          nome,
+          cnpj,
+          horarioFuncionamento,
+          ofereceDelivery,
+          raioEntregaKm,
+        },
+        endereco: {
+          cep,
+          logradouro,
+          numero,
+          bairro,
+          cidade,
+          estado,
+          complemento,
+          pontoReferencia,
+          latitude,
+          longitude,
+        },
+      };
+
+      const novaLoja = await lojaServices.criarLoja(dadosCompletos);
 
       return res.status(201).json(novaLoja);
     } catch (error) {
-      return res.status(400).json({ message: error.message });
+      if (error.message.includes('Já existe uma loja')) {
+        return res.status(400).json({ message: error.message });
+      }
+
+      return res
+        .status(500)
+        .json({ message: error.message || 'Erro interno ao criar loja.' });
     }
   },
 

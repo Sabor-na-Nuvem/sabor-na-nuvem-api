@@ -15,7 +15,10 @@ const lojaServices = {
 
   async buscarLoja(lojaId) {
     try {
-      const loja = await prisma.loja.findUnique({ where: { id: lojaId } });
+      const loja = await prisma.loja.findUnique({
+        where: { id: lojaId },
+        include: { endereco: true },
+      });
 
       return loja;
     } catch (error) {
@@ -75,14 +78,64 @@ const lojaServices = {
     }
   },
 
-  async criarLoja(dadosLoja) {
+  async criarLoja(dadosCompletos) {
     try {
-      const novaLoja = await prisma.loja.create({
-        data: dadosLoja,
+      const { loja: dadosLoja, endereco: dadosEndereco } = dadosCompletos;
+
+      if (!dadosLoja || !dadosEndereco) {
+        throw new Error('Dados da loja e do endereço são obrigatórios.');
+      }
+
+      const novaLojaComEndereco = await prisma.$transaction(async (tx) => {
+        const novoEndereco = await tx.endereco.create({
+          data: {
+            cep: dadosEndereco.cep,
+            estado: dadosEndereco.estado,
+            cidade: dadosEndereco.cidade,
+            bairro: dadosEndereco.bairro,
+            logradouro: dadosEndereco.logradouro,
+            numero: dadosEndereco.numero,
+            complemento: dadosEndereco.complemento,
+            pontoReferencia: dadosEndereco.pontoReferencia,
+            latitude: dadosEndereco.latitude,
+            longitude: dadosEndereco.longitude,
+          },
+        });
+
+        const novaLoja = await tx.loja.create({
+          data: {
+            nome: dadosLoja.nome,
+            cnpj: dadosLoja.cnpj,
+            horarioFuncionamento: dadosLoja.horarioFuncionamento,
+            ofereceDelivery: dadosLoja.ofereceDelivery,
+            raioEntregaKm: dadosLoja.raioEntregaKm,
+            enderecoId: novoEndereco.id,
+          },
+          include: {
+            endereco: true,
+          },
+        });
+
+        return novaLoja;
       });
 
-      return novaLoja;
+      return novaLojaComEndereco;
     } catch (error) {
+      if (error.code === 'P2002') {
+        const target = error.meta?.target || [];
+        if (target.includes('nome')) {
+          throw new Error(
+            `Já existe uma loja com o nome "${dadosCompletos.loja.nome}".`,
+          );
+        }
+        if (target.includes('cnpj')) {
+          throw new Error(
+            `Já existe uma loja com o CNPJ "${dadosCompletos.loja.cnpj}".`,
+          );
+        }
+        throw new Error('Já existe uma loja com estes dados (nome ou CNPJ).'); // Fallback
+      }
+
       console.error('Erro ao criar loja: ', error);
       throw new Error('Não foi possível criar a loja.');
     }
@@ -102,6 +155,21 @@ const lojaServices = {
       if (error.code === 'P2025') {
         throw new Error(`Loja com ID ${lojaId} não encontrada.`);
       }
+      if (error.code === 'P2002') {
+        const target = error.meta?.target || [];
+        if (target.includes('nome')) {
+          throw new Error(
+            `Já existe outra loja com o nome "${novosDados.nome}".`,
+          );
+        }
+        if (target.includes('cnpj')) {
+          throw new Error(
+            `Já existe outra loja com o CNPJ "${novosDados.cnpj}".`,
+          );
+        }
+        throw new Error('Já existe outra loja com estes dados (nome ou CNPJ).'); // Fallback
+      }
+
       console.error(`Erro ao atualizar a loja com ID ${lojaId}: `, error);
       throw new Error('Não foi possível atualizar a loja.');
     }
@@ -120,6 +188,13 @@ const lojaServices = {
       if (error.code === 'P2025') {
         throw new Error(`Loja com ID ${lojaId} não encontrada.`);
       }
+
+      if (error.code === 'P2003') {
+        throw new Error(
+          `Não é possível deletar a loja com ID ${lojaId} pois existem registros associados a ela (pedidos, endereços, funcionários, etc.). Remova as associações primeiro.`,
+        );
+      }
+
       console.error(`Erro ao deletar a loja com ID ${lojaId}: `, error);
       throw new Error('Não foi possível deletar a loja.');
     }
