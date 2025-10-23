@@ -17,7 +17,7 @@ const categoriaProdutoRouter = express.Router();
  *           description: O ID auto-gerado da categoria.
  *         nome:
  *           type: string
- *           description: O nome da categoria (ex: Lanches, Bebidas).
+ *           description: O nome da categoria, como Lanches ou Bebidas.
  *         descricao:
  *           type: string
  *           description: Uma breve descrição da categoria.
