@@ -119,10 +119,13 @@ model CupomDesconto {
   codCupom  String   @unique
   validade  DateTime
   qtdUsos   Int
+  ativo     Boolean  @default(true)
   usuarioId Int?
   // Timestamps
   createdAt DateTime @default(now()) @map("criadoEm")
   updatedAt DateTime @updatedAt @map("atualizadoEm")
+
+  Pedido Pedido[]
 
   usuario Usuario? @relation(fields: [usuarioId], references: [id], map: "cupom_usuario_fk")
 
@@ -246,8 +249,9 @@ model Pedido {
 
   itensNoPedido ItemPedido[]
 
-  cliente Usuario @relation(fields: [clienteId], references: [id], map: "pedido_usuario_fk")
-  loja    Loja    @relation(fields: [lojaId], references: [id], map: "pedido_loja_fk")
+  loja    Loja           @relation(fields: [lojaId], references: [id], map: "pedido_loja_fk")
+  cliente Usuario        @relation(fields: [clienteId], references: [id], map: "pedido_usuario_fk")
+  cupom   CupomDesconto? @relation(fields: [cupomUsadoId], references: [id], map: "pedido_cupom_fk")
 
   @@map("pedido")
 }
