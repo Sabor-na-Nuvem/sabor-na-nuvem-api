@@ -73,19 +73,24 @@ model Loja {
 }
 
 model Usuario {
-  id                        Int       @id @default(autoincrement()) @map("idUsuario")
-  nome                      String    @map("nomeUsuario") @db.VarChar(50)
-  email                     String    @unique @db.VarChar(30)
-  senha                     String
-  isFuncionario             Boolean
-  isAdmin                   Boolean
-  enderecoId                Int?      @unique
-  funcionarioLojaId         Int?
-  resetPasswordToken        String?   @unique
-  resetPasswordTokenExpires DateTime?
+  id                          Int       @id @default(autoincrement()) @map("idUsuario")
+  nome                        String    @map("nomeUsuario") @db.VarChar(50)
+  email                       String    @unique @db.VarChar(30)
+  senha                       String
+  isFuncionario               Boolean
+  isAdmin                     Boolean
+  enderecoId                  Int?      @unique
+  funcionarioLojaId           Int?
+  // --- CAMPOS PARA VERIFICAÇÃO DE MUDANÇA DE SENHA ---
+  resetPasswordToken          String?   @unique
+  resetPasswordTokenExpires   DateTime?
+  // --- CAMPOS PARA VERIFICAÇÃO DE MUDANÇA DE E-MAIL ---
+  newEmailPendingVerification String?
+  changeEmailToken            String?   @unique
+  changeEmailTokenExpires     DateTime?
   // Timestamps
-  createdAt                 DateTime  @default(now()) @map("criadoEm")
-  updatedAt                 DateTime  @updatedAt @map("atualizadoEm")
+  createdAt                   DateTime  @default(now()) @map("criadoEm")
+  updatedAt                   DateTime  @updatedAt @map("atualizadoEm")
 
   Pedido    Pedido[]
   carrinho  Carrinho?
