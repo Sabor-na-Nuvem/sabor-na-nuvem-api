@@ -1,3 +1,4 @@
+import { EstadoBrasil, Prisma } from '@prisma/client';
 import prisma from '../../config/prisma.js';
 
 const enderecoServices = {
@@ -67,7 +68,7 @@ const enderecoServices = {
         const enderecoCriado = await tx.endereco.create({
           data: {
             cep: dadosEndereco.cep,
-            estado: dadosEndereco.estado,
+            estado: EstadoBrasil[dadosEndereco.estado.toUpperCase()],
             cidade: dadosEndereco.cidade,
             bairro: dadosEndereco.bairro,
             logradouro: dadosEndereco.logradouro,
@@ -101,6 +102,9 @@ const enderecoServices = {
         error.message.includes('já possui um endereço')
       ) {
         throw error;
+      }
+      if (error instanceof Prisma.PrismaClientValidationError) {
+        throw new Error(`Estado inválido fornecido: ${dadosEndereco.estado}`);
       }
 
       console.error(

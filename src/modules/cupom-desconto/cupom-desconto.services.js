@@ -38,6 +38,23 @@ const cupomDescontoServices = {
     }
   },
 
+  // Chamada em ../usuario/usuario.controller.js
+  async buscarCuponsPorUsuario(idUsuario) {
+    try {
+      const cupons = await prisma.cupomDesconto.findMany({
+        where: { usuarioId: idUsuario, ativo: true },
+      });
+
+      return cupons;
+    } catch (error) {
+      console.error(
+        `Erro ao buscar os cupons do usuário com ID ${idUsuario}: `,
+        error,
+      );
+      throw new Error('Não foi possível buscar os cupons do usuário.');
+    }
+  },
+
   async criarCupom(dadosCupom) {
     try {
       const novoCupom = await prisma.cupomDesconto.create({

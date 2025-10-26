@@ -3,7 +3,7 @@ import lojaController from './loja.controller.js';
 
 const lojaRouter = express.Router({ mergeParams: true });
 
-// --- ROTAS RELATIVAS AO PAI (/api/lojas/) ---
+// --- (/api/lojas/) ---
 
 // GET / -> Busca todas as lojas
 lojaRouter.get('/', lojaController.buscarTodasAsLojas);
