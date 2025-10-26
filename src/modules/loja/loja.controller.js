@@ -33,6 +33,7 @@ const lojaController = {
     try {
       const latitude = parseFloat(req.query.latitude);
       const longitude = parseFloat(req.query.longitude);
+      const usarRaioDeEntrega = req.query.usarRaioDeEntrega === 'true';
       const raioKm = req.query.raioKm
         ? parseFloat(req.query.raioKm)
         : undefined;
@@ -42,15 +43,16 @@ const lojaController = {
           message: 'Latitude e longitude são obrigatórias e devem ser números.',
         });
       }
-      if (raioKm !== undefined && Number.isNaN(raioKm)) {
-        return res
-          .status(400)
-          .json({ message: 'Raio (raioKm) deve ser um número.' });
+      if (req.query.raioKm && Number.isNaN(raioKm)) {
+        return res.status(400).json({
+          message: 'Raio (km), se fornecido, deve ser um número.',
+        });
       }
 
       const lojasProximas = await lojaServices.buscarLojasProximas(
         latitude,
         longitude,
+        usarRaioDeEntrega,
         raioKm,
       );
 

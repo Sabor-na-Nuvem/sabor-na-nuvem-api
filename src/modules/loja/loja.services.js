@@ -27,7 +27,12 @@ const lojaServices = {
     }
   },
 
-  async buscarLojasProximas(latitude, longitude, raioKm = 5) {
+  async buscarLojasProximas(
+    latitude,
+    longitude,
+    usarRaioDeEntrega = false,
+    raioKm = 5,
+  ) {
     if (
       typeof latitude !== 'number' ||
       typeof longitude !== 'number' ||
@@ -39,31 +44,47 @@ const lojaServices = {
     const raioMetros = raioKm * 1000;
 
     try {
-      const lojasProximas = await prisma.$queryRaw(Prisma.sql`
+      const queryBase = Prisma.sql`
         SELECT
-          l.id,
-          l.nome,
-          l."horarioFuncionamento", -- Use aspas se o nome da coluna tiver maiúsculas
-          l."ofereceDelivery",
-          l."raioEntregaKm",
-          e.bairro,
-          e.logradouro,
-          e.numero,
+          l.id, l.nome, l."horarioFuncionamento", l."ofereceDelivery", l."raioEntregaKm",
+          e.bairro, e.logradouro, e.numero,
           ST_Distance(
-            ST_MakePoint(e.longitude::double precision, e.latitude::double precision)::geography, -- Ponto da loja
-            ST_MakePoint(${longitude}, ${latitude})::geography                                    -- Ponto do usuário
+            ST_MakePoint(e.longitude::double precision, e.latitude::double precision)::geography,
+            ST_MakePoint(${longitude}, ${latitude})::geography
           ) / 1000 AS distancia_km
         FROM "loja" AS l
         INNER JOIN "endereco" AS e ON l."enderecoId" = e.id
-        WHERE
-          ST_DWithin(
-            ST_MakePoint(e.longitude::double precision, e.latitude::double precision)::geography, -- Ponto da loja
-            ST_MakePoint(${longitude}, ${latitude})::geography,                                   -- Ponto do usuário
-            ${raioMetros}
-          )
-        ORDER BY
-          distancia_km ASC;
-      `);
+      `;
+
+      let whereClause;
+
+      if (usarRaioDeEntrega) {
+        // Filtra por ST_DWithin usando o raio da PRÓPRIA loja
+        whereClause = Prisma.sql`
+        WHERE l."raioEntregaKm" IS NOT NULL AND ST_DWithin(
+          ST_MakePoint(e.longitude::double precision, e.latitude::double precision)::geography,
+          ST_MakePoint(${longitude}, ${latitude})::geography,
+          l."raioEntregaKm" * 1000 -- Usa o raio da loja em metros
+        )
+      `;
+      } else {
+        // Filtra por ST_DWithin usando o raio FORNECIDO
+        whereClause = Prisma.sql`
+        WHERE ST_DWithin(
+          ST_MakePoint(e.longitude::double precision, e.latitude::double precision)::geography,
+          ST_MakePoint(${longitude}, ${latitude})::geography,
+          ${raioMetros} -- Usa o raio fornecido em metros
+        )
+      `;
+      }
+
+      const orderByClause = Prisma.sql`ORDER BY distancia_km ASC`;
+
+      const lojasProximas = await prisma.$queryRaw`
+        ${queryBase}
+        ${whereClause}
+        ${orderByClause}
+      `;
 
       return lojasProximas.map((loja) => ({
         ...loja,
