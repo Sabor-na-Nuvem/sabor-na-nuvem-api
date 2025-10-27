@@ -122,32 +122,29 @@ const cupomDescontoController = {
     }
   },
 
-  async validarCupom(req, res) {
+  async verificarValidadeCupom(req, res) {
     try {
-      const { codigoCupom } = req.body;
+      const { codCupom } = req.body;
+      const usuarioId = req.user?.id;
 
-      if (
-        !codigoCupom ||
-        typeof codCupom !== 'string' ||
-        codigoCupom.trim() === ''
-      ) {
+      if (!codCupom || typeof codCupom !== 'string' || codCupom.trim() === '') {
         return res
           .status(400)
-          .json({ message: 'O código do cupom é obrigatório.' });
+          .json({ message: 'O código do cupom (codCupom) é obrigatório.' });
       }
 
-      // TODO: Se a validação depender do usuário, pegue o ID do usuário autenticado
-
-      const resultadoValidacao = await cupomDescontoServices.validarCupom(
-        codigoCupom.trim(),
-        // usuarioId,    // Passa o ID do usuário se a validação depender dele
-      );
+      const resultadoValidacao =
+        await cupomDescontoServices.verificarValidadeCupom(
+          codCupom.trim(),
+          usuarioId,
+        );
 
       return res.status(200).json(resultadoValidacao);
     } catch (error) {
+      console.error(`Erro ao validar cupom ${req.body.codCupom}:`, error);
       return res
         .status(500)
-        .json({ message: 'Erro interno ao validar o cupom.' });
+        .json({ message: error.message || 'Erro interno ao validar o cupom.' });
     }
   },
 };

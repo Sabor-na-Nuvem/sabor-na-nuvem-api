@@ -118,7 +118,7 @@ const cupomDescontoServices = {
     }
   },
 
-  async validarCupom(codigoCupom, usuarioId = null) {
+  async verificarValidadeCupom(codigoCupom, usuarioId = null) {
     try {
       const cupom = await prisma.cupomDesconto.findUnique({
         where: { codCupom: codigoCupom },
@@ -127,6 +127,9 @@ const cupomDescontoServices = {
       // Validações
       if (!cupom) {
         return { valido: false, mensagem: 'Cupom não encontrado.' };
+      }
+      if (!cupom.ativo) {
+        return { valido: false, mensagem: 'Este cupom não está mais ativo.' };
       }
       if (cupom.validade < new Date()) {
         return { valido: false, mensagem: 'Cupom expirado.' };
@@ -145,6 +148,8 @@ const cupomDescontoServices = {
         valido: true,
         mensagem: 'Cupom válido!',
         cupomId: cupom.id,
+        tipoDesconto: cupom.tipoDesconto,
+        valorDesconto: cupom.valorDesconto,
       };
     } catch (error) {
       console.error(
@@ -155,7 +160,8 @@ const cupomDescontoServices = {
     }
   },
 
-  async validarEUsarCupom(codigoCupom, tx) {
+  // Chamado em pedido.services.js
+  async validarEUsarCupom(codigoCupom, tx, usuarioId = null) {
     const cupom = await tx.cupomDesconto.findUnique({
       where: { codCupom: codigoCupom },
     });
@@ -164,38 +170,52 @@ const cupomDescontoServices = {
     if (!cupom) {
       throw new Error(`Cupom "${codigoCupom}" não encontrado.`);
     }
+    if (!cupom.ativo) {
+      throw new Error(`Cupom "${codigoCupom}" não está ativo.`);
+    }
     if (cupom.validade < new Date()) {
       throw new Error(`Cupom "${codigoCupom}" expirado.`);
     }
     if (cupom.qtdUsos !== null && cupom.qtdUsos <= 0) {
       throw new Error(`Cupom "${codigoCupom}" já atingiu o limite de usos.`);
     }
-    // TODO: Adicionar outra validação (usuário específico)
+    if (cupom.usuarioId !== null && cupom.usuarioId !== usuarioId) {
+      throw new Error(`Cupom "${codigoCupom}" não é válido para este usuário.`);
+    }
 
-    // Decrementa o uso
-    let updatedCupom = cupom;
+    const dataUpdate = {};
+    let desativarCupom = false;
+
     if (cupom.qtdUsos !== null) {
-      updatedCupom = await tx.cupomDesconto.update({
+      dataUpdate.qtdUsos = { decrement: 1 };
+      if (cupom.qtdUsos === 1) {
+        desativarCupom = true;
+      }
+    }
+
+    if (desativarCupom) {
+      dataUpdate.ativo = false;
+    }
+
+    // Executa o update APENAS se houver algo a ser atualizado
+    if (Object.keys(dataUpdate).length > 0) {
+      await tx.cupomDesconto.update({
         where: { id: cupom.id },
-        data: {
-          qtdUsos: {
-            decrement: 1,
-          },
-        },
+        data: dataUpdate,
       });
+      if (desativarCupom) {
+        console.log(
+          `Cupom ${codigoCupom} (ID: ${cupom.id}) desativado após último uso.`,
+        );
+      }
     }
 
-    // Verifica se deve deletar após o uso (se qtdUsos chegou a 0)
-    if (updatedCupom.qtdUsos !== null && updatedCupom.qtdUsos === 0) {
-      await tx.cupomDesconto.delete({
-        where: { id: updatedCupom.id },
-      });
-      console.log(
-        `Cupom ${codigoCupom} (ID: ${updatedCupom.id}) deletado após último uso.`,
-      );
-    }
-
-    return { valido: true, cupomId: cupom.id };
+    return {
+      valido: true,
+      cupomId: cupom.id,
+      tipoDesconto: cupom.tipoDesconto,
+      valorDesconto: cupom.valorDesconto,
+    };
   },
 };
 

@@ -113,15 +113,17 @@ model RelatorioUsuario {
 }
 
 model CupomDesconto {
-  id        Int      @id @default(autoincrement()) @map("idCupomDesconto")
-  codCupom  String   @unique
-  validade  DateTime
-  qtdUsos   Int
-  ativo     Boolean  @default(true)
-  usuarioId String?
+  id            Int          @id @default(autoincrement()) @map("idCupomDesconto")
+  codCupom      String       @unique
+  validade      DateTime
+  qtdUsos       Int?
+  tipoDesconto  TipoDesconto
+  valorDesconto Decimal      @db.Decimal(10, 2)
+  ativo         Boolean      @default(true)
+  usuarioId     String?
   // Timestamps
-  createdAt DateTime @default(now()) @map("criadoEm")
-  updatedAt DateTime @updatedAt @map("atualizadoEm")
+  createdAt     DateTime     @default(now()) @map("criadoEm")
+  updatedAt     DateTime     @updatedAt @map("atualizadoEm")
 
   Pedido Pedido[]
 
@@ -337,6 +339,11 @@ enum RoleUsuario {
   CLIENTE
   FUNCIONARIO
   ADMIN
+}
+
+enum TipoDesconto {
+  PERCENTUAL // Ex: 10 (para 10%)
+  VALOR_FIXO  // Ex: 15.50 (para R$ 15,50)
 }
 
 enum TipoPedido {

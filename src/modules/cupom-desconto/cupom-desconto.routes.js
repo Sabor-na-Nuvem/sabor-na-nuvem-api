@@ -14,7 +14,10 @@ cupomDescontoRouter.get(
 
 cupomDescontoRouter.post('/', cupomDescontoController.criarCupom);
 
-cupomDescontoRouter.post('/validar', cupomDescontoController.validarCupom);
+cupomDescontoRouter.post(
+  '/validar',
+  cupomDescontoController.verificarValidadeCupom,
+);
 
 cupomDescontoRouter.put('/:id', cupomDescontoController.atualizarCupom);
 
