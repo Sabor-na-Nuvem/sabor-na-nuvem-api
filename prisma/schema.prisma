@@ -96,14 +96,16 @@ model Usuario {
 }
 
 model RelatorioUsuario {
-  usuarioId        String   @id
-  gastosTotais     Decimal  @db.Decimal(10, 2)
-  gastosMensais    Decimal  @db.Decimal(10, 2)
-  qtdTotalPedidos  Int
-  qtdMensalPedidos Int
+  usuarioId             String    @id
+  gastosTotais          Decimal   @db.Decimal(10, 2)
+  gastosMensais         Decimal   @db.Decimal(10, 2)
+  qtdTotalPedidos       Int
+  qtdMensalPedidos      Int
+  dataUltimoPedido      DateTime?
+  gastoDesdeUltimoCupom Decimal   @default(0.0) @db.Decimal(10, 2)
   // Timestamps
-  createdAt        DateTime @default(now()) @map("criadoEm")
-  updatedAt        DateTime @updatedAt @map("atualizadoEm")
+  createdAt             DateTime  @default(now()) @map("criadoEm")
+  updatedAt             DateTime  @updatedAt @map("atualizadoEm")
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], map: "relatorio_usuario_fk", onDelete: Cascade)
 

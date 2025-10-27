@@ -1,5 +1,6 @@
 import express from 'express';
 import produtoController from './produto.controller.js';
+import personalizavelRouter from '../personalizavel/personalizavel.routes.js';
 
 const produtoRouter = express.Router();
 
@@ -287,5 +288,8 @@ produtoRouter.put('/:id', produtoController.atualizarProduto);
  *         description: Produto não encontrado.
  */
 produtoRouter.delete('/:id', produtoController.deletarProduto);
+
+// Monta as rotas de personalizavel sob o path com :produtoId
+produtoRouter.use('/:produtoId/personalizaveis', personalizavelRouter);
 
 export default produtoRouter;

@@ -32,6 +32,7 @@ const produtoServices = {
 
   async buscarProdutoPorId(idProduto) {
     try {
+      // TODO: Incluir personalizavel aqui e na rota
       const produto = await prisma.produto.findUnique({
         where: {
           id: idProduto,
@@ -47,9 +48,12 @@ const produtoServices = {
 
   async buscarProdutoPorNome(nomeProduto) {
     try {
-      const produto = await prisma.produto.findUnique({
+      // TODO: Incluir personalizavel aqui e na rota
+      // TODO: Após decidir como organizar o banco por redes, decidir se o nome é atributo único ou não.
+      const produto = await prisma.produto.findMany({
         where: {
           nome: nomeProduto,
+          mode: 'insensitive',
         },
       });
 

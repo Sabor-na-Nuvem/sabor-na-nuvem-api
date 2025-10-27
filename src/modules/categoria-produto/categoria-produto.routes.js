@@ -50,7 +50,7 @@ const categoriaProdutoRouter = express.Router();
 
 /**
  * @swagger
- * /api/categoria-produto:
+ * /api/categorias-produto:
  *   get:
  *     summary: Retorna a lista de todas as categorias de produto
  *     tags: [Categorias de Produto]
@@ -71,7 +71,7 @@ categoriaProdutoRouter.get(
 
 /**
  * @swagger
- * /api/categoria-produto/{id}:
+ * /api/categorias-produto/{id}:
  *   get:
  *     summary: Busca uma única categoria pelo ID
  *     tags: [Categorias de Produto]
@@ -99,7 +99,7 @@ categoriaProdutoRouter.get(
 
 /**
  * @swagger
- * /api/categoria-produto/buscar/por-nome:
+ * /api/categorias-produto/buscar/por-nome:
  *   get:
  *     summary: Busca uma única categoria pelo nome
  *     tags: [Categorias de Produto]
@@ -128,7 +128,7 @@ categoriaProdutoRouter.get(
 
 /**
  * @swagger
- * /api/categoria-produto:
+ * /api/categorias-produto:
  *   post:
  *     summary: Cria uma nova categoria de produto
  *     tags: [Categorias de Produto]
@@ -152,7 +152,7 @@ categoriaProdutoRouter.post('/', categoriaProdutoController.criarCategoria);
 
 /**
  * @swagger
- * /api/categoria-produto/{id}:
+ * /api/categorias-produto/{id}:
  *   put:
  *     summary: Atualiza uma categoria de produto existente
  *     tags: [Categorias de Produto]
@@ -188,7 +188,7 @@ categoriaProdutoRouter.put(
 
 /**
  * @swagger
- * /api/categoria-produto/{id}:
+ * /api/categorias-produto/{id}:
  *   delete:
  *     summary: Deleta uma categoria de produto
  *     tags: [Categorias de Produto]
