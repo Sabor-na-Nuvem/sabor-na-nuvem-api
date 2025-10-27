@@ -1,0 +1,62 @@
+components:
+  schemas:
+    # Schema principal para CategoriaProduto (respostas GET)
+    CategoriaProduto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: O ID auto-gerado da categoria.
+          readOnly: true # Indica que não é enviado em POST/PUT
+        nome:
+          type: string
+          description: O nome da categoria, como Lanches ou Bebidas.
+        descricao:
+          type: string
+          description: Uma breve descrição da categoria.
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+      example:
+        id: 1
+        nome: "Lanches"
+        descricao: "Os melhores sanduíches da casa."
+        createdAt: "2025-10-27T10:00:00Z"
+        updatedAt: "2025-10-27T10:00:00Z"
+
+    # Schema para criar uma nova categoria (corpo do POST)
+    NovaCategoriaProduto:
+      type: object
+      required:
+        - nome
+      properties:
+        nome:
+          type: string
+          description: O nome da nova categoria.
+        descricao:
+          type: string
+          description: Uma breve descrição da categoria (opcional na criação?).
+      example:
+        nome: "Bebidas"
+        descricao: "Refrigerantes, sucos e águas."
+
+    # Schema para atualizar uma categoria (corpo do PUT/PATCH)
+    AtualizarCategoriaProduto:
+      type: object
+      properties:
+        nome:
+          type: string
+          description: O novo nome da categoria.
+        descricao:
+          type: string
+          description: A nova descrição da categoria.
+      example:
+        nome: "Bebidas Geladas"
+        descricao: "Todas as opções de bebidas geladas."

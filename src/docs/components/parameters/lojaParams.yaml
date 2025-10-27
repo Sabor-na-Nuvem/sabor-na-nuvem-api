@@ -1,0 +1,48 @@
+components:
+  parameters:
+    lojaIdPathParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+      description: O ID da loja
+    latitudeQueryParam:
+       in: query
+       name: latitude
+       required: true
+       schema:
+         type: number
+         format: float
+       description: Latitude do ponto central da busca.
+       example: -15.799765
+    longitudeQueryParam:
+       in: query
+       name: longitude
+       required: true
+       schema:
+         type: number
+         format: float
+       description: Longitude do ponto central da busca.
+       example: -47.864471
+    raioKmQueryParam:
+       in: query
+       name: raioKm
+       schema:
+         type: number
+         format: float
+         default: 5
+       description: Raio da busca em quilômetros (padrão 5km).
+    usarRaioDeEntregaQueryParam:
+       in: query
+       name: usarRaioDeEntrega
+       schema:
+         type: boolean
+         default: false
+       description: Se true, busca lojas cujo raio de entrega alcance o ponto, ignorando raioKm.
+    nomeLojaQueryParam:
+       in: query
+       name: nome
+       schema:
+         type: string
+       description: Filtrar lojas por nome (busca parcial, case-insensitive).

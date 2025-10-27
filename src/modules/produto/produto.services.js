@@ -1,41 +1,35 @@
 import prisma from '../../config/prisma.js';
 
 const produtoServices = {
-  async buscarTodosOsProdutos() {
+  async buscarTodosOsProdutos(categoriaId) {
     try {
-      const produtos = await prisma.produto.findMany();
+      const whereClause = {};
+      if (categoriaId !== undefined) {
+        whereClause.categoriaId = categoriaId;
+      }
 
-      return produtos;
-    } catch (error) {
-      console.error('Erro ao buscar todos os produtos: ', error);
-      throw new Error('Não foi possível buscar os produtos.');
-    }
-  },
-
-  async buscarProdutosPorCategoria(idCategoria) {
-    try {
       const produtos = await prisma.produto.findMany({
-        where: {
-          categoriaId: idCategoria,
+        where: whereClause,
+        include: {
+          categoria: true,
         },
       });
 
       return produtos;
     } catch (error) {
-      console.error(
-        `Erro ao buscar os produtos da categoria com ID ${idCategoria}: `,
-        error,
-      );
-      throw new Error('Não foi possível buscar os produtos da categoria.');
+      console.error('Erro ao buscar produtos:', error);
+      throw new Error('Não foi possível buscar os produtos.');
     }
   },
 
   async buscarProdutoPorId(idProduto) {
     try {
-      // TODO: Incluir personalizavel aqui e na rota
       const produto = await prisma.produto.findUnique({
         where: {
           id: idProduto,
+        },
+        include: {
+          personalizacao: true,
         },
       });
 
@@ -48,12 +42,14 @@ const produtoServices = {
 
   async buscarProdutoPorNome(nomeProduto) {
     try {
-      // TODO: Incluir personalizavel aqui e na rota
       // TODO: Após decidir como organizar o banco por redes, decidir se o nome é atributo único ou não.
       const produto = await prisma.produto.findMany({
         where: {
           nome: nomeProduto,
           mode: 'insensitive',
+        },
+        include: {
+          personalizacao: true,
         },
       });
 
@@ -67,11 +63,10 @@ const produtoServices = {
     }
   },
 
-  async buscarLojasPorProduto(produtoId, somenteDisponiveis = false) {
+  async buscarLojasPorProduto(idProduto, somenteDisponiveis = false) {
     try {
       const whereClause = {
-        // eslint-disable-next-line object-shorthand
-        produtoId: produtoId,
+        produtoId: idProduto,
       };
       if (somenteDisponiveis) {
         whereClause.disponivel = true;
@@ -109,7 +104,7 @@ const produtoServices = {
       return resultadoFormatado;
     } catch (error) {
       console.error(
-        `Erro ao buscar lojas para o produto com ID ${produtoId}: `,
+        `Erro ao buscar lojas para o produto com ID ${idProduto}: `,
         error,
       );
       throw new Error('Não foi possível buscar as lojas para este produto.');

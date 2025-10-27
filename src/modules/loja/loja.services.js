@@ -107,6 +107,12 @@ const lojaServices = {
         throw new Error('Dados da loja e do endereço são obrigatórios.');
       }
 
+      if (dadosLoja.ofereceDelivery && dadosLoja.raioEntregaKm <= 0) {
+        throw new Error(
+          'O raio de entrega deve ser maior que zero, caso a loja ofereça deliveries.',
+        );
+      }
+
       const novaLojaComEndereco = await prisma.$transaction(async (tx) => {
         const novoEndereco = await tx.endereco.create({
           data: {

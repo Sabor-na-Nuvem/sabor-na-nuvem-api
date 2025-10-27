@@ -5,51 +5,6 @@ const categoriaProdutoRouter = express.Router();
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     CategoriaProduto:
- *       type: object
- *       required:
- *         - nome
- *       properties:
- *         id:
- *           type: integer
- *           description: O ID auto-gerado da categoria.
- *         nome:
- *           type: string
- *           description: O nome da categoria, como Lanches ou Bebidas.
- *         descricao:
- *           type: string
- *           description: Uma breve descrição da categoria.
- *       example:
- *         id: 1
- *         nome: "Lanches"
- *         descricao: "Os melhores sanduíches da casa."
- *     NovaCategoriaProduto:
- *       type: object
- *       required:
- *         - nome
- *       properties:
- *         nome:
- *           type: string
- *           description: O nome da categoria.
- *         descricao:
- *           type: string
- *           description: Uma breve descrição da categoria.
- *       example:
- *         nome: "Bebidas"
- *         descricao: "Refrigerantes, sucos e águas."
- */
-
-/**
- * @swagger
- * tags:
- *   - name: Categorias de Produto
- *     description: API para gerenciamento das categorias de produto.
- */
-
-/**
- * @swagger
  * /api/categorias-produto:
  *   get:
  *     summary: Retorna a lista de todas as categorias de produto
@@ -63,6 +18,8 @@ const categoriaProdutoRouter = express.Router();
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/CategoriaProduto'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 categoriaProdutoRouter.get(
   '/',
@@ -76,12 +33,7 @@ categoriaProdutoRouter.get(
  *     summary: Busca uma única categoria pelo ID
  *     tags: [Categorias de Produto]
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: O ID da categoria
+ *       - $ref: '#/components/parameters/categoriaProdutoIdPathParam'
  *     responses:
  *       200:
  *         description: Os dados da categoria.
@@ -90,7 +42,9 @@ categoriaProdutoRouter.get(
  *             schema:
  *               $ref: '#/components/schemas/CategoriaProduto'
  *       404:
- *         description: Categoria não encontrada.
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 categoriaProdutoRouter.get(
   '/:id',
@@ -118,7 +72,9 @@ categoriaProdutoRouter.get(
  *             schema:
  *               $ref: '#/components/schemas/CategoriaProduto'
  *       404:
- *         description: Categoria não encontrada.
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 categoriaProdutoRouter.get(
@@ -132,6 +88,8 @@ categoriaProdutoRouter.get(
  *   post:
  *     summary: Cria uma nova categoria de produto
  *     tags: [Categorias de Produto]
+ * # security:
+ * #  - bearerAuth: [] # TODO: Adicionar segurança
  *     requestBody:
  *       required: true
  *       content:
@@ -146,9 +104,17 @@ categoriaProdutoRouter.get(
  *             schema:
  *               $ref: '#/components/schemas/CategoriaProduto'
  *       400:
- *         description: Dados inválidos.
+ *         $ref: '#/components/responses/BadRequestError'
+ *       # 401: { $ref: '#/components/responses/UnauthorizedError' } # Adicionar se tiver segurança
+ *       # 403: { $ref: '#/components/responses/ForbiddenError' } # Adicionar se tiver segurança
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-categoriaProdutoRouter.post('/', categoriaProdutoController.criarCategoria);
+categoriaProdutoRouter.post(
+  '/',
+  /* authenticate, authorizeAdmin, */
+  categoriaProdutoController.criarCategoria,
+);
 
 /**
  * @swagger
@@ -156,13 +122,10 @@ categoriaProdutoRouter.post('/', categoriaProdutoController.criarCategoria);
  *   put:
  *     summary: Atualiza uma categoria de produto existente
  *     tags: [Categorias de Produto]
+ * # security:
+ * #  - bearerAuth: [] # TODO: Adicionar segurança
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: O ID da categoria a ser atualizada
+ *       - $ref: '#/components/parameters/categoriaProdutoIdPathParam'
  *     requestBody:
  *       required: true
  *       content:
@@ -176,13 +139,18 @@ categoriaProdutoRouter.post('/', categoriaProdutoController.criarCategoria);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CategoriaProduto'
- *       404:
- *         description: Categoria não encontrada.
  *       400:
- *         description: Dados inválidos.
+ *         $ref: '#/components/responses/BadRequestError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       # 401: { $ref: '#/components/responses/UnauthorizedError' }
+ *       # 403: { $ref: '#/components/responses/ForbiddenError' }
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 categoriaProdutoRouter.put(
   '/:id',
+  /* authenticate, authorizeAdmin, */
   categoriaProdutoController.atualizarCategoria,
 );
 
@@ -192,21 +160,29 @@ categoriaProdutoRouter.put(
  *   delete:
  *     summary: Deleta uma categoria de produto
  *     tags: [Categorias de Produto]
+ * # security:
+ * #  - bearerAuth: [] # TODO: Adicionar segurança
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: O ID da categoria a ser deletada
+ *       - $ref: '#/components/parameters/categoriaProdutoIdPathParam'
  *     responses:
  *       204:
  *         description: Categoria deletada com sucesso (sem conteúdo).
+ *       400:
+ *         description: Não é possível deletar (categoria tem produtos associados, por exemplo).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
- *         description: Categoria não encontrada.
+ *         $ref: '#/components/responses/NotFoundError'
+ *       # 401: { $ref: '#/components/responses/UnauthorizedError' }
+ *       # 403: { $ref: '#/components/responses/ForbiddenError' }
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 categoriaProdutoRouter.delete(
   '/:id',
+  /* authenticate, authorizeAdmin, */
   categoriaProdutoController.deletarCategoria,
 );
 

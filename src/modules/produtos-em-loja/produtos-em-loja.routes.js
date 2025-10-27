@@ -3,57 +3,42 @@ import produtosEmLojaController from './produtos-em-loja.controller.js';
 
 const produtosEmLojaRouter = express.Router({ mergeParams: true });
 
-// --- ROTAS ANINHADAS SOB /api/lojas/:lojaId/produtos-loja ---
-
 /**
  * @swagger
- * /api/lojas/{lojaId}/produtos-loja:
+ * /lojas/{lojaId}/produtos-loja:
  *   get:
  *     summary: Lista todos os produtos cadastrados para uma loja específica
- *     tags: [ProdutosEmLoja]
+ *     tags: [Produtos Em Loja]
  *     parameters:
- *       - in: path
- *         name: lojaId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID da loja
- *       - in: query
- *         name: emPromocao
- *         schema:
- *           type: boolean
- *         description: Filtrar apenas por produtos em promoção (opcional)
+ *       - $ref: '#/components/parameters/lojaIdPathParamNested'
+ *       - $ref: '#/components/parameters/emPromocaoQueryParam'
+ *     # TODO: Add pagination parameters
  *     responses:
  *       200:
- *         description: Lista de produtos da loja com seus detalhes (preço, disponibilidade, etc.)
+ *         description: Lista de produtos da loja com detalhes.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/ProdutosEmLojaDetalhado'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: Loja não encontrada.
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 produtosEmLojaRouter.get('/', produtosEmLojaController.listarProdutosDaLoja);
 
 /**
  * @swagger
- * /api/lojas/{lojaId}/produtos-loja/{produtoId}:
+ * /lojas/{lojaId}/produtos-loja/{produtoId}:
  *   get:
  *     summary: Busca os detalhes de um produto específico em uma loja específica
- *     tags: [ProdutosEmLoja]
+ *     tags: [Produtos Em Loja]
  *     parameters:
- *       - in: path
- *         name: lojaId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID da loja
- *       - in: path
- *         name: produtoId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID do produto
+ *       - $ref: '#/components/parameters/lojaIdPathParamNested'
+ *       - $ref: '#/components/parameters/produtoIdPathParamNested'
  *     responses:
  *       200:
  *         description: Detalhes do produto na loja.
@@ -62,7 +47,10 @@ produtosEmLojaRouter.get('/', produtosEmLojaController.listarProdutosDaLoja);
  *             schema:
  *               $ref: '#/components/schemas/ProdutosEmLojaDetalhado'
  *       404:
- *         description: Produto não encontrado nesta loja.
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: Loja ou Produto não encontrado nesta loja.
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 produtosEmLojaRouter.get(
   '/:produtoId',
@@ -71,139 +59,115 @@ produtosEmLojaRouter.get(
 
 /**
  * @swagger
- * /api/lojas/{lojaId}/produtos-loja:
+ * /lojas/{lojaId}/produtos-loja:
  *   post:
- *     summary: Adiciona um produto ao catálogo de uma loja (cria a relação)
- *     tags: [ProdutosEmLoja]
+ *     summary: Adiciona um produto ao catálogo de uma loja (Admin/Dono da Loja)
+ *     tags: [Produtos Em Loja]
+ *     # security:
+ *     #   - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: lojaId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID da loja
+ *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - produtoId
- *               - valorBase
- *               - disponivel
- *             properties:
- *               produtoId:
- *                 type: integer
- *               valorBase:
- *                 type: number
- *                 format: float
- *               disponivel:
- *                 type: boolean
- *               emPromocao:
- *                 type: boolean
- *               descontoPromocao:
- *                 type: integer
- *               validadePromocao:
- *                 type: string
- *                 format: date-time
- *             example:
- *               produtoId: 5
- *               valorBase: 25.50
- *               disponivel: true
- *               emPromocao: false
+ *             $ref: '#/components/schemas/NovoProdutoEmLojaInput'
  *     responses:
  *       201:
  *         description: Produto adicionado à loja com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProdutosEmLoja'
  *       400:
+ *         $ref: '#/components/responses/BadRequestError'
  *         description: Dados inválidos ou produto já existe na loja.
+ *       # 401:
+ *       #   $ref: '#/components/responses/UnauthorizedError'
+ *       # 403:
+ *       #   $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: Loja ou Produto base não encontrado.
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-produtosEmLojaRouter.post('/', produtosEmLojaController.adicionarProdutoEmLoja);
+produtosEmLojaRouter.post(
+  '/',
+  /* authenticate, authorizeAdminOrStoreOwner, */
+  produtosEmLojaController.adicionarProdutoEmLoja,
+);
 
 /**
  * @swagger
- * /api/lojas/{lojaId}/produtos-loja/{produtoId}:
+ * /lojas/{lojaId}/produtos-loja/{produtoId}:
  *   put:
- *     summary: Atualiza os detalhes de um produto em uma loja (preço, promoção, disponibilidade)
- *     tags: [ProdutosEmLoja]
+ *     summary: Atualiza os detalhes de um produto em uma loja (Admin/Dono da Loja)
+ *     tags: [Produtos Em Loja]
+ *     # security:
+ *     #   - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: lojaId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID da loja
- *       - in: path
- *         name: produtoId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID do produto
+ *       - $ref: '#/components/parameters/lojaIdPathParamNested'
+ *       - $ref: '#/components/parameters/produtoIdPathParamNested'
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               valorBase:
- *                 type: number
- *                 format: float
- *               disponivel:
- *                 type: boolean
- *               emPromocao:
- *                 type: boolean
- *               descontoPromocao:
- *                 type: integer
- *               validadePromocao:
- *                 type: string
- *                 format: date-time
- *             example:
- *               valorBase: 26.00
- *               disponivel: true
- *               emPromocao: true
- *               descontoPromocao: 10
- *               validadePromocao: "2025-11-30T23:59:59Z"
+ *             $ref: '#/components/schemas/AtualizarProdutoEmLojaInput'
  *     responses:
  *       200:
  *         description: Detalhes atualizados com sucesso.
- *       404:
- *         description: Produto não encontrado nesta loja.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProdutosEmLoja'
  *       400:
- *         description: Dados inválidos.
+ *         $ref: '#/components/responses/BadRequestError'
+ *       # 401:
+ *       #   $ref: '#/components/responses/UnauthorizedError'
+ *       # 403:
+ *       #   $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: Loja ou Produto não encontrado nesta loja.
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 produtosEmLojaRouter.put(
   '/:produtoId',
+  /* authenticate, authorizeAdminOrStoreOwner, */
   produtosEmLojaController.atualizarProdutoNaLoja,
 );
 
 /**
  * @swagger
- * /api/lojas/{lojaId}/produtos-loja/{produtoId}:
+ * /lojas/{lojaId}/produtos-loja/{produtoId}:
  *   delete:
- *     summary: Remove um produto do catálogo de uma loja (deleta a relação)
- *     tags: [ProdutosEmLoja]
+ *     summary: Remove um produto do catálogo de uma loja (Admin/Dono da Loja)
+ *     tags: [Produtos Em Loja]
+ *     # security:
+ *     #   - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: lojaId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID da loja
- *       - in: path
- *         name: produtoId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID do produto
+ *       - $ref: '#/components/parameters/lojaIdPathParamNested'
+ *       - $ref: '#/components/parameters/produtoIdPathParamNested'
  *     responses:
  *       204:
  *         description: Produto removido da loja com sucesso.
+ *       # 401:
+ *       #   $ref: '#/components/responses/UnauthorizedError'
+ *       # 403:
+ *       #   $ref: '#/components/responses/ForbiddenError'
  *       404:
- *         description: Produto não encontrado nesta loja.
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: Loja ou Produto não encontrado nesta loja.
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 produtosEmLojaRouter.delete(
   '/:produtoId',
+  /* authenticate, authorizeAdminOrStoreOwner, */
   produtosEmLojaController.deletarProdutoDaLoja,
 );
 

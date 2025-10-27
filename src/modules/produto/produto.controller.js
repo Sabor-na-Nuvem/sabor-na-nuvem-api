@@ -3,27 +3,20 @@ import produtoServices from './produto.services.js';
 const produtoController = {
   async buscarTodosOsProdutos(req, res) {
     try {
-      const produtos = await produtoServices.buscarTodosOsProdutos();
+      const { categoriaId } = req.query;
+      let idCategoriaNumerico;
 
-      return res.status(200).json(produtos);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  },
-
-  async buscarProdutosPorCategoria(req, res) {
-    try {
-      const { id } = req.params;
-
-      if (Number.isNaN(Number(id))) {
-        return res
-          .status(400)
-          .json({ message: 'O ID da categoria deve ser um número.' });
+      if (categoriaId !== undefined) {
+        idCategoriaNumerico = Number(idCategoriaNumerico);
+        if (Number.isNaN(idCategoriaNumerico)) {
+          return res
+            .status(400)
+            .json({ message: 'O parâmetro "categoriaId" deve ser um número.' });
+        }
       }
 
-      const produtos = await produtoServices.buscarProdutosPorCategoria(
-        Number(id),
-      );
+      const produtos =
+        await produtoServices.buscarTodosOsProdutos(idCategoriaNumerico);
 
       return res.status(200).json(produtos);
     } catch (error) {

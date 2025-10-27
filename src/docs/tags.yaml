@@ -1,0 +1,33 @@
+tags:
+  - name: Categorias de Produto
+    description: API para gerenciamento das categorias de produto.
+
+  - name: Cupons de Desconto
+    description: API para gerenciamento e validação de cupons de desconto.
+
+  - name: Enderecos
+    description: Gerenciamento de endereços associados a usuários ou lojas.
+
+  - name: Lojas
+    description: API para gerenciamento de lojas.
+
+  - name: Produtos
+    description: API para gerenciamento de produtos.
+
+  - name: Produtos - Personalização
+    description: Gerenciamento dos grupos de personalização de produtos
+
+  - name: Produtos Em Loja
+    description: Gerenciamento do catálogo (produtos, preços, promoções) específico de cada loja.
+
+  - name: Telefones
+    description: Gerenciamento de telefones associados a usuários ou lojas.
+
+  - name: Usuarios
+    description: Operações gerais sobre perfis de usuário
+
+  - name: Usuarios (Meu Perfil)
+    description: Operações relacionadas ao perfil do usuário autenticado (/me)
+
+  - name: Usuarios (Admin)
+    description: Operações administrativas sobre usuários

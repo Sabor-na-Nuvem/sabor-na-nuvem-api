@@ -6,200 +6,85 @@ const produtoRouter = express.Router();
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     Produto:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           description: O ID auto-gerado do produto.
- *         nome:
- *           type: string
- *           description: O nome do produto.
- *         descricao:
- *           type: string
- *           description: A descrição detalhada do produto.
- *         imagemUrl:
- *           type: string
- *           description: URL da imagem do produto.
- *         categoriaId:
- *           type: integer
- *           description: O ID da categoria à qual o produto pertence.
- *         createdAt:
- *           type: string
- *           format: date-time
- *           description: A data de criação do produto.
- *         updatedAt:
- *           type: string
- *           format: date-time
- *           description: A data da última atualização do produto.
- *       example:
- *         id: 1
- *         nome: "X-Burger Clássico"
- *         descricao: "Pão, carne, queijo e salada."
- *         imagemUrl: "http://example.com/burger.jpg"
- *         categoriaId: 1
- *         createdAt: "2025-10-17T17:30:00.000Z"
- *         updatedAt: "2025-10-17T17:30:00.000Z"
- *
- *     NovoProduto:
- *       type: object
- *       required:
- *         - nome
- *         - categoriaId
- *       properties:
- *         nome:
- *           type: string
- *           description: O nome do produto.
- *         descricao:
- *           type: string
- *           description: Uma breve descrição do produto.
- *         imagemUrl:
- *           type: string
- *           description: URL da imagem do produto.
- *         categoriaId:
- *           type: integer
- *           description: O ID da categoria do produto.
- *       example:
- *         nome: "X-Burger Clássico"
- *         descricao: "Pão, carne, queijo e salada."
- *         imagemUrl: "http://example.com/burger.jpg"
- *         categoriaId: 1
- *
- *     ProdutoEmLojaDetalhado:
- *       type: object
- *       properties:
- *         lojaId:
- *           type: integer
- *           description: ID da loja
- *         nomeLoja:
- *           type: string
- *           description: Nome da loja
- *         valorBase:
- *           type: number
- *           format: float
- *           description: Valor base do produto na loja
- *         disponivel:
- *           type: boolean
- *           description: Indica se o produto está disponível na loja
- *         emPromocao:
- *           type: boolean
- *           description: Indica se o produto está em promoção
- *         descontoPromocao:
- *           type: integer
- *           description: Percentual de desconto aplicado (se houver)
- *         validadePromocao:
- *           type: string
- *           format: date-time
- *           description: Data e hora de validade da promoção
- *       example:
- *         lojaId: 3
- *         nomeLoja: "Sabor nas Nuvens - Asa Sul"
- *         valorBase: 25.50
- *         disponivel: true
- *         emPromocao: true
- *         descontoPromocao: 15
- *         validadePromocao: "2025-12-31T23:59:59Z"
- */
-
-/**
- * @swagger
- * tags:
- *   - name: Produtos
- *     description: API para gerenciamento de produtos.
- */
-
-/**
- * @swagger
- * /api/produtos:
+ * /produtos:
  *   get:
  *     summary: Retorna a lista de todos os produtos
  *     tags: [Produtos]
+ *     parameters:
+ *       - $ref: '#/components/parameters/categoriaIdQueryParam'
+ *       # TODO: Adicionar outros parâmetros (nome, paginação, ordenação)
  *     responses:
  *       200:
- *         description: A lista de produtos.
+ *         description: A lista de produtos (pode incluir categoria e personalizáveis).
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Produto'
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError' # Se categoriaId for inválido
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 produtoRouter.get('/', produtoController.buscarTodosOsProdutos);
 
 /**
  * @swagger
- * /api/produtos/{id}:
+ * /produtos/{id}:
  *   get:
- *     summary: Busca um único produto pelo ID
+ *     summary: Busca um único produto pelo ID (incluindo personalizáveis)
  *     tags: [Produtos]
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: O ID do produto
+ *       - $ref: '#/components/parameters/produtoIdPathParam'
  *     responses:
  *       200:
- *         description: Os dados do produto.
+ *         description: Os dados do produto com seus grupos de personalização.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Produto'
  *       404:
- *         description: Produto não encontrado.
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 produtoRouter.get('/:id', produtoController.buscarProdutoPorId);
 
 /**
  * @swagger
- * /api/produtos/buscar/por-nome:
+ * /produtos/buscar/por-nome:
  *   get:
- *     summary: Busca um único produto pelo nome
+ *     summary: Busca produtos pelo nome (case-insensitive, pode retornar múltiplos)
  *     tags: [Produtos]
  *     parameters:
- *       - in: query
- *         name: nome
- *         schema:
- *           type: string
- *         required: true
- *         description: O nome exato do produto para buscar
+ *       - $ref: '#/components/parameters/produtoNomeQueryParam'
  *     responses:
  *       200:
- *         description: Os dados do produto.
+ *         description: Lista de produtos encontrados com o nome especificado (pode ser vazia).
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Produto'
- *       404:
- *         description: Produto não encontrado.
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Produto'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 produtoRouter.get('/buscar/por-nome', produtoController.buscarProdutoPorNome);
 
 /**
  * @swagger
- * /api/produtos/{produtoId}/lojas:
+ * /produtos/{produtoId}/lojas:
  *   get:
- *     summary: Lista todas as lojas que possuem um determinado produto
- *     description: Retorna as lojas nas quais um produto específico está disponível, incluindo informações sobre preço, disponibilidade e promoção.
+ *     summary: Lista todas as lojas que vendem um determinado produto
  *     tags: [Produtos]
  *     parameters:
- *       - in: path
- *         name: produtoId
- *         required: true
- *         schema:
- *           type: integer
- *         description: O ID do produto
- *       - in: query
- *         name: somenteDisponiveis
- *         schema:
- *           type: boolean
- *         description: Se verdadeiro, retorna apenas lojas onde o produto está disponível.
+ *       - $ref: '#/components/parameters/produtoIdPathParamNested'
+ *       - $ref: '#/components/parameters/somenteDisponiveisQueryParam'
  *     responses:
  *       200:
- *         description: Lista de lojas que vendem o produto.
+ *         description: Lista de lojas que vendem o produto com detalhes.
  *         content:
  *           application/json:
  *             schema:
@@ -207,16 +92,20 @@ produtoRouter.get('/buscar/por-nome', produtoController.buscarProdutoPorNome);
  *               items:
  *                 $ref: '#/components/schemas/ProdutoEmLojaDetalhado'
  *       404:
- *         description: Produto não encontrado ou não disponível em nenhuma loja.
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 produtoRouter.get('/:produtoId/lojas', produtoController.buscarLojasPorProduto);
 
 /**
  * @swagger
- * /api/produtos:
+ * /produtos:
  *   post:
- *     summary: Cria um novo produto
+ *     summary: Cria um novo produto (Admin)
  *     tags: [Produtos]
+ *     # security:
+ *     #   - bearerAuth: [] # TODO: Adicionar segurança
  *     requestBody:
  *       required: true
  *       content:
@@ -231,29 +120,31 @@ produtoRouter.get('/:produtoId/lojas', produtoController.buscarLojasPorProduto);
  *             schema:
  *               $ref: '#/components/schemas/Produto'
  *       400:
- *         description: Dados inválidos.
+ *         $ref: '#/components/responses/BadRequestError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-produtoRouter.post('/', produtoController.criarProduto);
+produtoRouter.post(
+  '/',
+  /* authenticate, authorizeAdmin, */ produtoController.criarProduto,
+);
 
 /**
  * @swagger
- * /api/produtos/{id}:
+ * /produtos/{id}:
  *   put:
- *     summary: Atualiza um produto existente
+ *     summary: Atualiza um produto existente (Admin)
  *     tags: [Produtos]
+ *     # security:
+ *     #   - bearerAuth: [] # TODO: Adicionar segurança
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: O ID do produto a ser atualizado
+ *       - $ref: '#/components/parameters/produtoIdPathParam'
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/NovoProduto'
+ *             $ref: '#/components/schemas/AtualizarProduto'
  *     responses:
  *       200:
  *         description: Produto atualizado com sucesso.
@@ -261,35 +152,45 @@ produtoRouter.post('/', produtoController.criarProduto);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Produto'
- *       404:
- *         description: Produto não encontrado.
  *       400:
- *         description: Dados inválidos.
+ *         $ref: '#/components/responses/BadRequestError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-produtoRouter.put('/:id', produtoController.atualizarProduto);
+produtoRouter.put(
+  '/:id',
+  /* authenticate, authorizeAdmin, */ produtoController.atualizarProduto,
+);
 
 /**
  * @swagger
- * /api/produtos/{id}:
+ * /produtos/{id}:
  *   delete:
- *     summary: Deleta um produto
+ *     summary: Deleta um produto (Admin)
+ *     description: CUIDADO - Verifica se o produto está associado a itens de pedido antes de deletar.
  *     tags: [Produtos]
+ *     # security:
+ *     #   - bearerAuth: [] # TODO: Adicionar segurança
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: O ID do produto a ser deletado
+ *       - $ref: '#/components/parameters/produtoIdPathParam'
  *     responses:
  *       204:
- *         description: Produto deletado com sucesso (sem conteúdo).
+ *         description: Produto deletado com sucesso.
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
  *       404:
- *         description: Produto não encontrado.
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-produtoRouter.delete('/:id', produtoController.deletarProduto);
+produtoRouter.delete(
+  '/:id',
+  /* authenticate, authorizeAdmin, */ produtoController.deletarProduto,
+);
 
-// Monta as rotas de personalizavel sob o path com :produtoId
+// --- ROTAS ANINHADAS PARA PERSONALIZAVEIS ---
 produtoRouter.use('/:produtoId/personalizaveis', personalizavelRouter);
 
 export default produtoRouter;

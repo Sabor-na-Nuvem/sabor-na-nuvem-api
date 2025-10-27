@@ -1,0 +1,148 @@
+components:
+  schemas:
+    # Schema base representando a relação (resposta GET/:id ou parte da lista)
+    ProdutosEmLoja:
+      type: object
+      properties:
+        lojaId:
+          type: integer
+          description: ID da loja.
+          readOnly: true
+        produtoId:
+          type: integer
+          description: ID do produto.
+          readOnly: true
+        disponivel:
+          type: boolean
+          description: Indica se o produto está disponível para venda nesta loja.
+        valorBase:
+          type: number
+          format: float # Ou double
+          description: Preço base do produto nesta loja específica (sem promoções).
+        emPromocao:
+          type: boolean
+          description: Indica se há uma promoção ativa para este produto nesta loja.
+        descontoPromocao:
+          type: integer
+          nullable: true
+          description: Valor ou percentual do desconto (interpretar com base nas regras de negócio ou adicionar tipoDesconto?).
+        validadePromocao:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data e hora de término da promoção (se houver).
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      example:
+        lojaId: 1
+        produtoId: 5
+        disponivel: true
+        valorBase: 25.50
+        emPromocao: false
+        descontoPromocao: null
+        validadePromocao: null
+        createdAt: "2025-10-29T14:00:00Z"
+        updatedAt: "2025-10-29T14:00:00Z"
+
+    # Schema detalhado incluindo dados do Produto (para listagem GET /)
+    ProdutosEmLojaDetalhado:
+      type: object
+      properties:
+        # Campos diretos da relação ProdutosEmLoja
+        lojaId: { type: integer, readOnly: true }
+        produtoId: { type: integer, readOnly: true }
+        disponivel: { type: boolean }
+        valorBase: { type: number, format: float }
+        emPromocao: { type: boolean }
+        descontoPromocao: { type: integer, nullable: true }
+        validadePromocao: { type: string, format: date-time, nullable: true }
+        # Campos incluídos do Produto
+        produto:
+           type: object
+           properties:
+               id: { type: integer, readOnly: true} # Redundante, já tem produtoId
+               nome: { type: string }
+               descricao: { type: string }
+               imagemUrl: { type: string, format: url }
+               categoriaId: { type: integer }
+      example:
+        lojaId: 1
+        produtoId: 5
+        disponivel: true
+        valorBase: 25.50
+        emPromocao: false
+        descontoPromocao: null
+        validadePromocao: null
+        produto:
+          id: 5
+          nome: "X-Burger Especial"
+          descricao: "Pão brioche, 150g de carne..."
+          imagemUrl: "http://example.com/x-especial.jpg"
+
+
+    # Schema para adicionar um produto a uma loja (POST /)
+    NovoProdutoEmLojaInput:
+      type: object
+      required:
+        - produtoId
+        - valorBase
+        - disponivel # Ou definir um default?
+      properties:
+        produtoId:
+          type: integer
+          description: ID do produto (global) a ser adicionado à loja.
+        valorBase:
+          type: number
+          format: float
+          description: Preço base do produto nesta loja.
+        disponivel:
+          type: boolean
+          default: true
+          description: Se o produto já entra disponível (default true).
+        emPromocao:
+          type: boolean
+          default: false
+        descontoPromocao:
+          type: integer # Ou number/float
+          nullable: true
+        validadePromocao:
+          type: string
+          format: date-time
+          nullable: true
+      example:
+        produtoId: 5
+        valorBase: 25.50
+        disponivel: true
+        emPromocao: true
+        descontoPromocao: 10 # 10%
+        validadePromocao: "2025-12-31T23:59:59Z"
+
+    # Schema para atualizar um produto em uma loja (PUT ou PATCH /:produtoId)
+    AtualizarProdutoEmLojaInput:
+      type: object
+      properties:
+        valorBase:
+          type: number
+          format: float
+        disponivel:
+          type: boolean
+        emPromocao:
+          type: boolean
+        descontoPromocao:
+          type: integer # Ou number/float
+          nullable: true # Permite remover desconto
+        validadePromocao:
+          type: string
+          format: date-time
+          nullable: true # Permite remover validade
+      example:
+        disponivel: false # Exemplo tirando produto do ar
+        emPromocao: false
+        descontoPromocao: null
+        validadePromocao: null

@@ -1,0 +1,44 @@
+components:
+  responses:
+    UnauthorizedError:
+      description: Não autenticado (Token JWT inválido ou ausente).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse' # Precisa do schema ErrorResponse
+    ForbiddenError:
+      description: Não autorizado (Usuário não tem permissão para esta ação).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: Recurso não encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequestError:
+      description: Requisição inválida (dados faltando, formato incorreto, violação de regra).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Erro interno inesperado no servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensagem de erro.
+      required:
+        - message
+      example:
+        message: 'Recurso não encontrado.'

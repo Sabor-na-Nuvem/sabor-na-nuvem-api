@@ -1,0 +1,80 @@
+components:
+  schemas:
+    Telefone:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: O ID auto-gerado do telefone.
+          readOnly: true
+        ddd:
+          type: string
+          description: Código DDD (2 dígitos).
+          example: "61"
+          maxLength: 2
+        numero:
+          type: string
+          description: Número do telefone (8 ou 9 dígitos).
+          example: "987654321"
+          maxLength: 9
+        usuarioId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID (UUID) do usuário associado (se houver).
+          readOnly: true
+        lojaId:
+          type: integer
+          nullable: true
+          description: ID da loja associada (se houver).
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+      example:
+        id: 201
+        ddd: "11"
+        numero: "912345678"
+        usuarioId: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        lojaId: null
+        createdAt: "2025-10-29T09:00:00Z"
+        updatedAt: "2025-10-29T09:00:00Z"
+
+    NovoTelefone:
+      type: object
+      required:
+        - ddd
+        - numero
+      properties:
+        ddd:
+          type: string
+          description: Código DDD (2 dígitos).
+          pattern: '^[0-9]{2}$'
+        numero:
+          type: string
+          description: Número do telefone (8 ou 9 dígitos, apenas números).
+          pattern: '^[0-9]{8,9}$'
+      example:
+        ddd: "21"
+        numero: "988776655"
+
+    AtualizarTelefone:
+      type: object
+      properties:
+        ddd:
+          type: string
+          description: Código DDD (2 dígitos).
+          pattern: '^[0-9]{2}$'
+        numero:
+          type: string
+          description: Número do telefone (8 ou 9 dígitos, apenas números).
+          pattern: '^[0-9]{8,9}$'
+      example:
+        numero: "32119876"

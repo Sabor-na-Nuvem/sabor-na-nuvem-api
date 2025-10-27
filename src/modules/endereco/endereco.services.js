@@ -1,4 +1,4 @@
-import { EstadoBrasil, Prisma } from '@prisma/client';
+import { EstadosBrasil, Prisma } from '@prisma/client';
 import prisma from '../../config/prisma.js';
 
 const enderecoServices = {
@@ -68,7 +68,7 @@ const enderecoServices = {
         const enderecoCriado = await tx.endereco.create({
           data: {
             cep: dadosEndereco.cep,
-            estado: EstadoBrasil[dadosEndereco.estado.toUpperCase()],
+            estado: EstadosBrasil[dadosEndereco.estado.toUpperCase()],
             cidade: dadosEndereco.cidade,
             bairro: dadosEndereco.bairro,
             logradouro: dadosEndereco.logradouro,

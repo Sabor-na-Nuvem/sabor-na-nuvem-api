@@ -1,0 +1,9 @@
+components:
+  parameters:
+    telefoneIdPathParam:
+      in: path
+      name: telefoneId
+      required: true
+      schema:
+        type: integer
+      description: O ID do telefone

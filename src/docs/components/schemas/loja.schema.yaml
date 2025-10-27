@@ -1,0 +1,134 @@
+components:
+  schemas:
+    Loja:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: O ID auto-gerado da loja.
+          readOnly: true
+        nome:
+          type: string
+          description: O nome da loja.
+        cnpj:
+          type: string
+          description: O CNPJ da loja (apenas números, 14 dígitos).
+        enderecoId:
+          type: integer
+          description: O ID do endereço associado à loja.
+          readOnly: true # Geralmente não enviado diretamente
+        horarioFuncionamento:
+          type: string
+          description: Texto descrevendo o horário (Seg-Sex 10h-22h, por exemplo).
+        ofereceDelivery:
+          type: boolean
+          description: Indica se a loja oferece delivery.
+        raioEntregaKm:
+          type: number
+          format: float # Ou double
+          nullable: true
+          description: O raio de entrega em KM (se oferecer delivery).
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+      example:
+        id: 1
+        nome: "Sabor na Nuvem - Unidade Centro"
+        cnpj: "12345678000190"
+        enderecoId: 101
+        horarioFuncionamento: "Seg-Sab 11:00 - 23:00"
+        ofereceDelivery: true
+        raioEntregaKm: 5.5
+        createdAt: "2025-10-28T10:00:00Z"
+        updatedAt: "2025-10-28T11:30:00Z"
+
+    NovaLoja:
+      type: object
+      required:
+        - nome
+        - cnpj
+        - horarioFuncionamento
+        - ofereceDelivery
+        - endereco # Dados do endereço são enviados aninhados na criação
+      properties:
+        nome:
+          type: string
+        cnpj:
+          type: string
+          description: CNPJ (apenas números, 14 dígitos).
+          pattern: '^[0-9]{14}$' # Adiciona validação de formato
+        horarioFuncionamento:
+          type: string
+        ofereceDelivery:
+          type: boolean
+        raioEntregaKm:
+          type: number
+          format: float
+          nullable: true
+          description: Obrigatório se ofereceDelivery for true (validação na lógica).
+        endereco:
+          $ref: '#/components/schemas/NovoEndereco' # Referencia o schema de input de endereço
+      example:
+        nome: "Nova Loja Deliciosa"
+        cnpj: "98765432000110"
+        horarioFuncionamento: "Ter-Dom 18:00 - 00:00"
+        ofereceDelivery: true
+        raioEntregaKm: 8
+        endereco:
+          # Exemplo de NovoEndereco aqui
+          cep: "72900-000"
+          logradouro: "Avenida Principal"
+          numero: "456"
+          bairro: "Centro"
+          cidade: "Santo Antônio do Descoberto"
+          estado: "GO"
+          latitude: -16.000000
+          longitude: -48.000000
+
+    AtualizarLoja: # Idealmente para PATCH (parcial)
+      type: object
+      description: Enviar apenas os campos que deseja atualizar.
+      properties:
+        nome:
+          type: string
+        horarioFuncionamento:
+          type: string
+        ofereceDelivery:
+          type: boolean
+        raioEntregaKm:
+          type: number
+          format: float
+          nullable: true # Permite remover o raio definindo como null?
+        # NÃO incluir cnpj ou endereco aqui se não forem atualizáveis por esta rota
+      example:
+        nome: "Loja Deliciosa (Renomeada)"
+        ofereceDelivery: false
+        raioEntregaKm: null # Exemplo removendo o raio
+
+    LojaComDistancia:
+      type: object
+      allOf: # Herda/combina propriedades de Loja
+        - $ref: '#/components/schemas/Loja'
+      properties:
+        distancia_km:
+          type: number
+          format: float
+          description: Distância calculada da loja até o ponto de referência (em KM).
+      required: # Garante que distancia_km sempre virá
+        - distancia_km
+      example:
+        id: 1
+        nome: "Sabor na Nuvem - Unidade Centro"
+        horarioFuncionamento: "Seg-Sab 11:00 - 23:00"
+        ofereceDelivery: true
+        raioEntregaKm: 5.5
+        distancia_km: 2.35

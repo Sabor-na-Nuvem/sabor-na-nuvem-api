@@ -1,0 +1,30 @@
+components:
+  parameters:
+    produtoIdPathParam:
+      in: path
+      name: id # Nome do parâmetro na rota /:id
+      required: true
+      schema:
+        type: integer
+      description: O ID do produto
+    produtoIdPathParamNested: # Nome diferente para rotas aninhadas
+      in: path
+      name: produtoId # Nome do parâmetro na rota /:produtoId/...
+      required: true
+      schema:
+        type: integer
+      description: O ID do produto
+    produtoNomeQueryParam:
+      in: query
+      name: nome
+      required: true
+      schema:
+        type: string
+      description: O nome exato (case-insensitive) do produto para buscar
+    somenteDisponiveisQueryParam:
+       in: query
+       name: somenteDisponiveis
+       schema:
+         type: boolean
+         default: false
+       description: Se verdadeiro, retorna apenas lojas onde o produto está disponível.

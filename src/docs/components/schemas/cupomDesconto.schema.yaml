@@ -1,0 +1,179 @@
+components:
+  schemas:
+    # Enum TipoDesconto
+    TipoDesconto:
+      type: string
+      enum: [PERCENTUAL, VALOR_FIXO]
+      description: Define se o desconto é um percentual ou um valor fixo em R$.
+
+    # Schema principal (resposta GET)
+    CupomDesconto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: O ID auto-gerado do cupom.
+          readOnly: true
+        codCupom:
+          type: string
+          description: O código único do cupom, como PROMO10 ou NATALVIP.
+        validade:
+          type: string
+          format: date-time
+          description: Data e hora de expiração do cupom.
+        qtdUsos:
+          type: integer
+          nullable: true
+          description: Quantidade restante de usos (null para ilimitado).
+        ativo:
+          type: boolean
+          description: Indica se o cupom está ativo para uso (pode ser desativado manualmente ou por qtdUsos = 0).
+        tipoDesconto:
+          $ref: '#/components/schemas/TipoDesconto' # Referencia o Enum
+        valorDesconto:
+          type: number
+          format: float
+          description: O valor do desconto (10 para 10%, ou 15.50 para R$15,50). Use tipoDesconto para interpretar.
+          example: 10.00
+        usuarioId:
+          type: string
+          format: uuid
+          nullable: true
+          description: O ID (UUID) do usuário específico ao qual este cupom se aplica (opcional).
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+      example:
+        id: 1
+        codCupom: "BEMVINDO15"
+        validade: "2026-12-31T23:59:59Z"
+        qtdUsos: null # Exemplo de uso ilimitado
+        ativo: true
+        tipoDesconto: "PERCENTUAL"
+        valorDesconto: 15.00
+        usuarioId: null
+        createdAt: "2025-10-23T10:00:00Z"
+        updatedAt: "2025-10-23T10:00:00Z"
+
+    # Schema para criar um cupom (POST /)
+    NovoCupomDesconto:
+      type: object
+      required:
+        - codCupom
+        - validade
+        - tipoDesconto
+        - valorDesconto
+      properties:
+        codCupom:
+          type: string
+          description: Código único para o cupom (sensível a maiúsculas/minúsculas?).
+        validade:
+          type: string
+          format: date-time
+          description: Data e hora de expiração.
+        qtdUsos:
+          type: integer
+          nullable: true
+          description: Quantidade máxima de usos (null ou omitir para ilimitado).
+        ativo:
+          type: boolean
+          default: true
+          description: Se o cupom já começa ativo (default true).
+        tipoDesconto:
+          $ref: '#/components/schemas/TipoDesconto'
+        valorDesconto:
+          type: number
+          format: float
+          description: Valor/percentual do desconto.
+        usuarioId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Associar a um usuário específico (opcional).
+      example:
+        codCupom: "PIZZA10REAIS"
+        validade: "2025-11-30T23:59:59Z"
+        qtdUsos: 50
+        ativo: true
+        tipoDesconto: "VALOR_FIXO"
+        valorDesconto: 10.00
+        usuarioId: null
+
+    # Schema para atualizar um cupom (PUT ou PATCH /:id)
+    AtualizarCupomDesconto:
+      type: object
+      description: Apenas os campos a serem atualizados.
+      properties:
+        validade:
+          type: string
+          format: date-time
+        qtdUsos:
+          type: integer
+          nullable: true
+        ativo:
+          type: boolean
+        tipoDesconto:
+          $ref: '#/components/schemas/TipoDesconto'
+        valorDesconto:
+          type: number
+          format: float
+        usuarioId:
+          type: string
+          format: uuid
+          nullable: true
+      example:
+        ativo: false # Exemplo desativando um cupom
+        validade: "2026-01-31T23:59:59Z"
+
+    # Schema para requisição de validação (POST /validar)
+    ValidacaoCupomRequest:
+      type: object
+      required:
+        - codCupom
+      properties:
+        codCupom:
+          type: string
+          description: O código do cupom a ser validado.
+      example:
+        codCupom: "BEMVINDO15"
+
+    # Schema para resposta da validação (POST /validar)
+    ValidacaoCupomResponse:
+      type: object
+      required:
+        - valido
+        - mensagem
+      properties:
+        valido:
+          type: boolean
+          description: Indica se o cupom é válido para o contexto atual.
+        mensagem:
+          type: string
+          description: Mensagem explicando o status.
+        cupomId:
+          type: integer
+          nullable: true
+          description: O ID do cupom validado (se válido).
+        tipoDesconto:
+          $ref: '#/components/schemas/TipoDesconto'
+          nullable: true # Só presente se for válido
+        valorDesconto:
+          type: number
+          format: float
+          nullable: true # Só presente se for válido
+      example: # Exemplo de cupom válido
+        valido: true
+        mensagem: "Cupom BEMVINDO15 aplicado com sucesso!"
+        cupomId: 1
+        tipoDesconto: "PERCENTUAL"
+        valorDesconto: 15.00
+      # example: # Exemplo de cupom inválido
+      #   valido: false
+      #   mensagem: "Cupom expirado."
