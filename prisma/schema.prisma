@@ -61,13 +61,15 @@ model Loja {
   createdAt            DateTime @default(now()) @map("criadoEm")
   updatedAt            DateTime @updatedAt @map("atualizadoEm")
 
-  Pedido                 Pedido[]
+  pedido                 Pedido[]
   funcionarios           Usuario[]
   telefones              Telefone[]
+  carrinho               Carrinho[]
   produtosEmEstoque      ProdutosEmLoja[]
   modificadoresEmEstoque ModificadorEmLoja[]
 
-  endereco Endereco @relation(fields: [enderecoId], references: [id], map: "loja_endereco_fk", onDelete: Restrict)
+  endereco   Endereco @relation(fields: [enderecoId], references: [id], map: "loja_endereco_fk", onDelete: Restrict)
+  carrinhoId String
 
   @@map("loja")
 }
@@ -83,7 +85,7 @@ model Usuario {
   createdAt         DateTime    @default(now()) @map("criadoEm")
   updatedAt         DateTime    @updatedAt @map("atualizadoEm")
 
-  Pedido    Pedido[]
+  pedido    Pedido[]
   carrinho  Carrinho?
   telefones Telefone[]
   cupons    CupomDesconto[]
@@ -125,7 +127,7 @@ model CupomDesconto {
   createdAt     DateTime     @default(now()) @map("criadoEm")
   updatedAt     DateTime     @updatedAt @map("atualizadoEm")
 
-  Pedido Pedido[]
+  pedido Pedido[]
 
   usuario Usuario? @relation(fields: [usuarioId], references: [id], map: "cupom_usuario_fk", onDelete: SetNull)
 
@@ -212,7 +214,8 @@ model Modificador {
   createdAt         DateTime @default(now()) @map("criadoEm")
   updatedAt         DateTime @updatedAt @map("atualizadoEm")
 
-  lojasQueDisponibilizam ModificadorEmLoja[]
+  lojasQueDisponibilizam  ModificadorEmLoja[]
+  modificadoresEmCarrinho ItemCarrinhoModificadores[]
 
   personalizavel Personalizavel @relation(fields: [personalizavelId], references: [id], map: "modificador_personalizavel_fk", onDelete: Cascade)
 
@@ -278,7 +281,7 @@ model ItemPedido {
 model Carrinho {
   id        String     @id @map("idCarrinho")
   tipo      TipoPedido @map("tipoPedido")
-  valorBase Decimal    @default(0.0) @db.Decimal(7, 2)
+  lojaId    Int
   // Timestamps
   createdAt DateTime   @default(now()) @map("criadoEm")
   updatedAt DateTime   @updatedAt @map("atualizadoEm")
@@ -286,24 +289,39 @@ model Carrinho {
   itensNoCarrinho ItemCarrinho[]
 
   cliente Usuario @relation(fields: [id], references: [id], map: "carrinho_usuario_fk", onDelete: Cascade)
+  loja    Loja    @relation(fields: [lojaId], references: [id], map: "carrinho_loja_fk", onDelete: Restrict)
 
   @@map("carrinho")
 }
 
 model ItemCarrinho {
-  carrinhoId         String
-  produtoId          Int
-  qtdProduto         Int
-  valorTotalProdutos Decimal  @default(0.0) @db.Decimal(7, 2)
+  id                   Int      @id @default(autoincrement())
+  carrinhoId           String
+  produtoId            Int
+  qtdProduto           Int      @default(1)
+  valorUnitarioProduto Decimal  @db.Decimal(7, 2)
   // Timestamps
-  createdAt          DateTime @default(now()) @map("criadoEm")
-  updatedAt          DateTime @updatedAt @map("atualizadoEm")
+  createdAt            DateTime @default(now()) @map("criadoEm")
+  updatedAt            DateTime @updatedAt @map("atualizadoEm")
 
+  modificadoresSelecionados ItemCarrinhoModificadores[]
+
+  produto  Produto  @relation(fields: [produtoId], references: [id], map: "itemCarrinho_produto_fk", onDelete: Restrict)
   carrinho Carrinho @relation(fields: [carrinhoId], references: [id], map: "itemCarrinho_carrinho_fk", onDelete: Cascade)
-  produto  Produto  @relation(fields: [produtoId], references: [id], map: "itemCarrinho_produto_fk", onDelete: Cascade)
 
-  @@id([carrinhoId, produtoId])
   @@map("itemCarrinho")
+}
+
+model ItemCarrinhoModificadores {
+  itemCarrinhoId        Int
+  modificadorId         Int
+  valorAdicionalCobrado Decimal @db.Decimal(4, 2)
+
+  modificador  Modificador  @relation(fields: [modificadorId], references: [id], onDelete: Restrict)
+  itemCarrinho ItemCarrinho @relation(fields: [itemCarrinhoId], references: [id], onDelete: Cascade)
+
+  @@id([itemCarrinhoId, modificadorId])
+  @@map("itemCarrinhoModificadores")
 }
 
 // --- ENUMs ---
