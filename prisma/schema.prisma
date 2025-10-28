@@ -37,8 +37,8 @@ model Endereco {
   numero          String        @db.VarChar(10)
   complemento     String?
   pontoReferencia String?
-  latitude        Decimal       @db.Decimal(9, 6)
-  longitude       Decimal       @db.Decimal(9, 6)
+  latitude        Decimal?      @db.Decimal(9, 6)
+  longitude       Decimal?      @db.Decimal(9, 6)
   // Timestamps
   createdAt       DateTime      @default(now()) @map("criadoEm")
   updatedAt       DateTime      @updatedAt @map("atualizadoEm")
@@ -97,10 +97,10 @@ model Usuario {
 
 model RelatorioUsuario {
   usuarioId             String    @id
-  gastosTotais          Decimal   @db.Decimal(10, 2)
-  gastosMensais         Decimal   @db.Decimal(10, 2)
-  qtdTotalPedidos       Int
-  qtdMensalPedidos      Int
+  gastosTotais          Decimal   @default(0.0) @db.Decimal(10, 2)
+  gastosMensais         Decimal   @default(0.0) @db.Decimal(10, 2)
+  qtdTotalPedidos       Int       @default(0)
+  qtdMensalPedidos      Int       @default(0)
   dataUltimoPedido      DateTime?
   gastoDesdeUltimoCupom Decimal   @default(0.0) @db.Decimal(10, 2)
   // Timestamps
@@ -135,7 +135,7 @@ model CupomDesconto {
 model CategoriaProduto {
   id        Int      @id @default(autoincrement()) @map("idCategoria")
   nome      String   @unique @map("nomeCategoria")
-  descricao String   @map("descricaoCategoria")
+  descricao String?  @map("descricaoCategoria")
   // Timestamps
   createdAt DateTime @default(now()) @map("criadoEm")
   updatedAt DateTime @updatedAt @map("atualizadoEm")
@@ -147,9 +147,9 @@ model CategoriaProduto {
 
 model Produto {
   id          Int      @id @default(autoincrement()) @map("idProduto")
-  imagemUrl   String
+  imagemUrl   String?
   nome        String   @map("nomeProduto")
-  descricao   String   @map("descricaoProduto")
+  descricao   String?  @map("descricaoProduto")
   categoriaId Int
   // Timestamps
   createdAt   DateTime @default(now()) @map("criadoEm")
@@ -169,13 +169,13 @@ model ProdutosEmLoja {
   lojaId           Int
   produtoId        Int
   disponivel       Boolean
-  valorBase        Decimal  @db.Decimal(5, 2)
+  valorBase        Decimal   @db.Decimal(5, 2)
   emPromocao       Boolean
-  descontoPromocao Int
-  validadePromocao DateTime
+  descontoPromocao Int?
+  validadePromocao DateTime?
   // Timestamps
-  createdAt        DateTime @default(now()) @map("criadoEm")
-  updatedAt        DateTime @updatedAt @map("atualizadoEm")
+  createdAt        DateTime  @default(now()) @map("criadoEm")
+  updatedAt        DateTime  @updatedAt @map("atualizadoEm")
 
   loja    Loja    @relation(fields: [lojaId], references: [id], map: "lojaProduto_loja_fk", onDelete: Cascade)
   produto Produto @relation(fields: [produtoId], references: [id], map: "lojaProduto_produto_fk", onDelete: Cascade)
@@ -239,13 +239,13 @@ model Pedido {
   id           Int          @id @default(autoincrement()) @map("idPedido")
   clienteId    String?
   lojaId       Int
-  dataHora     DateTime     @map("dataHoraPedido")
+  dataHora     DateTime     @default(now()) @map("dataHoraPedido")
   valorBase    Decimal      @db.Decimal(7, 2)
   valorCobrado Decimal      @db.Decimal(7, 2)
   cupomUsadoId Int?
   tipo         TipoPedido   @map("tipoPedido")
   observacoes  String?      @map("observacoesPedido")
-  status       StatusPedido
+  status       StatusPedido @default(PENDENTE)
   // Timestamps
   createdAt    DateTime     @default(now()) @map("criadoEm")
   updatedAt    DateTime     @updatedAt @map("atualizadoEm")
@@ -278,7 +278,7 @@ model ItemPedido {
 model Carrinho {
   id        String     @id @map("idCarrinho")
   tipo      TipoPedido @map("tipoPedido")
-  valorBase Decimal    @db.Decimal(7, 2)
+  valorBase Decimal    @default(0.0) @db.Decimal(7, 2)
   // Timestamps
   createdAt DateTime   @default(now()) @map("criadoEm")
   updatedAt DateTime   @updatedAt @map("atualizadoEm")
@@ -294,7 +294,7 @@ model ItemCarrinho {
   carrinhoId         String
   produtoId          Int
   qtdProduto         Int
-  valorTotalProdutos Decimal  @db.Decimal(7, 2)
+  valorTotalProdutos Decimal  @default(0.0) @db.Decimal(7, 2)
   // Timestamps
   createdAt          DateTime @default(now()) @map("criadoEm")
   updatedAt          DateTime @updatedAt @map("atualizadoEm")
