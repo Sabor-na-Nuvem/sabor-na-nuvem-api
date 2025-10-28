@@ -1,0 +1,59 @@
+components:
+  schemas:
+    # Objeto para um único modificador no input
+    ModificadorInput:
+      type: object
+      required:
+        - modificadorId
+      properties:
+        modificadorId:
+          type: integer
+          description: O ID do modificador (opção) a ser adicionado.
+      example:
+        modificadorId: 101 # Ex: Bacon Extra
+
+    # Schema para POST /itens (Adicionar Item)
+    NovoItemCarrinhoInput:
+      type: object
+      required:
+        - produtoId
+        - qtdProduto
+        - lojaId # Obrigatório para a lógica de "Criar no Primeiro Item"
+      properties:
+        produtoId:
+          type: integer
+          description: O ID do produto base a ser adicionado.
+        qtdProduto:
+          type: integer
+          description: A quantidade deste item (com estas personalizações).
+          minimum: 1
+          example: 1
+        lojaId:
+          type: integer
+          description: O ID da loja onde o produto está sendo comprado. Este ID será usado para criar o carrinho se ele não existir, ou para validar contra o carrinho existente.
+        modificadores:
+          type: array
+          description: Lista das opções de personalização selecionadas para este item.
+          items:
+            $ref: '#/components/schemas/ModificadorInput'
+          default: [] # Default é um array vazio
+      example:
+        produtoId: 5
+        qtdProduto: 1
+        lojaId: 1 # Loja onde o item está sendo visto/comprado
+        modificadores:
+          - { modificadorId: 101 } # Ex: Bacon Extra
+          - { modificadorId: 202 } # Ex: Ao Ponto
+
+    # Schema for PATCH /itens/:itemCarrinhoId (Atualizar Item)
+    AtualizarItemCarrinhoInput:
+      type: object
+      required:
+        - qtdProduto
+      properties:
+        qtdProduto:
+          type: integer
+          description: A nova quantidade desejada (deve ser 1 ou mais).
+          minimum: 1
+      example:
+        qtdProduto: 2

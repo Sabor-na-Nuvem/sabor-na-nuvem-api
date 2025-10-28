@@ -1,3 +1,4 @@
+import { TipoPedido } from '@prisma/client';
 import prisma from '../../config/prisma.js';
 import carrinhoServices from '../carrinho/carrinho.services.js';
 
@@ -6,28 +7,35 @@ const itemCarrinhoServicess = {
     const {
       idProduto,
       qtdProduto,
+      idLoja,
       modificadores: modificadoresInput = [],
     } = dadosItem;
 
+    if (!idLoja || Number.isNaN(Number(idLoja))) {
+      throw new Error('A loja (lojaId) é obrigatória ao adicionar um item.');
+    }
+
     try {
       await prisma.$transaction(async (tx) => {
-        const carrinho = await tx.carrinho
-          .findUniqueOrThrow({
-            where: { id: idUsuario },
-            select: { lojaId: true },
-          })
-          .catch(() => {
-            throw new Error(
-              'Carrinho não encontrado. O usuário precisa ter um carrinho (mesmo que vazio).',
-            );
-          });
+        // Cria o carrinho em caso de primeira inserção
+        const carrinho = await tx.carrinho.upsert({
+          where: { id: idUsuario },
+          update: {},
+          create: {
+            id: idUsuario,
+            lojaId: Number(idLoja),
+            tipo: TipoPedido.ENTREGA,
+          },
+          select: { lojaId: true },
+        });
 
-        if (!carrinho.lojaId) {
+        const { lojaId } = carrinho;
+
+        if (carrinho.lojaId !== Number(idLoja)) {
           throw new Error(
-            'Loja não definida no carrinho. Por favor, selecione uma loja primeiro.',
+            `Este item é da Loja ${Number(idLoja)}, mas seu carrinho já contém itens da Loja ${carrinho.lojaId}. Limpe o carrinho para trocar de loja.`,
           );
         }
-        const { lojaId } = carrinho;
 
         // Validar o Produto Base
         const produtoEmLoja = await tx.produtosEmLoja.findUnique({
@@ -151,7 +159,8 @@ const itemCarrinhoServicess = {
         error.message.includes('Loja não definida') ||
         error.message.includes('obrigatória faltante') ||
         error.message.includes('excedida') ||
-        error.message.includes('não pertence')
+        error.message.includes('não pertence') ||
+        error.message.includes('Limpe o carrinho')
       ) {
         throw error;
       }

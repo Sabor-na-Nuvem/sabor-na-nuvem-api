@@ -1,0 +1,9 @@
+components:
+  parameters:
+    itemCarrinhoIdPathParam:
+      in: path
+      name: itemCarrinhoId
+      required: true
+      schema:
+        type: integer
+      description: O ID do item específico no carrinho (ItemCarrinho.id)
