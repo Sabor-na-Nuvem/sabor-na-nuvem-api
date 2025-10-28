@@ -11,6 +11,7 @@ import enderecoRoutes from './modules/endereco/endereco.routes.js';
 import telefoneRoutes from './modules/telefone/telefone.routes.js';
 import produtosEmLojaRoutes from './modules/produtos-em-loja/produtos-em-loja.routes.js';
 import categoriaProdutoRouter from './modules/categoria-produto/categoria-produto.routes.js';
+import modificadorEmLojaRouter from './modules/modificador-em-loja/modificador-em-loja.routes.js';
 
 dotenv.config();
 const app = express();
@@ -28,6 +29,9 @@ app.use('/api/categorias-produto', categoriaProdutoRouter);
 
 // Rotas aninhadas para ProdutoEmLoja
 app.use('/api/lojas/:lojaId/produtos-loja', produtosEmLojaRoutes);
+
+// Rotas aninhadas para ModificadorEmLoja
+app.use('/api/lojas/:lojaId/modificadores-loja', modificadorEmLojaRouter);
 
 // Rotas aninhandas para Endereco
 app.use('/api/lojas/:lojaId/endereco', enderecoRoutes);

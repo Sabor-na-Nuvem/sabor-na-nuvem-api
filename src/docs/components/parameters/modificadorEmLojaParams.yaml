@@ -1,0 +1,16 @@
+components:
+  parameters:
+    modificadorIdPathParam:
+      in: path
+      name: modificadorId
+      required: true
+      schema:
+        type: integer
+      description: O ID do modificador (opção) no contexto da loja.
+    disponivelQueryParam: # Filtro para listagem
+      in: query
+      name: disponivel
+      schema:
+        type: boolean
+      required: false
+      description: Filtrar apenas por modificadores disponíveis na loja.

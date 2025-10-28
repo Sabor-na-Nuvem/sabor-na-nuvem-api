@@ -1,0 +1,104 @@
+components:
+  schemas:
+    # Schema base para ModificadorEmLoja
+    ModificadorEmLoja:
+      type: object
+      properties:
+        lojaId:
+          type: integer
+          description: ID da loja.
+          readOnly: true
+        modificadorId:
+          type: integer
+          description: ID do modificador (opção).
+          readOnly: true
+        disponivel:
+          type: boolean
+          description: Indica se esta opção está disponível nesta loja.
+        valorAdicional:
+          type: number
+          format: float # Ou double
+          description: Preço adicional desta opção nesta loja específica (em R$).
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação do registro.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+      example:
+        lojaId: 1
+        modificadorId: 101 # Ex: Bacon Extra
+        disponivel: true
+        valorAdicional: 6.50
+        createdAt: "2025-10-30T15:00:00Z"
+        updatedAt: "2025-10-30T15:00:00Z"
+
+    # Schema detalhado incluindo nome do Modificador (para listagem)
+    ModificadorEmLojaDetalhado:
+      type: object
+      properties:
+        lojaId: { type: integer, readOnly: true }
+        modificadorId: { type: integer, readOnly: true }
+        disponivel: { type: boolean }
+        valorAdicional: { type: number, format: float }
+        modificador: # Inclui dados do modificador base
+          type: object
+          properties:
+            id: { type: integer, readOnly: true } # Redundante
+            nome: { type: string }
+            descricao: { type: string, nullable: true }
+            isOpcaoPadrao: { type: boolean }
+            ordemVisualizacao: { type: integer, nullable: true }
+            personalizavelId: { type: integer } # Pode ser útil saber o grupo
+      example:
+        lojaId: 1
+        modificadorId: 101
+        disponivel: true
+        valorAdicional: 6.50
+        modificador:
+          id: 101
+          nome: "Bacon Extra"
+          descricao: "Duas fatias crocantes."
+          isOpcaoPadrao: false
+          ordemVisualizacao: 1
+
+    # Schema para adicionar um modificador a uma loja (POST /)
+    NovoModificadorEmLojaInput:
+      type: object
+      required:
+        - modificadorId
+        - valorAdicional
+        - disponivel # Ou definir default?
+      properties:
+        modificadorId:
+          type: integer
+          description: ID do modificador (global) a ser adicionado à loja.
+        disponivel:
+          type: boolean
+          default: true
+          description: Se a opção já entra disponível (default true).
+        valorAdicional:
+          type: number
+          format: float
+          description: Preço adicional desta opção nesta loja.
+      example:
+        modificadorId: 101 # Bacon Extra
+        disponivel: true
+        valorAdicional: 6.50
+
+    # Schema para atualizar um modificador em uma loja (PUT/PATCH /:modificadorId)
+    AtualizarModificadorEmLojaInput:
+      type: object
+      properties:
+        disponivel:
+          type: boolean
+        valorAdicional:
+          type: number
+          format: float
+      example:
+        disponivel: false # Exemplo tirando opção do ar
+        valorAdicional: 7.00 # Exemplo atualizando preço
