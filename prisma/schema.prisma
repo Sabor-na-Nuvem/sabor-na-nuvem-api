@@ -202,12 +202,15 @@ model Personalizavel {
 }
 
 model Modificador {
-  id               Int      @id @default(autoincrement()) @map("idModificador")
-  nome             String   @map("nomeModificador")
-  personalizavelId Int
+  id                Int      @id @default(autoincrement()) @map("idModificador")
+  nome              String   @map("nomeModificador")
+  descricao         String?  @map("descricaoModificador")
+  ordemVisualizacao Int?
+  isOpcaoPadrao     Boolean  @default(false)
+  personalizavelId  Int
   // Timestamps
-  createdAt        DateTime @default(now()) @map("criadoEm")
-  updatedAt        DateTime @updatedAt @map("atualizadoEm")
+  createdAt         DateTime @default(now()) @map("criadoEm")
+  updatedAt         DateTime @updatedAt @map("atualizadoEm")
 
   lojasQueDisponibilizam ModificadorEmLoja[]
 
@@ -343,7 +346,7 @@ enum RoleUsuario {
 
 enum TipoDesconto {
   PERCENTUAL // Ex: 10 (para 10%)
-  VALOR_FIXO  // Ex: 15.50 (para R$ 15,50)
+  VALOR_FIXO // Ex: 15.50 (para R$ 15,50)
 }
 
 enum TipoPedido {

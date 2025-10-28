@@ -1,4 +1,5 @@
 import express from 'express';
+import modificadorRouter from '../modificador/modificador.routes.js';
 import personalizavelController from './personalizavel.controller.js';
 
 const personalizavelRouter = express.Router({ mergeParams: true });
@@ -154,5 +155,8 @@ personalizavelRouter.delete(
   /* authenticate, authorizeAdmin, */
   personalizavelController.deletarPersonalizavel,
 );
+
+// --- MONTAGEM DAS ROTAS ANINHADAS DE MODIFICADOR ---
+personalizavelRouter.use('/:personalizavelId/modificadores', modificadorRouter);
 
 export default personalizavelRouter;
