@@ -3,6 +3,14 @@ import prisma from '../../config/prisma.js';
 const produtosEmLojaServices = {
   async listarProdutosDaLoja(idLoja, somenteEmPromocao) {
     try {
+      const lojaExiste = await prisma.loja.findUnique({
+        where: { id: idLoja },
+        select: { id: true },
+      });
+      if (!lojaExiste) {
+        throw new Error(`Loja com ID ${idLoja} não encontrada.`);
+      }
+
       const whereClause = {
         lojaId: idLoja,
       };
@@ -42,6 +50,9 @@ const produtosEmLojaServices = {
 
       return resultadoFormatado;
     } catch (error) {
+      if (error.message.includes('não encontrada')) {
+        throw error;
+      }
       console.error(
         `Erro ao buscar os produtos da loja com ID ${idLoja}: `,
         error,
@@ -105,6 +116,20 @@ const produtosEmLojaServices = {
 
   async adicionarProdutoEmLoja(idLoja, dadosProdutoEmLoja) {
     try {
+      const [lojaExiste, produtoBaseExiste] = await Promise.all([
+        prisma.loja.findUnique({ where: { id: idLoja }, select: { id: true } }),
+        prisma.produto.findUnique({
+          where: { id: dadosProdutoEmLoja.produtoId },
+          select: { id: true },
+        }),
+      ]);
+
+      if (!lojaExiste) throw new Error(`Loja com ID ${idLoja} não encontrada.`);
+      if (!produtoBaseExiste)
+        throw new Error(
+          `Produto base com ID ${dadosProdutoEmLoja.produtoId} não encontrado.`,
+        );
+
       const produtoNaLoja = await prisma.produtosEmLoja.create({
         data: {
           lojaId: idLoja,
@@ -121,6 +146,9 @@ const produtosEmLojaServices = {
         throw new Error(
           `O produto com ID ${dadosProdutoEmLoja.produtoId} já existe na loja com ID ${idLoja}.`,
         );
+      }
+      if (error.code === 'P2003' || error.message.includes('não encontrad')) {
+        throw error;
       }
 
       console.error(

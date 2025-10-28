@@ -1,6 +1,5 @@
 import produtosEmLojaServices from './produtos-em-loja.services.js';
 
-// TODO: adicionar validação se a loja existe ou não em todas essas funções?
 const produtosEmLojaController = {
   async listarProdutosDaLoja(req, res) {
     try {
@@ -20,6 +19,9 @@ const produtosEmLojaController = {
 
       return res.status(200).json(produtos);
     } catch (error) {
+      if (error.message.includes('não encontrada')) {
+        return res.status(404).json({ message: error.message });
+      }
       return res.status(500).json({ message: error.message });
     }
   },
@@ -47,7 +49,9 @@ const produtosEmLojaController = {
 
       return res.status(200).json(produto);
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({
+        message: error.message || 'Erro ao buscar modificador na loja.',
+      });
     }
   },
 
@@ -73,7 +77,15 @@ const produtosEmLojaController = {
 
       return res.status(201).json(novoProdutoNaLoja);
     } catch (error) {
-      return res.status(400).json({ message: error.message });
+      if (error.message.includes('já existe')) {
+        return res.status(400).json({ message: error.message });
+      }
+      if (error.message.includes('não encontrado')) {
+        return res.status(404).json({ message: error.message });
+      }
+      return res.status(400).json({
+        message: error.message || 'Erro ao adicionar modificador na loja.',
+      });
     }
   },
 
@@ -100,7 +112,9 @@ const produtosEmLojaController = {
       if (error.message.includes('não encontrado')) {
         return res.status(404).json({ message: error.message });
       }
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({
+        message: error.message || 'Erro ao atualizar modificador na loja.',
+      });
     }
   },
 
@@ -124,7 +138,9 @@ const produtosEmLojaController = {
       if (error.message.includes('não encontrado')) {
         return res.status(404).json({ message: error.message });
       }
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({
+        message: error.message || 'Erro ao deletar modificador da loja.',
+      });
     }
   },
 };
