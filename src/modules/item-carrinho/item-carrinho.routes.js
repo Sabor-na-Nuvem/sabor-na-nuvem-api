@@ -7,6 +7,50 @@ const itemCarrinhoRouter = express.Router({ mergeParams: true });
 
 /**
  * @swagger
+ * /usuarios/me/carrinho/itens/from-pedido:
+ *   post:
+ *     summary: Adiciona itens de um pedido antigo ao carrinho atual (Reordenar)
+ *     tags: [Itens do Carrinho]
+ *     security:
+ *       - bearerAuth: []
+ *     description: |
+ *       Copia os itens (produtos + modificadores) de um pedido anterior para o carrinho atual.
+ *       1. O carrinho atual **precisa** ter uma `lojaId` definida.
+ *       2. O `pedidoId` fornecido deve pertencer ao usuário autenticado.
+ *       3. **Cada item do pedido antigo é REVALIDADO (preço, disponibilidade) contra a `lojaId` do carrinho ATUAL.**
+ *       4. Itens ou modificadores indisponíveis na nova loja serão ignorados.
+ *       5. A resposta incluirá o carrinho atualizado e uma lista de avisos sobre itens que não puderam ser adicionados.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ReordenarInput'
+ *     responses:
+ *       200:
+ *         description: Itens adicionados com sucesso (parcial ou totalmente). Retorna o carrinho e avisos.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AtualizarCarrinhoResponse' # Reutiliza o schema { carrinho, avisos }
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *         description: Dados inválidos ou loja não definida no carrinho.
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: Pedido antigo não encontrado ou não pertence ao usuário.
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+itemCarrinhoRouter.post(
+  '/from-pedido',
+  itemCarrinhoController.adicionarItensDoPedido,
+);
+
+/**
+ * @swagger
  * /usuarios/me/carrinho/itens:
  *   post:
  *     summary: Adiciona um item (com personalizações) ao carrinho

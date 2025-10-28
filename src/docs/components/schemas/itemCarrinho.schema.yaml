@@ -57,3 +57,15 @@ components:
           minimum: 1
       example:
         qtdProduto: 2
+
+    # Schema para POST /itens/from-pedido (Reordenar)
+    ReordenarInput:
+      type: object
+      required:
+        - pedidoId
+      properties:
+        pedidoId:
+          type: integer
+          description: O ID do Pedido antigo que será usado como fonte para os itens.
+      example:
+        pedidoId: 135

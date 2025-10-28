@@ -1,6 +1,44 @@
 import itemCarrinhoServices from './item-carrinho.services.js';
 
 const itemCarrinhoController = {
+  async adicionarItensDoPedido(req, res) {
+    const usuarioId = req.user?.id;
+    const { pedidoId } = req.body;
+
+    if (!usuarioId) {
+      return res.status(401).json({ message: 'Usuário não autenticado.' });
+    }
+
+    if (!pedidoId || Number.isNaN(Number(pedidoId))) {
+      return res.status(400).json({
+        message: 'O ID do pedido é obrigatório e deve ser um número.',
+      });
+    }
+
+    try {
+      const { carrinho, avisos } =
+        await itemCarrinhoServices.adicionarItensDoPedido(
+          usuarioId,
+          Number(pedidoId),
+        );
+
+      return res.status(200).json({ carrinho, avisos });
+    } catch (error) {
+      if (
+        error.message.includes('não encontrado') ||
+        error.message.includes('pertence')
+      ) {
+        return res.status(404).json({ message: error.message });
+      }
+      if (error.message.includes('Loja não definida')) {
+        return res.status(400).json({ message: error.message });
+      }
+      return res.status(500).json({
+        message: error.message || 'Erro ao reordenar o pedido.',
+      });
+    }
+  },
+
   async adicionarItemAoCarrinho(req, res) {
     const usuarioId = req.user?.id;
     // Body esperado: { idProduto: 1, qtdProduto: 1, modificadores: [{ modificadorId: 101 }, ...] }
