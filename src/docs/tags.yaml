@@ -16,6 +16,9 @@ tags:
 
   - name: Produtos - Personalização
     description: Gerenciamento dos grupos de personalização de produtos
+  
+  - name: Produtos - Modificadores
+    description: Gerenciamento das opções (modificadores) dentro dos grupos de personalização.
 
   - name: Produtos Em Loja
     description: Gerenciamento do catálogo (produtos, preços, promoções) específico de cada loja.

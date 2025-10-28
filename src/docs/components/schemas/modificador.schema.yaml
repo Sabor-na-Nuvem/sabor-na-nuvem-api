@@ -1,0 +1,86 @@
+components:
+  schemas:
+    Modificador:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: O ID auto-gerado do modificador (opção).
+          readOnly: true
+        nome:
+          type: string
+          description: O nome da opção (Bacon Extra, Sem Cebola, ...).
+        descricao:
+          type: string
+          nullable: true
+          description: Descrição opcional da opção.
+        ordemVisualizacao:
+          type: integer
+          nullable: true
+          description: Ordem de exibição da opção dentro do grupo.
+        isOpcaoPadrao:
+          type: boolean
+          description: Indica se esta opção vem pré-selecionada.
+        personalizavelId:
+          type: integer
+          description: ID do grupo de personalização ao qual pertence.
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+      example:
+        id: 101
+        nome: "Bacon Extra"
+        descricao: "Duas fatias extras de bacon crocante."
+        ordemVisualizacao: 1
+        isOpcaoPadrao: false
+        personalizavelId: 1
+        createdAt: "2025-10-27T10:00:00Z"
+        updatedAt: "2025-10-27T10:00:00Z"
+
+    NovoModificadorInput:
+      type: object
+      required:
+        - nome
+      properties:
+        nome:
+          type: string
+        descricao:
+          type: string
+          nullable: true
+        ordemVisualizacao:
+          type: integer
+          nullable: true
+        isOpcaoPadrao:
+          type: boolean
+          default: false
+      example:
+        nome: "Queijo Cheddar Extra"
+        descricao: "Uma fatia adicional do nosso cheddar cremoso."
+        ordemVisualizacao: 2
+        isOpcaoPadrao: false
+
+    AtualizarModificadorInput:
+      type: object
+      description: Apenas os campos a serem atualizados.
+      properties:
+        nome:
+          type: string
+        descricao:
+          type: string
+          nullable: true
+        ordemVisualizacao:
+          type: integer
+          nullable: true
+        isOpcaoPadrao:
+          type: boolean
+      example:
+        nome: "Bacon Crocante Extra"
+        isOpcaoPadrao: true # Exemplo tornando padrão

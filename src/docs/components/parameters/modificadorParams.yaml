@@ -1,0 +1,9 @@
+components:
+  parameters:
+    modificadorIdPathParam:
+      in: path
+      name: modificadorId
+      required: true
+      schema:
+        type: integer
+      description: O ID do modificador (opção)
