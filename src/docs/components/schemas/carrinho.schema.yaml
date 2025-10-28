@@ -1,0 +1,117 @@
+components:
+  schemas:
+    # Schema para PATCH /api/usuarios/me/carrinho
+    AtualizarCarrinhoInput:
+      type: object
+      description: Campos para atualizar o carrinho (pelo menos um é obrigatório).
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoPedido' # Assumindo que TipoPedido está definido
+        lojaId:
+          type: integer
+          description: O ID da nova loja. Mudar isso revalidará todos os itens do carrinho.
+      example:
+        tipo: "ENTREGA"
+        lojaId: 2
+
+    # Schema para um Modificador formatado (usado na resposta completa)
+    ModificadorSelecionadoDetalhado:
+      type: object
+      properties:
+        modificadorId: { type: integer }
+        valorAdicionalCobrado: { type: number, format: float }
+        modificador: # Dados do modificador base
+          type: object
+          properties:
+            nome: { type: string }
+            personalizavel: # Grupo pai do modificador
+              type: object
+              properties: { nome: { type: string } }
+      example:
+        modificadorId: 101
+        valorAdicionalCobrado: 6.50
+        modificador:
+          nome: "Bacon Extra"
+          personalizavel: { nome: "Adicionais" }
+
+    # Schema para um Item formatado (usado na resposta completa)
+    ItemCarrinhoDetalhado:
+      type: object
+      properties:
+        id: { type: integer, description: "ID do ItemCarrinho (não do produto)" }
+        produtoId: { type: integer }
+        qtdProduto: { type: integer }
+        valorUnitarioProduto: { type: number, format: float, description: "Preço 'congelado' do produto base" }
+        produto: # Dados do produto base
+          type: object
+          properties:
+            id: { type: integer }
+            nome: { type: string }
+            descricao: { type: string }
+            imagemUrl: { type: string, format: url }
+        modificadoresSelecionados:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModificadorSelecionadoDetalhado'
+      example:
+        id: 15
+        produtoId: 5
+        qtdProduto: 1
+        valorUnitarioProduto: 25.50
+        produto: { id: 5, nome: "X-Burger", descricao: "...", imagemUrl: "..." }
+        modificadoresSelecionados:
+          - $ref: '#/components/schemas/ModificadorSelecionadoDetalhado/example'
+
+    # Schema para a resposta GET / (o carrinho completo)
+    CarrinhoCompleto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: O ID do carrinho (corresponde ao ID do usuário).
+        tipo:
+          $ref: '#/components/schemas/TipoPedido'
+        lojaId:
+          type: integer
+          nullable: true # Pode ser nulo se o carrinho estiver vazio/sem loja
+          description: O ID da loja à qual o carrinho está associado (obrigatório se houver itens).
+        loja:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            nome: { type: string }
+          example: { id: 1, nome: "Loja Central" }
+        itensNoCarrinho:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemCarrinhoDetalhado'
+        subtotal:
+          type: string # .toFixed(2) retorna string
+          format: float
+          description: O subtotal calculado (formatado com 2 casas decimais).
+      example:
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        tipo: "ENTREGA"
+        lojaId: 1
+        loja: { id: 1, nome: "Loja Central" }
+        itensNoCarrinho:
+           - $ref: '#/components/schemas/ItemCarrinhoDetalhado/example'
+        subtotal: "32.00"
+
+    # Schema para a resposta PATCH / (carrinho + avisos)
+    AtualizarCarrinhoResponse:
+      type: object
+      properties:
+        carrinho:
+          $ref: '#/components/schemas/CarrinhoCompleto'
+        avisos:
+          type: array
+          items:
+            type: string
+          description: Mensagens sobre ajustes no carrinho (itens removidos, por exemplo).
+      example:
+        carrinho:
+          $ref: '#/components/schemas/CarrinhoCompleto/example'
+        avisos: ["Item 'X-Bacon' foi removido (indisponível na nova loja)."]

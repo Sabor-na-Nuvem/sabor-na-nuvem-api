@@ -12,6 +12,19 @@ const carrinhoController = {
       const carrinho = await carrinhoServices.buscarCarrinhoCompleto(usuarioId);
 
       if (!carrinho) {
+        // Retorna um objeto "Carrinho" padrão e vazio para o frontend
+        // O frontend não precisa tratar 'null', apenas um carrinho sem itens/loja.
+        return res.status(200).json({
+          id: usuarioId,
+          tipo: 'ENTREGA',
+          lojaId: null,
+          loja: null,
+          itensNoCarrinho: [],
+          subtotal: '0.00',
+        });
+      }
+
+      if (!carrinho) {
         return res.status(200).json({
           id: usuarioId,
           tipo: 'ENTREGA',
@@ -35,6 +48,12 @@ const carrinhoController = {
 
     if (!usuarioId) {
       return res.status(401).json({ message: 'Usuário não autenticado.' });
+    }
+
+    if (!novosDados.lojaId && !novosDados.tipo) {
+      return res.status(400).json({
+        message: 'Nenhum dado (lojaId ou tipo) fornecido para atualização.',
+      });
     }
 
     try {

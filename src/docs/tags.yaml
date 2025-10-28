@@ -29,6 +29,12 @@ tags:
   - name: Modificador Em Loja
     description: Gerenciamento da disponibilidade e preço dos modificadores (opções) em cada loja.
 
+  - name: Carrinho
+    description: Operações sobre o carrinho de compras do usuário autenticado.
+
+  - name: Itens do Carrinho
+    description: Operações sobre os itens individuais dentro do carrinho de compras.
+
   - name: Cupons de Desconto
     description: API para gerenciamento e validação de cupons de desconto.
 

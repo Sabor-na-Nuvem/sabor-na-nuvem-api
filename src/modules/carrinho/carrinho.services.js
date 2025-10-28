@@ -116,17 +116,13 @@ const carrinhoServices = {
           },
         });
 
-        if (!carrinhoAtual) {
-          throw new Error(`Carrinho para usuário ${idUsuario} não encontrado.`);
-        }
-
-        const dadosUpdateCarrinho = {};
+        const dadosParaUpsert = {};
 
         // Lógica para atualizar o TIPO
         if (novosDados.tipo && typeof novosDados.tipo === 'string') {
           const tipoFormatado = novosDados.tipo.toUpperCase();
           if (tipoFormatado in TipoPedido) {
-            dadosUpdateCarrinho.tipo = TipoPedido[tipoFormatado];
+            dadosParaUpsert.tipo = TipoPedido[tipoFormatado];
           } else {
             console.warn(
               `Tipo inválido fornecido: "${novosDados.tipo}". Mudança ignorada.`,
@@ -138,12 +134,26 @@ const carrinhoServices = {
         const novaLojaId = novosDados.lojaId
           ? Number(novosDados.lojaId)
           : undefined;
+
+        if (!carrinhoAtual && !novaLojaId) {
+          throw new Error(
+            'Loja (lojaId) é obrigatória ao criar um carrinho ou adicionar o primeiro item.',
+          );
+        }
+
+        const lojaIdAntiga = carrinhoAtual?.lojaId;
+        const mudouDeLoja = novaLojaId && novaLojaId !== lojaIdAntiga;
+
+        if (novaLojaId) {
+          dadosParaUpsert.lojaId = novaLojaId;
+        }
+
         if (
-          novaLojaId &&
-          novaLojaId !== carrinhoAtual.lojaId &&
+          mudouDeLoja &&
+          carrinhoAtual &&
           carrinhoAtual.itensNoCarrinho.length > 0
         ) {
-          dadosUpdateCarrinho.lojaId = novaLojaId;
+          dadosParaUpsert.lojaId = novaLojaId;
 
           for (const item of carrinhoAtual.itensNoCarrinho) {
             let itemValido = true;
@@ -295,12 +305,15 @@ const carrinhoServices = {
         } // fim if (novaLojaId)
 
         // Atualiza o Carrinho
-        if (Object.keys(dadosUpdateCarrinho).length > 0) {
-          await tx.carrinho.update({
-            where: { id: idUsuario },
-            data: dadosUpdateCarrinho,
-          });
-        }
+        await tx.carrinho.upsert({
+          where: { id: idUsuario },
+          update: dadosParaUpsert,
+          create: {
+            id: idUsuario,
+            lojaId: novaLojaId || carrinhoAtual?.lojaId,
+            tipo: dadosParaUpsert.tipo || TipoPedido.ENTREGA,
+          },
+        });
 
         const carrinhoFinal = await this.buscarCarrinhoCompleto(idUsuario, tx);
         return { carrinho: carrinhoFinal, avisos: avisosAoUsuario };
@@ -308,17 +321,16 @@ const carrinhoServices = {
 
       return carrinhoAtualizado;
     } catch (error) {
+      if (error.message.includes('não encontrado')) {
+        throw error;
+      }
+      if (error.code === 'P2003') {
+        throw new Error(`Loja com ID ${novosDados.lojaId} não encontrada.`);
+      }
       console.error(
         `Erro ao atualizar o carrinho do usuário ${idUsuario}: `,
         error,
       );
-      if (
-        error.message.includes('não encontrado') ||
-        error.message.includes('não pertence') ||
-        error.message.includes('Tipo de proprietário inválido')
-      ) {
-        throw error;
-      }
       throw new Error(`Não foi possível atualizar o carrinho.`);
     }
   },
