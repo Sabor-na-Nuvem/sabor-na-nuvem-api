@@ -36,6 +36,14 @@ produtosEmLojaRouter.get('/', produtosEmLojaController.listarProdutosDaLoja);
  *   get:
  *     summary: Busca os detalhes de um produto específico em uma loja específica
  *     tags: [Produtos Em Loja]
+ *     description: |
+ *       Retorna os detalhes de um produto em uma loja específica, incluindo:
+ *       1. O preço/disponibilidade base (`valorBase`, `disponivel`).
+ *       2. Os dados do produto (`nome`, `descricao`, `imagemUrl`).
+ *       3. A lista de grupos de personalização (`personalizacao`).
+ *       4. A lista de modificadores DENTRO de cada grupo, já filtrada para incluir **apenas** os disponíveis nesta loja, com seus respectivos preços (`valorAdicional`).
+ *       5. Uma flag `isPurchasable` (boolean) indicando se o produto pode ser comprado (se está disponível e se todas as personalizações obrigatórias têm opções disponíveis).
+ *       6. Um `unavailableReason` (string) se `isPurchasable` for falso.
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *       - $ref: '#/components/parameters/produtoIdPathParamNested'

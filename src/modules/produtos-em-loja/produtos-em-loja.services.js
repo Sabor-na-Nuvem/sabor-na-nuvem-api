@@ -140,9 +140,32 @@ const produtosEmLojaServices = {
                 disponivelNaLoja: modificadorEmLoja.disponivel,
                 valorAdicional: modificadorEmLoja.valorAdicional,
               };
-            }),
+            })
+            .filter((modificador) => modificador.disponivelNaLoja === true),
         })),
+
+        // Atributos de verificação
+        isPurchasable: true,
+        unavailableReason: null,
       };
+
+      if (!produtoFormatado.disponivel) {
+        produtoFormatado.isPurchasable = false;
+        produtoFormatado.unavailableReason =
+          'Este produto está indisponível nesta loja no momento.';
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const grupo of produtoFormatado.personalizacao) {
+        if (!produtoFormatado.isPurchasable) break;
+        const qtdModificadoresDisponiveis = grupo.modificadores.length;
+
+        if (grupo.selecaoMinima > qtdModificadoresDisponiveis) {
+          produtoFormatado.isPurchasable = false;
+          produtoFormatado.unavailableReason = `A opção "${grupo.nome}" exige pelo menos ${grupo.selecaoMinima} escolha(s), mas apenas ${qtdModificadoresDisponiveis} está(ão) disponível(is) nesta loja.`;
+          break;
+        }
+      }
 
       return produtoFormatado;
     } catch (error) {

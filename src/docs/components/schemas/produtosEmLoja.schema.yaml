@@ -133,6 +133,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PersonalizavelComModificadoresEmLoja'
+        # Campos de disponibilidade de compra
+        isPurchasable:
+          type: boolean
+          description: 'VERDADEIRO se o produto (disponivel=true) E todas as suas personalizações obrigatórias (selecaoMinima > 0) possuem opções disponíveis nesta loja. FALSO caso contrário.'
+        unavailableReason:
+          type: string
+          nullable: true
+          description: 'Se isPurchasable for falso, este campo explica o motivo (produto indisponível, opções obrigatórias faltando, ...).'
       example: # Adicione um exemplo completo aqui
         lojaId: 1
         produtoId: 5
@@ -144,7 +152,13 @@ components:
         nome: 'X-Burger Especial'
         descricao: 'Pão brioche...'
         imagemUrl: 'http://example.com/x-burger-especial.jpg'
-        categoria: { id: 1, nome: 'Lanches', descricao: 'Os lanches mais vendidos da casa.', ... }
+        categoria:
+          {
+            id: 1,
+            nome: 'Lanches',
+            descricao: 'Os lanches mais vendidos da casa.',
+            ...,
+          }
         personalizacao:
           [
             {
@@ -175,7 +189,8 @@ components:
               nome: 'Ponto da Carne',
               selecaoMinima: 1,
               selecaoMaxima: 1,
-              modificadores: [
+              modificadores:
+                [
                   {
                     id: 201,
                     nome: 'Mal Passado',
@@ -195,6 +210,8 @@ components:
                 ],
             },
           ]
+        isPurchasable: true
+        unavailableReason: null
 
     # Schema para adicionar um produto a uma loja (POST /)
     NovoProdutoEmLojaInput:
