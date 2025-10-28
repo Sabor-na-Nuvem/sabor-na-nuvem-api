@@ -47,8 +47,8 @@ components:
         emPromocao: false
         descontoPromocao: null
         validadePromocao: null
-        createdAt: "2025-10-29T14:00:00Z"
-        updatedAt: "2025-10-29T14:00:00Z"
+        createdAt: '2025-10-29T14:00:00Z'
+        updatedAt: '2025-10-29T14:00:00Z'
 
     # Schema detalhado incluindo dados do Produto (para listagem GET /)
     ProdutosEmLojaDetalhado:
@@ -64,13 +64,13 @@ components:
         validadePromocao: { type: string, format: date-time, nullable: true }
         # Campos incluídos do Produto
         produto:
-           type: object
-           properties:
-               id: { type: integer, readOnly: true} # Redundante, já tem produtoId
-               nome: { type: string }
-               descricao: { type: string }
-               imagemUrl: { type: string, format: url }
-               categoriaId: { type: integer }
+          type: object
+          properties:
+            id: { type: integer, readOnly: true } # Redundante, já tem produtoId
+            nome: { type: string }
+            descricao: { type: string }
+            imagemUrl: { type: string, format: url }
+            categoriaId: { type: integer }
       example:
         lojaId: 1
         produtoId: 5
@@ -81,10 +81,120 @@ components:
         validadePromocao: null
         produto:
           id: 5
-          nome: "X-Burger Especial"
-          descricao: "Pão brioche, 150g de carne..."
-          imagemUrl: "http://example.com/x-especial.jpg"
+          nome: 'X-Burger Especial'
+          descricao: 'Pão brioche, 150g de carne...'
+          imagemUrl: 'http://example.com/x-especial.jpg'
 
+    # Schema para UM modificador DENTRO da resposta detalhada
+    ModificadorDetalhadoEmLoja:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        descricao: { type: string, nullable: true }
+        isDefault: { type: boolean }
+        ordemVisualizacao: { type: integer, nullable: true }
+        disponivelNaLoja: { type: boolean }
+        valorAdicional: { type: number, format: float }
+        # estoqueNaLoja: { type: integer, nullable: true }
+
+    # Schema para UM grupo de personalização DENTRO da resposta detalhada
+    PersonalizavelComModificadoresEmLoja:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        selecaoMinima: { type: integer }
+        selecaoMaxima: { type: integer }
+        modificadores:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModificadorDetalhadoEmLoja' # Usa o schema definido acima
+
+    # Schema PRINCIPAL da resposta DETALHADA
+    ProdutosEmLojaDetalhadoComPersonalizacao:
+      type: object
+      properties:
+        # Campos de ProdutosEmLoja
+        lojaId: { type: integer }
+        produtoId: { type: integer }
+        disponivel: { type: boolean }
+        valorBase: { type: number, format: float }
+        emPromocao: { type: boolean }
+        descontoPromocao: { type: integer, nullable: true }
+        validadePromocao: { type: string, format: date-time, nullable: true }
+        # Campos do Produto Base
+        nome: { type: string }
+        descricao: { type: string }
+        imagemUrl: { type: string, format: url }
+        # Relações Incluídas
+        categoria: { $ref: '#/components/schemas/CategoriaProduto' }
+        personalizacao:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonalizavelComModificadoresEmLoja'
+      example: # Adicione um exemplo completo aqui
+        lojaId: 1
+        produtoId: 5
+        disponivel: true
+        valorBase: 25.50
+        emPromocao: false
+        descontoPromocao: null
+        validadePromocao: null
+        nome: 'X-Burger Especial'
+        descricao: 'Pão brioche...'
+        imagemUrl: 'http://example.com/x-burger-especial.jpg'
+        categoria: { id: 1, nome: 'Lanches', descricao: 'Os lanches mais vendidos da casa.', ... }
+        personalizacao:
+          [
+            {
+              id: 1,
+              nome: 'Adicionais',
+              selecaoMinima: 0,
+              selecaoMaxima: 3,
+              modificadores:
+                [
+                  {
+                    id: 101,
+                    nome: 'Bacon Extra',
+                    disponivelNaLoja: true,
+                    valorAdicional: 6.50,
+                    ...,
+                  },
+                  {
+                    id: 102,
+                    nome: 'Queijo Extra',
+                    disponivelNaLoja: true,
+                    valorAdicional: 4.00,
+                    ...,
+                  },
+                ],
+            },
+            {
+              id: 2,
+              nome: 'Ponto da Carne',
+              selecaoMinima: 1,
+              selecaoMaxima: 1,
+              modificadores: [
+                  {
+                    id: 201,
+                    nome: 'Mal Passado',
+                    isDefault: false,
+                    disponivelNaLoja: true,
+                    valorAdicional: 0.00,
+                    ...,
+                  },
+                  {
+                    id: 202,
+                    nome: 'Ao Ponto',
+                    isDefault: true,
+                    disponivelNaLoja: true,
+                    valorAdicional: 0.00,
+                    ...,
+                  },
+                ],
+            },
+          ]
 
     # Schema para adicionar um produto a uma loja (POST /)
     NovoProdutoEmLojaInput:
@@ -121,7 +231,7 @@ components:
         disponivel: true
         emPromocao: true
         descontoPromocao: 10 # 10%
-        validadePromocao: "2025-12-31T23:59:59Z"
+        validadePromocao: '2025-12-31T23:59:59Z'
 
     # Schema para atualizar um produto em uma loja (PUT ou PATCH /:produtoId)
     AtualizarProdutoEmLojaInput:

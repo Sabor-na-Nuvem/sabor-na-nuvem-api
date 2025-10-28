@@ -45,7 +45,7 @@ produtosEmLojaRouter.get('/', produtosEmLojaController.listarProdutosDaLoja);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ProdutosEmLojaDetalhado'
+ *               $ref: '#/components/schemas/ProdutosEmLojaDetalhadoComPersonalizacao'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  *         description: Loja ou Produto não encontrado nesta loja.

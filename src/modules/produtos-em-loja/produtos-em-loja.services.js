@@ -71,13 +71,25 @@ const produtosEmLojaServices = {
           },
         },
         include: {
+          // Inclui o objeto Produto base
           produto: {
-            select: {
-              id: true,
-              nome: true,
-              imagemUrl: true,
-              descricao: true,
+            include: {
+              // Inclui a categoria do produto
               categoria: true,
+              // Inclui a lista de GRUPOS de personalização
+              personalizacao: {
+                include: {
+                  // Dentro de cada grupo, inclui a lista de OPÇÕES (Modificadores)
+                  modificadores: {
+                    orderBy: { ordemVisualizacao: 'asc' },
+                    include: {
+                      lojasQueDisponibilizam: {
+                        where: { lojaId: idLoja },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -87,22 +99,52 @@ const produtosEmLojaServices = {
         return null;
       }
 
-      const resultadoFormatado = {
+      const produtoFormatado = {
+        // Dados da relação ProdutosEmLoja (preço na loja, etc.)
         lojaId: produtoNaLoja.lojaId,
         produtoId: produtoNaLoja.produtoId,
-        nomeProduto: produtoNaLoja.produto.nome,
-        imagemUrl: produtoNaLoja.produto.imagemUrl,
-        descricaoProduto: produtoNaLoja.produto.descricao,
-        categoriaId: produtoNaLoja.produto.categoria.id,
-        categoriaNome: produtoNaLoja.produto.categoria.nome,
         disponivel: produtoNaLoja.disponivel,
         valorBase: produtoNaLoja.valorBase,
         emPromocao: produtoNaLoja.emPromocao,
         descontoPromocao: produtoNaLoja.descontoPromocao,
         validadePromocao: produtoNaLoja.validadePromocao,
+
+        // Dados do Produto base
+        nome: produtoNaLoja.produto.nome,
+        descricao: produtoNaLoja.produto.descricao,
+        imagemUrl: produtoNaLoja.produto.imagemUrl,
+        categoria: produtoNaLoja.produto.categoria, // Objeto categoria
+
+        // Lista de Grupos de Personalização
+        personalizacao: produtoNaLoja.produto.personalizacao.map((grupo) => ({
+          id: grupo.id,
+          nome: grupo.nome,
+          selecaoMinima: grupo.selecaoMinima,
+          selecaoMaxima: grupo.selecaoMaxima,
+          // Lista de Modificadores DENTRO deste grupo
+          modificadores: grupo.modificadores
+            .filter(
+              (modificador) =>
+                modificador.lojasQueDisponibilizam &&
+                modificador.lojasQueDisponibilizam.length > 0,
+            )
+            .map((modificador) => {
+              // Pega os dados do modificador na loja atual (disponiblidade e valor adicional)
+              const modificadorEmLoja = modificador.lojasQueDisponibilizam[0];
+              return {
+                id: modificador.id,
+                nome: modificador.nome,
+                descricao: modificador.descricao,
+                isOpcaoPadrao: modificador.isOpcaoPadrao,
+                ordemVisualizacao: modificador.ordemVisualizacao,
+                disponivelNaLoja: modificadorEmLoja.disponivel,
+                valorAdicional: modificadorEmLoja.valorAdicional,
+              };
+            }),
+        })),
       };
 
-      return resultadoFormatado;
+      return produtoFormatado;
     } catch (error) {
       console.error(
         `Erro ao buscar o produto com ID ${idProduto} na loja com ID ${idLoja}: `,
