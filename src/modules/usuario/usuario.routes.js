@@ -1,5 +1,6 @@
 import express from 'express';
 import usuarioController from './usuario.controller.js';
+import carrinhoRouter from '../carrinho/carrinho.routes.js';
 
 const usuarioRouter = express.Router();
 
@@ -259,5 +260,8 @@ usuarioRouter.delete(
   '/:id',
   /* authenticate, authorizeAdmin, */ usuarioController.deletarUsuarioPorId,
 );
+
+// Monta as rotas de carrinho sob o usuário logado
+usuarioRouter.use('/me/carrinho', /* authenticate, */ carrinhoRouter);
 
 export default usuarioRouter;
