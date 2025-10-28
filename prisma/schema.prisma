@@ -214,8 +214,9 @@ model Modificador {
   createdAt         DateTime @default(now()) @map("criadoEm")
   updatedAt         DateTime @updatedAt @map("atualizadoEm")
 
-  lojasQueDisponibilizam  ModificadorEmLoja[]
-  modificadoresEmCarrinho ItemCarrinhoModificadores[]
+  lojasQueDisponibilizam    ModificadorEmLoja[]
+  selecionadoNosItensPedido ItemPedidoModificadores[]
+  modificadoresEmCarrinho   ItemCarrinhoModificadores[]
 
   personalizavel Personalizavel @relation(fields: [personalizavelId], references: [id], map: "modificador_personalizavel_fk", onDelete: Cascade)
 
@@ -263,19 +264,33 @@ model Pedido {
 }
 
 model ItemPedido {
-  pedidoId           Int
-  produtoId          Int
-  qtdProduto         Int
-  valorTotalProdutos Decimal  @db.Decimal(7, 2)
+  id                   Int      @id @default(autoincrement()) @map("itemPedidoId")
+  pedidoId             Int
+  produtoId            Int
+  qtdProduto           Int
+  valorUnitarioProduto Decimal  @db.Decimal(7, 2)
   // Timestamps
-  createdAt          DateTime @default(now()) @map("criadoEm")
-  updatedAt          DateTime @updatedAt @map("atualizadoEm")
+  createdAt            DateTime @default(now()) @map("criadoEm")
+  updatedAt            DateTime @updatedAt @map("atualizadoEm")
+
+  modificadoresSelecionados ItemPedidoModificadores[]
 
   pedido  Pedido  @relation(fields: [pedidoId], references: [id], map: "itemPedido_pedido_fk", onDelete: Cascade)
   produto Produto @relation(fields: [produtoId], references: [id], map: "itemPedido_produto_fk", onDelete: Restrict)
 
-  @@id([pedidoId, produtoId])
   @@map("itemPedido")
+}
+
+model ItemPedidoModificadores {
+  itemPedidoId          Int
+  modificadorId         Int
+  valorAdicionalCobrado Decimal @db.Decimal(4, 2)
+
+  itemPedido  ItemPedido  @relation(fields: [itemPedidoId], references: [id], onDelete: Cascade)
+  modificador Modificador @relation(fields: [modificadorId], references: [id], onDelete: Restrict)
+
+  @@id([itemPedidoId, modificadorId])
+  @@map("itemPedidoModificadores")
 }
 
 model Carrinho {
