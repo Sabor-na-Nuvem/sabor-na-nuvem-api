@@ -35,6 +35,15 @@ tags:
   - name: Itens do Carrinho
     description: Operações sobre os itens individuais dentro do carrinho de compras.
 
+  - name: Pedidos (Cliente)
+    description: Operações do cliente sobre seus próprios pedidos (criar, listar histórico, cancelar, ...).
+
+  - name: Pedidos (Loja)
+    description: Operações de funcionários/admins sobre os pedidos de uma loja específica.
+
+  - name: Pedidos (Admin Global)
+    description: Operações administrativas globais sobre todos os pedidos.
+
   - name: Cupons de Desconto
     description: API para gerenciamento e validação de cupons de desconto.
 

@@ -1,0 +1,235 @@
+components:
+  schemas:
+    # --- Schemas de Resposta (Detalhes Aninhados) ---
+    ItemPedidoModificadorDetalhado:
+      type: object
+      properties:
+        valorAdicionalCobrado: { type: number, format: float }
+        modificador:
+          type: object
+          properties:
+            personalizavelId: { type: integer }
+            nome: { type: string }
+            ordemVisualizacao: { type: integer, nullable: true }
+
+    ItemPedidoDetalhado:
+      type: object
+      properties:
+        id: { type: integer }
+        produtoId: { type: integer }
+        qtdProduto: { type: integer }
+        valorUnitarioProduto: { type: number, format: float }
+        produto:
+          type: object
+          properties:
+            nome: { type: string }
+            imagemUrl: { type: string, format: url }
+            categoria: { type: object, properties: { nome: { type: string } } }
+            personalizacao:
+              type: array
+              items:
+                type: object
+                properties: { id: { type: integer }, nome: { type: string } }
+        modificadoresSelecionados:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemPedidoModificadorDetalhado'
+
+    # Schema de Resposta para GET /:id (Completo)
+    PedidoDetalhado:
+      type: object
+      properties:
+        id: { type: integer }
+        clienteId: { type: string, format: uuid, nullable: true }
+        lojaId: { type: integer }
+        dataHora: { type: string, format: date-time }
+        valorBase: { type: number, format: float }
+        valorCobrado: { type: number, format: float }
+        cupomUsadoId: { type: integer, nullable: true }
+        tipo: { $ref: '#/components/schemas/TipoPedido' }
+        observacoes: { type: string, nullable: true }
+        status: { $ref: '#/components/schemas/StatusPedido' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        cupom:
+          {
+            type: object,
+            nullable: true,
+            properties: { codCupom: { type: string } },
+          }
+        loja: { type: object, properties: { nome: { type: string } } }
+        cliente:
+          {
+            type: object,
+            nullable: true,
+            properties: { nome: { type: string } },
+          }
+        itensNoPedido:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemPedidoDetalhado'
+      example:
+        id: 1
+        clienteId: 'f47ac10b-...'
+        lojaId: 1
+        dataHora: '2025-10-30T10:00:00Z'
+        valorBase: 32.00
+        valorCobrado: 32.00
+        cupomUsadoId: null
+        tipo: 'ENTREGA'
+        observacoes: 'Sem cebola'
+        status: 'EM_PREPARO'
+        createdAt: '2025-10-30T10:00:00Z'
+        updatedAt: '2025-10-30T10:05:00Z'
+        cupom: null
+        loja: { nome: 'Loja Central' }
+        cliente: { nome: 'João da Silva' }
+        itensNoPedido:
+          - id: 50 # ID do ItemPedido (não do produto)
+            produtoId: 5
+            qtdProduto: 1
+            valorUnitarioProduto: 25.50 # Preço base "congelado" do X-Burger
+            produto:
+              nome: 'X-Burger Especial'
+              imagemUrl: 'http://example.com/x-burger.jpg'
+              categoria: { nome: 'Lanches' }
+              personalizacao: # Os grupos que este produto OFERECE
+                - { id: 1, nome: 'Adicionais' }
+                - { id: 2, nome: 'Ponto da Carne' }
+            modificadoresSelecionados: # As opções que o cliente ESCOLHEU
+              - valorAdicionalCobrado: 6.50 # Preço "congelado" do Bacon Extra
+                modificador:
+                  personalizavelId: 1 # Linka com o grupo "Adicionais"
+                  nome: 'Bacon Extra'
+                  ordemVisualizacao: 1
+              - valorAdicionalCobrado: 0.00
+                modificador:
+                  personalizavelId: 2 # Linka com o grupo "Ponto da Carne"
+                  nome: 'Ao Ponto'
+                  ordemVisualizacao: 2
+          - id: 51 # ID do ItemPedido
+            produtoId: 20
+            qtdProduto: 2
+            valorUnitarioProduto: 5.00 # Preço base "congelado" do Refrigerante
+            produto:
+              nome: 'Refrigerante Lata'
+              imagemUrl: 'http://example.com/soda.jpg'
+              categoria: { nome: 'Bebidas' }
+              personalizacao: [] # Este produto não tem personalização
+            modificadoresSelecionados: [] # Nenhuma opção escolhida
+
+    # --- Schemas de Resposta (Lista) ---
+    Paginacao:
+      type: object
+      properties:
+        totalItens: { type: integer }
+        itensPorPagina: { type: integer }
+        paginaAtual: { type: integer }
+        totalPaginas: { type: integer }
+      example:
+        totalItens: 25
+        itensPorPagina: 10
+        paginaAtual: 0
+        totalPaginas: 3
+
+    PedidoParaLista: # Schema simplificado para listagem
+      type: object
+      properties:
+        id: { type: integer }
+        clienteId: { type: string, format: uuid, nullable: true }
+        lojaId: { type: integer }
+        dataHora: { type: string, format: date-time }
+        valorCobrado: { type: number, format: float }
+        tipo: { $ref: '#/components/schemas/TipoPedido' }
+        status: { $ref: '#/components/schemas/StatusPedido' }
+        createdAt: { type: string, format: date-time }
+        loja:
+          {
+            type: object,
+            properties: { nome: { type: string } },
+            nullable: true,
+          }
+        cliente:
+          {
+            type: object,
+            properties: { nome: { type: string } },
+            nullable: true,
+          }
+      example:
+        id: 1
+        clienteId: 'f47ac10b-...'
+        lojaId: 1
+        dataHora: '2025-10-30T10:00:00Z'
+        valorCobrado: 32.00
+        tipo: 'ENTREGA'
+        status: 'EM_PREPARO'
+        createdAt: '2025-10-30T10:00:00Z'
+        loja: { nome: 'Loja Central' }
+        cliente: { nome: 'João da Silva' }
+
+    ListaPedidosResponse:
+      type: object
+      properties:
+        pedidos:
+          type: array
+          items:
+            $ref: '#/components/schemas/PedidoParaLista'
+        paginacao:
+          $ref: '#/components/schemas/Paginacao'
+
+    # --- Schemas de Input (Requisição) ---
+    ItemCarrinhoMockadoInput: # Usado para criar pedido anônimo
+      type: object
+      required: [produtoId, qtdProduto, valorUnitarioProduto]
+      properties:
+        produtoId: { type: integer }
+        qtdProduto: { type: integer, minimum: 1 }
+        valorUnitarioProduto:
+          {
+            type: number,
+            format: float,
+            description: "Preço 'congelado' do item base",
+          }
+        modificadoresSelecionados:
+          type: array
+          items:
+            type: object
+            required: [modificadorId, valorAdicionalCobrado]
+            properties:
+              modificadorId: { type: integer }
+              valorAdicionalCobrado: { type: number, format: float }
+
+    CarrinhoMockadoInput: # Usado para criar pedido anônimo
+      type: object
+      required: [lojaId, tipo, itensNoCarrinho]
+      properties:
+        lojaId: { type: integer }
+        tipo: { $ref: '#/components/schemas/TipoPedido' }
+        itensNoCarrinho:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemCarrinhoMockadoInput'
+
+    CriarPedidoInput:
+      type: object
+      properties:
+        codCupom: { type: string, nullable: true }
+        observacoes: { type: string, nullable: true }
+        carrinho:
+          {
+            $ref: '#/components/schemas/CarrinhoMockadoInput',
+            description: 'Obrigatório se o usuário não estiver logado. Se logado, o carrinho do banco é usado.',
+          }
+      example:
+        codCupom: 'PROMO10'
+        observacoes: 'Sem cebola no X-Bacon.'
+        # 'carrinho' seria enviado apenas se anônimo
+
+    AtualizarStatusPedidoInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusPedido'
+      example:
+        status: 'EM_PREPARO'
