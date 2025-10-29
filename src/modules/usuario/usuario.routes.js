@@ -91,6 +91,11 @@ usuarioRouter.get(
   /* authenticate, */ usuarioController.buscarCuponsDoUsuarioLogado,
 );
 
+usuarioRouter.get(
+  '/me/relatorio',
+  /* authenticate, */ usuarioController.buscarRelatorioDoUsuarioLogado,
+);
+
 /**
  * @swagger
  * /usuarios/me:
@@ -175,6 +180,11 @@ usuarioRouter.delete(
 usuarioRouter.get(
   '/',
   /* authenticate, authorizeAdmin, */ usuarioController.buscarTodosOsUsuarios,
+);
+
+usuarioRouter.get(
+  '/:id/relatorio',
+  /* authenticate, authorizeAdmin, */ usuarioController.buscarRelatorioDoUsuarioPorId,
 );
 
 /**

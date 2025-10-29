@@ -93,6 +93,22 @@ const usuarioServices = {
     }
   },
 
+  async buscarRelatorioPorUsuarioId(idUsuario) {
+    try {
+      const relatorio = await prisma.relatorioUsuario.findUnique({
+        where: { usuarioId: idUsuario },
+      });
+
+      return relatorio;
+    } catch (error) {
+      console.error(
+        `Erro ao buscar relatório para o usuário ${idUsuario}: `,
+        error,
+      );
+      throw new Error('Não foi possível buscar o relatório do usuário.');
+    }
+  },
+
   async buscarTodosOsUsuarios(filtros) {
     try {
       const whereClause = {};

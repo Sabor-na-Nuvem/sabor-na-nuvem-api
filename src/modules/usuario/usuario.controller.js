@@ -60,6 +60,23 @@ const usuarioController = {
     }
   },
 
+  async buscarRelatorioDoUsuarioLogado(req, res) {
+    const usuarioId = req.user?.id;
+    if (!usuarioId) {
+      return res.status(401).json({ message: 'Usuário não autenticado.' });
+    }
+    try {
+      const relatorio =
+        await usuarioServices.buscarRelatorioPorUsuarioId(usuarioId);
+      if (!relatorio) {
+        return res.status(404).json({ message: 'Relatório não encontrado.' });
+      }
+      return res.status(200).json(relatorio);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  },
+
   async atualizarUsuarioLogado(req, res) {
     const usuarioId = req.user?.id;
     const novosDados = req.body;
@@ -133,12 +150,12 @@ const usuarioController = {
 
   async buscarUsuarioPorId(req, res) {
     const { id } = req.params;
-    const usuarioId = Number(id);
+    const usuarioId = id;
 
-    if (Number.isNaN(usuarioId)) {
+    if (!usuarioId) {
       return res
         .status(400)
-        .json({ message: 'O ID do usuário deve ser um número.' });
+        .json({ message: 'O ID do usuário é obrigatório.' });
     }
 
     try {
@@ -154,15 +171,41 @@ const usuarioController = {
     }
   },
 
-  async atualizarUsuarioPorId(req, res) {
+  async buscarRelatorioDoUsuarioPorId(req, res) {
     const { id } = req.params;
-    const usuarioId = Number(id);
-    const novosDados = req.body;
+    const usuarioId = id;
 
-    if (Number.isNaN(usuarioId)) {
+    if (!usuarioId) {
       return res
         .status(400)
-        .json({ message: 'O ID do usuário deve ser um número.' });
+        .json({ message: 'O ID do usuário é obrigatório.' });
+    }
+
+    try {
+      const relatorio =
+        await usuarioServices.buscarRelatorioPorUsuarioId(usuarioId);
+
+      if (!relatorio) {
+        return res
+          .status(404)
+          .json({ message: 'Relatório não encontrado para este usuário.' });
+      }
+
+      return res.status(200).json(relatorio);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  },
+
+  async atualizarUsuarioPorId(req, res) {
+    const { id } = req.params;
+    const usuarioId = id;
+    const novosDados = req.body;
+
+    if (!usuarioId) {
+      return res
+        .status(400)
+        .json({ message: 'O ID do usuário é obrigatório.' });
     }
 
     // Impedir que o admin atualize dados que não deveria
@@ -194,12 +237,12 @@ const usuarioController = {
 
   async deletarUsuarioPorId(req, res) {
     const { id } = req.params;
-    const usuarioId = Number(id);
+    const usuarioId = id;
 
-    if (Number.isNaN(usuarioId)) {
+    if (!usuarioId) {
       return res
         .status(400)
-        .json({ message: 'O ID do usuário deve ser um número.' });
+        .json({ message: 'O ID do usuário é obrigatório.' });
     }
 
     try {

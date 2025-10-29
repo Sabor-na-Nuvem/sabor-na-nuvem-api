@@ -9,6 +9,7 @@ import pedidoRoutes from './modules/pedido/pedido.routes.js';
 import produtoRoutes from './modules/produto/produto.routes.js';
 import usuarioRoutes from './modules/usuario/usuario.routes.js';
 import cupomDescontoRouter from './modules/cupom-desconto/cupom-desconto.routes.js';
+import relatorioRouter from './modules/relatorio-usuario/relatorio-usuario.routes.js';
 import categoriaProdutoRouter from './modules/categoria-produto/categoria-produto.routes.js';
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.use('/api/produtos', produtoRoutes);
 // Rotas independentes
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/cupons', cupomDescontoRouter);
+app.use('/api/relatorios', relatorioRouter);
 app.use('/api/categorias-produto', categoriaProdutoRouter);
 
 // --- ROTA DA DOCUMENTACAO SWAGGER ---
