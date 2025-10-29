@@ -200,6 +200,8 @@ const pedidoServices = {
       return novoPedidoCompleto;
     } catch (error) {
       if (
+        error.message.includes('Carrinho inválido') ||
+        error.message.includes('não está mais disponível') ||
         error.message.includes('não encontrado') ||
         error.message.includes('indisponível') ||
         error.message.includes('inválido') ||
