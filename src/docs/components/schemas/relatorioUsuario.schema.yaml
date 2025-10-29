@@ -1,0 +1,93 @@
+components:
+  schemas:
+    # Schema para um RelatorioUsuario
+    RelatorioUsuario:
+      type: object
+      properties:
+        usuarioId:
+          type: string
+          format: uuid
+          description: O ID (UUID) do usuário ao qual este relatório pertence.
+          readOnly: true
+        gastosTotais:
+          type: number
+          format: float
+          description: Valor total gasto pelo usuário em todos os pedidos.
+        gastosMensais:
+          type: number
+          format: float
+          description: Valor gasto pelo usuário no mês corrente (ou últimos 30 dias).
+        qtdTotalPedidos:
+          type: integer
+          description: Quantidade total de pedidos concluídos.
+        qtdMensalPedidos:
+          type: integer
+          description: Quantidade de pedidos concluídos no mês corrente.
+        dataUltimoPedido:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data e hora do último pedido concluído.
+        gastoDesdeUltimoCupom:
+          type: number
+          format: float
+          description: Valor acumulado para o próximo cupom de fidelidade.
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação do registro do relatório.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização do relatório.
+          readOnly: true
+      example:
+        usuarioId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+        gastosTotais: 1250.50
+        gastosMensais: 150.20
+        qtdTotalPedidos: 15
+        qtdMensalPedidos: 2
+        dataUltimoPedido: '2025-10-28T18:30:00Z'
+        gastoDesdeUltimoCupom: 50.20
+        createdAt: '2025-01-15T10:00:00Z'
+        updatedAt: '2025-10-28T18:30:00Z'
+
+    # Inclui o relatório E os dados do usuário associado
+    RelatorioUsuarioDetalhado:
+      type: object
+      description: Informações de relatório agregadas com os detalhes do perfil do usuário.
+      allOf:
+        - $ref: '#/components/schemas/RelatorioUsuario'
+      properties:
+        usuario: # Adiciona os dados do usuário
+          type: object
+          description: 'Detalhes do perfil do usuário associado a este relatório.'
+          properties:
+            id:
+              type: string
+              format: uuid
+            nome:
+              type: string
+            email:
+              type: string
+              format: email
+            cargo:
+              $ref: '#/components/schemas/RoleUsuario'
+      example:
+        # Exemplo de RelatorioUsuario
+        usuarioId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+        gastosTotais: 1250.50
+        gastosMensais: 150.20
+        qtdTotalPedidos: 15
+        qtdMensalPedidos: 2
+        dataUltimoPedido: '2025-10-28T18:30:00Z'
+        gastoDesdeUltimoCupom: 50.20
+        createdAt: '2025-01-15T10:00:00Z'
+        updatedAt: '2025-10-28T18:30:00Z'
+        # Dados do usuário incluídos
+        usuario:
+          id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+          nome: 'João da Silva'
+          email: 'joao.silva@email.com'
+          cargo: 'CLIENTE'

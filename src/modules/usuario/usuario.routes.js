@@ -91,6 +91,25 @@ usuarioRouter.get(
   /* authenticate, */ usuarioController.buscarCuponsDoUsuarioLogado,
 );
 
+/**
+ * @swagger
+ * /usuarios/me/relatorio:
+ *   get:
+ *     summary: Busca o relatório de gastos do usuário autenticado
+ *     tags: [Usuarios (Meu Perfil)]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados do relatório do usuário.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RelatorioUsuario'
+ *       401: { $ref: '#/components/responses/UnauthorizedError' }
+ *       404: { $ref: '#/components/responses/NotFoundError', description: 'Relatório não encontrado.' }
+ *       500: { $ref: '#/components/responses/InternalServerError' }
+ */
 usuarioRouter.get(
   '/me/relatorio',
   /* authenticate, */ usuarioController.buscarRelatorioDoUsuarioLogado,
@@ -182,6 +201,28 @@ usuarioRouter.get(
   /* authenticate, authorizeAdmin, */ usuarioController.buscarTodosOsUsuarios,
 );
 
+/**
+ * @swagger
+ * /usuarios/{id}/relatorio:
+ *   get:
+ *     summary: Busca o relatório de um usuário específico pelo ID (Admin)
+ *     tags: [Usuarios (Admin)]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/userIdPathParam'
+ *     responses:
+ *       200:
+ *         description: Dados do relatório do usuário.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RelatorioUsuario'
+ *       401: { $ref: '#/components/responses/UnauthorizedError' }
+ *       403: { $ref: '#/components/responses/ForbiddenError' }
+ *       404: { $ref: '#/components/responses/NotFoundError', description: 'Usuário ou Relatório não encontrado.' }
+ *       500: { $ref: '#/components/responses/InternalServerError' }
+ */
 usuarioRouter.get(
   '/:id/relatorio',
   /* authenticate, authorizeAdmin, */ usuarioController.buscarRelatorioDoUsuarioPorId,

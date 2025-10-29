@@ -70,21 +70,3 @@ components:
         format: uuid
       description: (Admin/Loja) Filtra pedidos por um cliente específico.
     
-    # --- Parâmetros de Paginação ---
-    pageQueryParam:
-      in: query
-      name: page
-      required: false
-      schema:
-        type: integer
-        default: 0
-      description: 'Número da página (começando em 0).'
-    
-    limitQueryParam:
-      in: query
-      name: limit
-      required: false
-      schema:
-        type: integer
-        default: 10
-      description: 'Número de itens por página (padrão 10).'
