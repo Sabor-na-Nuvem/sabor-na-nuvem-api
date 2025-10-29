@@ -5,13 +5,11 @@ import swaggerSpec from './config/swagger.js';
 
 // Variaveis de rota
 import lojaRoutes from './modules/loja/loja.routes.js';
-import usuarioRoutes from './modules/usuario/usuario.routes.js';
+import pedidoRoutes from './modules/pedido/pedido.routes.js';
 import produtoRoutes from './modules/produto/produto.routes.js';
-import enderecoRoutes from './modules/endereco/endereco.routes.js';
-import telefoneRoutes from './modules/telefone/telefone.routes.js';
-import produtosEmLojaRoutes from './modules/produtos-em-loja/produtos-em-loja.routes.js';
+import usuarioRoutes from './modules/usuario/usuario.routes.js';
+import cupomDescontoRouter from './modules/cupom-desconto/cupom-desconto.routes.js';
 import categoriaProdutoRouter from './modules/categoria-produto/categoria-produto.routes.js';
-import modificadorEmLojaRouter from './modules/modificador-em-loja/modificador-em-loja.routes.js';
 
 dotenv.config();
 const app = express();
@@ -22,24 +20,16 @@ const PORT = process.env.PORT || 3000;
 // --- ROTAS DA APLICACAO ---
 
 // Rotas Principais
-app.use('/api/lojas', lojaRoutes);
-app.use('/api/produtos', produtoRoutes);
+// Todas as rotas de usuário, incluindo aninhadas, começam aqui
 app.use('/api/usuarios', usuarioRoutes);
+// Todas as rotas de loja, incluindo aninhadas, começam aqui
+app.use('/api/lojas', lojaRoutes);
+// Todas as rotas de produto, incluindo aninhadas, começam aqui
+app.use('/api/produtos', produtoRoutes);
+// Rotas independentes
+app.use('/api/pedidos', pedidoRoutes);
+app.use('/api/cupons', cupomDescontoRouter);
 app.use('/api/categorias-produto', categoriaProdutoRouter);
-
-// Rotas aninhadas para ProdutoEmLoja
-app.use('/api/lojas/:lojaId/produtos-loja', produtosEmLojaRoutes);
-
-// Rotas aninhadas para ModificadorEmLoja
-app.use('/api/lojas/:lojaId/modificadores-loja', modificadorEmLojaRouter);
-
-// Rotas aninhandas para Endereco
-app.use('/api/lojas/:lojaId/endereco', enderecoRoutes);
-app.use('/api/usuarios/:usuarioId/endereco', enderecoRoutes);
-
-// Rotas aninhandas para Telefone
-app.use('/api/lojas/:lojaId/telefones', telefoneRoutes);
-app.use('/api/usuarios/:usuarioId/telefones', telefoneRoutes);
 
 // --- ROTA DA DOCUMENTACAO SWAGGER ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

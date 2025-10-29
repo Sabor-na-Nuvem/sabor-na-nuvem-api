@@ -1,5 +1,7 @@
 import express from 'express';
 import produtoController from './produto.controller.js';
+
+// --- Importação do Roteador Filho ---
 import personalizavelRouter from '../personalizavel/personalizavel.routes.js';
 
 const produtoRouter = express.Router();
@@ -190,7 +192,10 @@ produtoRouter.delete(
   /* authenticate, authorizeAdmin, */ produtoController.deletarProduto,
 );
 
-// --- ROTAS ANINHADAS PARA PERSONALIZAVEIS ---
+// --- Montagem Aninhada (Nível 2) ---
+
+// Monta o router de Personalizavel sob um produto específico
+// Path: /api/produtos/:produtoId/personalizaveis
 produtoRouter.use('/:produtoId/personalizaveis', personalizavelRouter);
 
 export default produtoRouter;

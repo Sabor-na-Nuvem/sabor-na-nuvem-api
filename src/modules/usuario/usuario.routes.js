@@ -1,6 +1,10 @@
 import express from 'express';
 import usuarioController from './usuario.controller.js';
+
+// --- Importação dos Roteadores Filhos ---
 import carrinhoRouter from '../carrinho/carrinho.routes.js';
+import enderecoRouter from '../endereco/endereco.routes.js';
+import telefoneRouter from '../telefone/telefone.routes.js';
 
 const usuarioRouter = express.Router();
 
@@ -261,7 +265,27 @@ usuarioRouter.delete(
   /* authenticate, authorizeAdmin, */ usuarioController.deletarUsuarioPorId,
 );
 
-// Monta as rotas de carrinho sob o usuário logado
+// --- Montagem Aninhada (Nível 2) ---
+
+// Monta o router de Carrinho sob o usuário logado
+// Path: /api/usuarios/me/carrinho
 usuarioRouter.use('/me/carrinho', /* authenticate, */ carrinhoRouter);
+
+// Monta o router de Endereço sob um usuário específico
+// Path: /api/usuarios/:usuarioId/endereco
+usuarioRouter.use(
+  '/:usuarioId/endereco',
+  /* authenticate, authorizeSelfOrAdmin, */ enderecoRouter,
+);
+
+// Monta o router de Telefone sob um usuário específico
+// Path: /api/usuarios/:usuarioId/telefones
+usuarioRouter.use(
+  '/:usuarioId/telefones',
+  /* authenticate, authorizeSelfOrAdmin, */ telefoneRouter,
+);
+
+// TODO: Adicionar rota para o relatório
+// usuarioRouter.get('/:usuarioId/relatorio' /* ... */);
 
 export default usuarioRouter;

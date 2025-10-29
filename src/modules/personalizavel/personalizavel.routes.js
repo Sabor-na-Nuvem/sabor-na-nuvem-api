@@ -156,7 +156,10 @@ personalizavelRouter.delete(
   personalizavelController.deletarPersonalizavel,
 );
 
-// --- MONTAGEM DAS ROTAS ANINHADAS DE MODIFICADOR ---
+// --- Montagem Aninhada (Nível 3) ---
+
+// Monta o router de ItemCarrinho sob um Carrinho específico
+// Path: /api/produtos/:produtoId/personalizaveis/:personalizavelId/modificadores
 personalizavelRouter.use('/:personalizavelId/modificadores', modificadorRouter);
 
 export default personalizavelRouter;

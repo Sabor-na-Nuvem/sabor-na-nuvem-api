@@ -98,9 +98,10 @@ carrinhoRouter.patch('/', carrinhoController.atualizarCarrinho);
  */
 carrinhoRouter.delete('/', carrinhoController.limparCarrinho);
 
-// --- Monta o router de ITENS aninhado ---
-// A documentação para /api/usuarios/me/carrinho/itens/*
-// estará em item-carrinho.routes.js
+// --- Montagem Aninhada (Nível 3) ---
+
+// Monta o router de ItemCarrinho sob um Carrinho específico
+// Path: /api/usuarios/me/carrinho/itens
 carrinhoRouter.use('/itens', itemCarrinhoRouter);
 
 export default carrinhoRouter;

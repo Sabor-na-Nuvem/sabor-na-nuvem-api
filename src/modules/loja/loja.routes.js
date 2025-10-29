@@ -1,6 +1,12 @@
 import express from 'express';
 import lojaController from './loja.controller.js';
 
+// Imports dos routers aninhados
+import enderecoRouter from '../endereco/endereco.routes.js';
+import telefoneRouter from '../telefone/telefone.routes.js';
+import produtosEmLojaRouter from '../produtos-em-loja/produtos-em-loja.routes.js';
+import modificadorEmLojaRouter from '../modificador-em-loja/modificador-em-loja.routes.js';
+
 const lojaRouter = express.Router();
 
 /**
@@ -175,6 +181,33 @@ lojaRouter.put(
 lojaRouter.delete(
   '/:id',
   /* authenticate, authorizeAdmin, */ lojaController.deletarLoja,
+);
+
+// --- Montagem Aninhada (Nível 2) ---
+
+// Monta o router de Endereço sob uma loja específica
+// Path: /api/lojas/:lojaId/endereco
+lojaRouter.use(
+  '/:lojaId/endereco',
+  /* authenticate, authorizeAdminOrStoreOwner, */ enderecoRouter,
+);
+
+// Monta o router de Telefone sob uma loja específica
+// Path: /api/lojas/:lojaId/telefones
+lojaRouter.use(
+  '/:lojaId/telefones',
+  /* authenticate, authorizeAdminOrStoreOwner, */ telefoneRouter,
+);
+
+// Monta o router de ProdutosEmLoja (catálogo da loja)
+// Path: /api/lojas/:lojaId/produtos-loja
+lojaRouter.use('/:lojaId/produtos-loja', /* ...auth... */ produtosEmLojaRouter);
+
+// Monta o router de ModificadorEmLoja (opções da loja)
+// Path: /api/lojas/:lojaId/modificadores-loja
+lojaRouter.use(
+  '/:lojaId/modificadores-loja',
+  /* ...auth... */ modificadorEmLojaRouter,
 );
 
 export default lojaRouter;
