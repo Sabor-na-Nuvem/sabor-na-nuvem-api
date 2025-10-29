@@ -1,9 +1,11 @@
 import express from 'express';
 import dotenv from 'dotenv';
+
+// --- IMPORTAÇÃO DO SWAGGER ---
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
 
-// Variaveis de rota
+// --- IMPORTAÇÃO DAS ROTAS ---
 import lojaRoutes from './modules/loja/loja.routes.js';
 import pedidoRoutes from './modules/pedido/pedido.routes.js';
 import produtoRoutes from './modules/produto/produto.routes.js';
@@ -11,6 +13,9 @@ import usuarioRoutes from './modules/usuario/usuario.routes.js';
 import cupomDescontoRouter from './modules/cupom-desconto/cupom-desconto.routes.js';
 import relatorioRouter from './modules/relatorio-usuario/relatorio-usuario.routes.js';
 import categoriaProdutoRouter from './modules/categoria-produto/categoria-produto.routes.js';
+
+// --- IMPORTAÇÃO DOS JOBS ---
+import './jobs/scheduler.js';
 
 dotenv.config();
 const app = express();
