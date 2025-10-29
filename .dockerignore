@@ -1,0 +1,16 @@
+# Ignora dependências locais (serão instaladas no container)
+node_modules
+
+# Arquivo de log do npm
+npm-debug.log
+
+# Arquivos de ambiente (serão injetados pelo env_file)
+.env
+.env.test
+
+# Metadados do Git e GitHub
+.git
+.github
+
+# Configurações do editor de código
+.vscode

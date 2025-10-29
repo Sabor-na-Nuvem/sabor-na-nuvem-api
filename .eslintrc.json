@@ -22,5 +22,13 @@
         "js": "always"
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.test.js", "*.spec.js"], 
+      "rules": {
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] 
+      }
+    }
+  ]
 }
