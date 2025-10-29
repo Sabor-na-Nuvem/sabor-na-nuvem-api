@@ -1,4 +1,5 @@
 import { TipoDesconto } from '@prisma/client';
+import crypto from 'crypto';
 import prisma from '../../config/prisma.js';
 
 const VALIDADE_DIAS_FIDELIDADE = 30;
