@@ -349,6 +349,49 @@ const pedidoServices = {
           );
         }
 
+        // --- LÓGICA DE RECOMPENSA E RELATÓRIO ---
+        if (novoStatus === StatusPedido.REALIZADO && pedido.clienteId) {
+          const limiarCupom = 100.0; // Definir o limiar para ganhar um cupom (ex: R$ 100)
+          const usuarioId = pedido.clienteId;
+
+          // Atualiza o relatório com os gastos deste pedido
+          const relatorioAtualizado = await tx.relatorioUsuario.update({
+            where: { usuarioId },
+            data: {
+              gastosTotais: { increment: pedido.valorCobrado },
+              gastosMensais: { increment: pedido.valorCobrado },
+              qtdTotalPedidos: { increment: 1 },
+              qtdMensalPedidos: { increment: 1 },
+              gastoDesdeUltimoCupom: { increment: pedido.valorCobrado },
+              dataUltimoPedido: new Date(),
+            },
+          });
+
+          if (relatorioAtualizado.gastoDesdeUltimoCupom.gte(limiarCupom)) {
+            try {
+              // Cria o cupom de fidelidade
+              await cupomDescontoServices.criarCupomFidelidade(tx, usuarioId);
+
+              await tx.relatorioUsuario.update({
+                where: { usuarioId },
+                data: {
+                  gastoDesdeUltimoCupom: {
+                    decrement: new Prisma.Decimal(limiarCupom),
+                  },
+                },
+              });
+              console.log(
+                `Cupom de fidelidade gerado para usuário ${usuarioId}.`,
+              );
+            } catch (cupomError) {
+              console.error(
+                `FALHA AO GERAR CUPOM FIDELIDADE para usuário ${usuarioId} (Pedido ${idPedido}): `,
+                cupomError,
+              );
+            }
+          }
+        } // --- FIM DA LÓGICA DE RECOMPENSA ---
+
         const pedidoNovo = await tx.pedido.update({
           where: {
             id: idPedido,

@@ -33,6 +33,15 @@ const usuarioServices = {
           email: dadosPerfil.email,
           nome: dadosPerfil.nome,
           cargo: cargoDoUsuario,
+          relatorio: {
+            create: {
+              gastosTotais: 0.0,
+              gastosMensais: 0.0,
+              qtdTotalPedidos: 0,
+              qtdMensalPedidos: 0,
+              gastoDesdeUltimoCupom: 0.0,
+            },
+          },
         },
         select: {
           id: true,
