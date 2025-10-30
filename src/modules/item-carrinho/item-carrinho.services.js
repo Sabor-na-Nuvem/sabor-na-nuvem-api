@@ -179,7 +179,7 @@ const itemCarrinhoServicess = {
 
   async adicionarItemAoCarrinho(idUsuario, dadosItem) {
     const {
-      idProduto,
+      produtoId,
       qtdProduto,
       idLoja,
       modificadores: modificadoresInput = [],
@@ -214,7 +214,7 @@ const itemCarrinhoServicess = {
         // Validar o Produto Base
         const produtoEmLoja = await tx.produtosEmLoja.findUnique({
           where: {
-            lojaId_produtoId: { lojaId, idProduto },
+            lojaId_produtoId: { lojaId, produtoId },
             disponivel: true,
           },
           include: {
@@ -303,7 +303,7 @@ const itemCarrinhoServicess = {
         const novoItem = await tx.itemCarrinho.create({
           data: {
             carrinhoId: idUsuario,
-            produtoId: idProduto,
+            produtoId,
             qtdProduto,
             valorUnitarioProduto: produtoEmLoja.valorBase,
           },

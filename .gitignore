@@ -3,6 +3,7 @@
 
 # Variáveis de Ambiente e Segredos
 .env
+.env.test
 
 # Logs
 npm-debug.log*

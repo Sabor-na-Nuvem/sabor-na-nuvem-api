@@ -71,7 +71,9 @@ const itemCarrinhoController = {
       }
       if (
         error.message.includes('indisponível') ||
-        error.message.includes('deve ser definida')
+        error.message.includes('deve ser definida') ||
+        error.message.includes('obrigatória faltante') ||
+        error.message.includes('excedida')
       ) {
         return res.status(400).json({ message: error.message });
       }
