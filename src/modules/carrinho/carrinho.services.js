@@ -321,7 +321,10 @@ const carrinhoServices = {
 
       return carrinhoAtualizado;
     } catch (error) {
-      if (error.message.includes('não encontrado')) {
+      if (
+        error.message.includes('não encontrado') ||
+        error.message.includes('Loja (lojaId) é obrigatória')
+      ) {
         throw error;
       }
       if (error.code === 'P2003') {
