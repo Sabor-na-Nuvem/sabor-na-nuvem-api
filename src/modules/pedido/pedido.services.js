@@ -65,7 +65,8 @@ const pedidoServices = {
           // Revalida Produto Base
           const produtoEmLoja = await tx.produtosEmLoja.findFirst({
             where: {
-              lojaId_produtoId: { lojaId, produtoId: item.produtoId },
+              lojaId,
+              produtoId: item.produtoId,
               disponivel: true,
             },
           });
