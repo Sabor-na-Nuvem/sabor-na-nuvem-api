@@ -1,0 +1,30 @@
+components:
+  parameters:
+    userIdPathParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: O ID (UUID) do usuário
+    usuarioNomeQueryParam:
+      in: query
+      name: nome
+      schema:
+        type: string
+      description: Filtrar usuários por nome (busca parcial, case-insensitive).
+    usuarioEmailQueryParam:
+      in: query
+      name: email
+      schema:
+        type: string
+        format: email
+      description: Filtrar usuário por email exato (case-insensitive).
+    usuarioCargoQueryParam:
+      in: query
+      name: cargo
+      schema:
+        type: string
+        $ref: '#/components/schemas/RoleUsuario'
+      description: Filtrar usuários por cargo.

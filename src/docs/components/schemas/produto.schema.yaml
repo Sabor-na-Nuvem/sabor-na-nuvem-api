@@ -1,0 +1,123 @@
+components:
+  schemas:
+    Produto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: O ID auto-gerado do produto.
+          readOnly: true
+        nome:
+          type: string
+          description: O nome do produto.
+        descricao:
+          type: string
+          description: A descrição detalhada do produto.
+        imagemUrl:
+          type: string
+          format: url # Indica que é uma URL
+          description: URL da imagem do produto.
+        categoriaId:
+          type: integer
+          description: O ID da categoria à qual o produto pertence.
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+        # Adicionar relações incluídas se necessário
+        categoria:
+          $ref: '#/components/schemas/CategoriaProduto' # Assumindo CategoriaProduto definido
+        personalizacao:
+          type: array
+          items:
+            $ref: '#/components/schemas/Personalizavel' # Assumindo Personalizavel definido
+      example:
+        id: 1
+        nome: "X-Burger Clássico"
+        descricao: "Pão, carne, queijo e salada."
+        imagemUrl: "http://example.com/burger.jpg"
+        categoriaId: 1
+        createdAt: "2025-10-17T17:30:00.000Z"
+        updatedAt: "2025-10-17T17:30:00.000Z"
+        # categoria: { id: 1, nome: "Lanches", ... }
+        # personalizacao: [ { id: 1, nome: "Adicionais", ... }, ... ]
+
+    NovoProduto:
+      type: object
+      required:
+        - nome
+        - categoriaId
+      properties:
+        nome:
+          type: string
+        descricao:
+          type: string
+        imagemUrl:
+          type: string
+          format: url
+        categoriaId:
+          type: integer
+      example:
+        nome: "X-Burger Clássico"
+        descricao: "Pão, carne, queijo e salada."
+        imagemUrl: "http://example.com/burger.jpg"
+        categoriaId: 1
+
+    AtualizarProduto: # Para PUT ou PATCH
+      type: object
+      properties:
+        nome:
+          type: string
+        descricao:
+          type: string
+        imagemUrl:
+          type: string
+          format: url
+        categoriaId:
+          type: integer
+      example:
+        nome: "X-Burger Super Clássico"
+        descricao: "Nova descrição atualizada."
+
+    ProdutoEmLojaDetalhado:
+      type: object
+      properties:
+        lojaId:
+          type: integer
+          description: ID da loja
+        nomeLoja:
+          type: string
+          description: Nome da loja
+        valorBase:
+          type: number
+          format: float
+          description: Valor base do produto na loja
+        disponivel:
+          type: boolean
+          description: Indica se o produto está disponível na loja
+        emPromocao:
+          type: boolean
+          description: Indica se o produto está em promoção
+        descontoPromocao:
+          type: integer # Ou number/float se o valor for fixo
+          nullable: true
+          description: Percentual ou valor de desconto aplicado (se houver)
+        validadePromocao:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data e hora de validade da promoção
+      example:
+        lojaId: 3
+        nomeLoja: "Sabor nas Nuvens - Asa Sul"
+        valorBase: 25.50
+        disponivel: true
+        emPromocao: true
+        descontoPromocao: 15
+        validadePromocao: "2025-12-31T23:59:59Z"

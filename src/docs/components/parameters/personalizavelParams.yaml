@@ -1,0 +1,9 @@
+components:
+  parameters:
+    personalizavelIdPathParam:
+      in: path
+      name: personalizavelId
+      required: true
+      schema:
+        type: integer
+      description: O ID do grupo de personalização

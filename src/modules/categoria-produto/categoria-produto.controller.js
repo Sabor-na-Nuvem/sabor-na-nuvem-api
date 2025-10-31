@@ -1,10 +1,10 @@
-import categoriaProdutoService from './categoria-produto.services.js';
+import categoriaProdutoServices from './categoria-produto.services.js';
 
 const categoriaProdutoController = {
   async buscarTodasAsCategorias(req, res) {
     try {
       const categorias =
-        await categoriaProdutoService.buscarTodasAsCategorias();
+        await categoriaProdutoServices.buscarTodasAsCategorias();
 
       return res.status(200).json(categorias);
     } catch (error) {
@@ -16,7 +16,13 @@ const categoriaProdutoController = {
     try {
       const { id } = req.params;
 
-      const categoria = await categoriaProdutoService.buscarCategoriaPorId(
+      if (Number.isNaN(Number(id))) {
+        return res
+          .status(400)
+          .json({ message: 'O ID da categoria deve ser um número.' });
+      }
+
+      const categoria = await categoriaProdutoServices.buscarCategoriaPorId(
         Number(id),
       );
 
@@ -32,10 +38,16 @@ const categoriaProdutoController = {
 
   async buscarCategoriaPorNome(req, res) {
     try {
-      const nome = req.body;
+      const { nome } = req.query;
+
+      if (!nome) {
+        return res
+          .status(400)
+          .json({ message: 'O parâmetro "nome" na query é obrigatório.' });
+      }
 
       const categoria =
-        await categoriaProdutoService.buscarCategoriaPorId(nome);
+        await categoriaProdutoServices.buscarCategoriaPorNome(nome);
 
       if (!categoria) {
         return res.status(404).json({ message: 'Categoria não encontrada.' });
@@ -51,7 +63,7 @@ const categoriaProdutoController = {
     try {
       const dadosCategoria = req.body;
       const novaCategoria =
-        await categoriaProdutoService.criarCategoria(dadosCategoria);
+        await categoriaProdutoServices.criarCategoria(dadosCategoria);
 
       return res.status(201).json(novaCategoria);
     } catch (error) {
@@ -64,8 +76,14 @@ const categoriaProdutoController = {
       const { id } = req.params;
       const novosDados = req.body;
 
+      if (Number.isNaN(Number(id))) {
+        return res
+          .status(400)
+          .json({ message: 'O ID da categoria deve ser um número.' });
+      }
+
       const categoriaAtualizada =
-        await categoriaProdutoService.atualizarCategoria(
+        await categoriaProdutoServices.atualizarCategoria(
           Number(id),
           novosDados,
         );
@@ -83,7 +101,13 @@ const categoriaProdutoController = {
     try {
       const { id } = req.params;
 
-      await categoriaProdutoService.deletarCategoria(Number(id));
+      if (Number.isNaN(Number(id))) {
+        return res
+          .status(400)
+          .json({ message: 'O ID da categoria deve ser um número.' });
+      }
+
+      await categoriaProdutoServices.deletarCategoria(Number(id));
 
       return res.status(204).send();
     } catch (error) {

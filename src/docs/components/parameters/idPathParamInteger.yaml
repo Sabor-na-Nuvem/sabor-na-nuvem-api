@@ -1,0 +1,9 @@
+components:
+  parameters:
+    categoriaProdutoIdPathParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+      description: O ID da categoria do produto

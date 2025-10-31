@@ -1,0 +1,16 @@
+components:
+  parameters:
+    cupomIdPathParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+      description: O ID do cupom de desconto
+    cupomCodigoQueryParam:
+      in: query
+      name: codCupom
+      required: true
+      schema:
+        type: string
+      description: O código exato do cupom a ser buscado

@@ -1,0 +1,72 @@
+components:
+  parameters:
+    pedidoIdPathParam:
+      in: path
+      name: pedidoId
+      required: true
+      schema:
+        type: integer
+      description: O ID do pedido.
+    
+    lojaIdPathParam: # Reutilizável para rotas de loja
+      in: path
+      name: lojaId
+      required: true
+      schema:
+        type: integer
+      description: O ID da loja.
+
+    # --- Parâmetros de Query para Filtros de Listagem ---
+    statusQueryParam:
+      in: query
+      name: status
+      required: false
+      schema:
+        $ref: '#/components/schemas/StatusPedido' # Referencia o Enum
+      description: Filtra pedidos por um status específico.
+    
+    tipoQueryParam:
+      in: query
+      name: tipo
+      required: false
+      schema:
+        $ref: '#/components/schemas/TipoPedido' # Referencia o Enum
+      description: Filtra pedidos por tipo (ENTREGA ou RETIRADA).
+
+    dataDeQueryParam:
+      in: query
+      name: dataDe
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 'Data inicial para filtro (formato AAAA-MM-DD).'
+      example: '2025-10-01'
+
+    dataAteQueryParam:
+      in: query
+      name: dataAte
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 'Data final para filtro (formato AAAA-MM-DD).'
+      example: '2025-10-31'
+
+    lojaIdQueryParam: # Para filtro do Admin
+      in: query
+      name: lojaId
+      required: false
+      schema:
+        type: integer
+      description: (Admin) Filtra pedidos por uma loja específica.
+    
+    clienteIdQueryParam: # Para filtro do Admin
+      in: query
+      name: clienteId
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: (Admin/Loja) Filtra pedidos por um cliente específico.
+    

@@ -1,0 +1,111 @@
+components:
+  schemas:
+    # Enum RoleUsuario
+    RoleUsuario:
+      type: string
+      enum: [CLIENTE, FUNCIONARIO, ADMIN]
+      description: Cargo do usuário no sistema.
+
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: O ID único do usuário (UUID).
+          readOnly: true
+        nome:
+          type: string
+          description: Nome do usuário.
+        email:
+          type: string
+          format: email
+          description: Endereço de e-mail do usuário (gerenciado pelo Auth Service).
+          readOnly: true # Indicar que não é alterável aqui
+        cargo:
+          $ref: '#/components/schemas/RoleUsuario'
+          description: O cargo/role do usuário no sistema.
+        enderecoId:
+          type: integer
+          nullable: true
+          description: ID do endereço associado (se houver).
+          readOnly: true # Gerenciado pelas rotas /endereco
+        funcionarioLojaId:
+          type: integer
+          nullable: true
+          description: ID da loja onde o usuário é funcionário (se aplicável).
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação do perfil.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização do perfil.
+          readOnly: true
+      example:
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        nome: "João da Silva"
+        email: "joao.silva@email.com"
+        cargo: "CLIENTE"
+        enderecoId: 101
+        funcionarioLojaId: null
+        createdAt: "2025-10-28T10:00:00Z"
+        updatedAt: "2025-10-28T11:30:00Z"
+
+    NovoUsuarioInput:
+      type: object
+      required:
+        - id
+        - email
+        - nome
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: O ID (UUID) gerado pelo serviço de autenticação.
+        email:
+          type: string
+          format: email
+          description: O e-mail do usuário (vindo do serviço de autenticação).
+        nome:
+          type: string
+          description: O nome do usuário.
+        cargo:
+          type: string
+          description: Cargo inicial (opcional, default CLIENTE). ("CLIENTE", "FUNCIONARIO", "ADMIN")
+      example:
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        email: "joao.silva@email.com"
+        nome: "João da Silva"
+        cargo: "CLIENTE"
+
+    AtualizarUsuarioLogadoInput:
+      type: object
+      description: Apenas os campos a serem atualizados pelo usuário logado.
+      properties:
+        nome:
+          type: string
+          description: O novo nome do usuário.
+      example:
+        nome: "João Silva Santos"
+
+    AtualizarUsuarioAdminInput:
+      type: object
+      description: Apenas os campos a serem atualizados pelo admin.
+      properties:
+        nome:
+          type: string
+          description: O novo nome do usuário.
+        cargo:
+          type: string
+          description: O novo cargo do usuário.
+        funcionarioLojaId:
+          type: integer
+          nullable: true
+          description: ID da loja se for funcionário, ou null.
+      example:
+        nome: "Maria Oliveira"
+        cargo: "FUNCIONARIO"
+        funcionarioLojaId: 5

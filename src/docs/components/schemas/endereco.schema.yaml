@@ -1,0 +1,179 @@
+components:
+  schemas:
+    # Enum EstadosBrasil
+    EstadosBrasil:
+      type: string
+      enum: [AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO]
+      description: Sigla do estado brasileiro.
+
+    # Schema principal para Endereco (respostas GET)
+    Endereco:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: O ID auto-gerado do endereço.
+          readOnly: true
+        cep:
+          type: string
+          description: CEP formatado (72900-000, por exemplo).
+          maxLength: 9
+        estado:
+          $ref: '#/components/schemas/EstadosBrasil'
+        cidade:
+          type: string
+          description: Nome da cidade.
+        bairro:
+          type: string
+          description: Nome do bairro.
+        logradouro:
+          type: string
+          description: Nome da rua, avenida, praça, etc.
+        numero:
+          type: string
+          description: Número da residência/estabelecimento (pode conter letras).
+          maxLength: 10
+        complemento:
+          type: string
+          nullable: true
+          description: Complemento (Apto 101, Bloco B, Fundos, ...).
+        pontoReferencia:
+          type: string
+          nullable: true
+          description: Ponto de referência para auxiliar o entregador (Em frente à padaria, por exemplo).
+        latitude:
+          type: number
+          format: double # Prisma Decimal -> number/double in OpenAPI
+          description: Coordenada de latitude.
+        longitude:
+          type: number
+          format: double # Prisma Decimal -> number/double in OpenAPI
+          description: Coordenada de longitude.
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+      example:
+        id: 101
+        cep: "72900-000"
+        estado: "DF"
+        cidade: "Brasília"
+        bairro: "Plano Piloto"
+        logradouro: "Avenida Central"
+        numero: "123"
+        complemento: "Apto 4"
+        pontoReferencia: "Prédio amarelo"
+        latitude: -15.600000
+        longitude: -47.800000
+        createdAt: "2025-10-27T10:00:00Z"
+        updatedAt: "2025-10-27T10:00:00Z"
+
+    # Schema para criar um novo endereço (corpo do POST)
+    NovoEndereco:
+      type: object
+      required:
+        - cep
+        - estado
+        - cidade
+        - bairro
+        - logradouro
+        - numero
+        # TODO: Considerar se lat/lon são obrigatórios na criação ou obtidos via geocoding
+        - latitude
+        - longitude
+      properties:
+        cep:
+          type: string
+          maxLength: 9
+        estado:
+          $ref: '#/components/schemas/EstadosBrasil'
+        cidade:
+          type: string
+        bairro:
+          type: string
+        logradouro:
+          type: string
+        numero:
+          type: string
+          maxLength: 10
+        complemento:
+          type: string
+          nullable: true
+        pontoReferencia:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+      example:
+        cep: "71000-000"
+        estado: "DF"
+        cidade: "Brasília"
+        bairro: "Asa Sul"
+        logradouro: "SQS 105"
+        numero: "Bloco G"
+        complemento: "Apto 302"
+        pontoReferencia: "Perto do metrô"
+        latitude: -15.800000
+        longitude: -47.900000
+
+    # Schema para atualizar um endereço (corpo do PUT)
+    AtualizarEndereco:
+      type: object
+      description: Todos os campos do endereço são enviados para substituição completa (semântica do PUT).
+      required:
+        - cep
+        - estado
+        - cidade
+        - bairro
+        - logradouro
+        - numero
+        - latitude
+        - longitude
+      properties:
+        cep:
+          type: string
+          maxLength: 9
+        estado:
+          $ref: '#/components/schemas/EstadosBrasil'
+        cidade:
+          type: string
+        bairro:
+          type: string
+        logradouro:
+          type: string
+        numero:
+          type: string
+          maxLength: 10
+        complemento:
+          type: string
+          nullable: true
+        pontoReferencia:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+      example:
+        cep: "71000-111"
+        estado: "DF"
+        cidade: "Brasília"
+        bairro: "Asa Sul"
+        logradouro: "SQS 106"
+        numero: "Bloco A"
+        complemento: "Apto 101"
+        pontoReferencia: ""
+        latitude: -15.810000
+        longitude: -47.910000

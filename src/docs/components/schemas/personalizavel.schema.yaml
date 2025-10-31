@@ -1,0 +1,92 @@
+components:
+  schemas:
+    Personalizavel:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID do grupo de personalização.
+          readOnly: true
+        nome:
+          type: string
+          description: Nome do grupo (Adicionais, Ponto da Carne, ...).
+        produtoId:
+          type: integer
+          description: ID do produto ao qual pertence.
+          readOnly: true
+        selecaoMinima:
+          type: integer
+          description: Mínimo de opções que devem ser selecionadas neste grupo.
+        selecaoMaxima:
+          type: integer
+          description: Máximo de opções que podem ser selecionadas neste grupo.
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização.
+          readOnly: true
+        modificadores:
+          type: array
+          items:
+            $ref: '#/components/schemas/Modificador'
+      example:
+        id: 1
+        nome: "Adicionais"
+        produtoId: 10
+        selecaoMinima: 0
+        selecaoMaxima: 3
+        createdAt: "2025-10-27T10:00:00Z"
+        updatedAt: "2025-10-27T10:00:00Z"
+        modificadores:
+          - id: 101
+            nome: "Bacon Extra"
+            personalizavelId: 1
+            valorAdicional: 6.00
+            createdAt: "2025-10-27T10:00:00Z"
+            updatedAt: "2025-10-27T10:00:00Z"
+          - id: 102
+            nome: "Queijo Extra"
+            personalizavelId: 1
+            valorAdicional: 4.00
+            createdAt: "2025-10-27T10:00:00Z"
+            updatedAt: "2025-10-27T10:00:00Z"
+
+    NovoPersonalizavel:
+      type: object
+      required:
+        - nome
+        - selecaoMinima
+        - selecaoMaxima
+      properties:
+        nome:
+          type: string
+        selecaoMinima:
+          type: integer
+          minimum: 0 # Adiciona validação
+        selecaoMaxima:
+          type: integer
+          minimum: 1 # Geralmente o máximo é pelo menos 1
+      example:
+        nome: "Molhos Extras"
+        selecaoMinima: 0
+        selecaoMaxima: 2
+
+    AtualizarPersonalizavel:
+      type: object
+      properties:
+        nome:
+          type: string
+        selecaoMinima:
+          type: integer
+          minimum: 0
+        selecaoMaxima:
+          type: integer
+          minimum: 1
+      example:
+        nome: "Molhos Especiais"
+        selecaoMaxima: 1

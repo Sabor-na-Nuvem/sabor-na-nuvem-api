@@ -7,8 +7,12 @@ RUN npm install
 
 COPY . .
 
+RUN chmod +x /app/entrypoint.sh
+
 RUN npx prisma generate
 
 EXPOSE 3000
+
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 CMD [ "npm", "run", "dev" ]

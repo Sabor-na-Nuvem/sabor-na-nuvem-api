@@ -1,0 +1,9 @@
+components:
+  parameters:
+    emPromocaoQueryParam:
+      in: query
+      name: emPromocao
+      schema:
+        type: boolean
+      required: false
+      description: Filtrar apenas por produtos que estão em promoção na loja.
