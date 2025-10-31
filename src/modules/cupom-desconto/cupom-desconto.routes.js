@@ -6,9 +6,6 @@ import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
 
 const cupomDescontoRouter = express.Router();
 
-// --- Middleware reutilizável para proteger rotas de Admin ---
-const authorizeAdmin = authMiddleware.ensureRole([RoleUsuario.ADMIN]);
-
 // -----------------------------------------------------------------------------
 // ROTAS ADMINISTRATIVAS (GERENCIAMENTO)
 // -----------------------------------------------------------------------------
@@ -40,8 +37,7 @@ const authorizeAdmin = authMiddleware.ensureRole([RoleUsuario.ADMIN]);
  */
 cupomDescontoRouter.get(
   '/',
-  authMiddleware.ensureAuthenticated,
-  authorizeAdmin,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   cupomDescontoController.listarCupons,
 );
 
@@ -73,8 +69,7 @@ cupomDescontoRouter.get(
  */
 cupomDescontoRouter.get(
   '/buscar/por-codigo',
-  authMiddleware.ensureAuthenticated,
-  authorizeAdmin,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   cupomDescontoController.buscarCupomPorCodigo,
 );
 
@@ -106,8 +101,7 @@ cupomDescontoRouter.get(
  */
 cupomDescontoRouter.get(
   '/:id',
-  authMiddleware.ensureAuthenticated,
-  authorizeAdmin,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   cupomDescontoController.buscarCupomPorId,
 );
 
@@ -143,8 +137,7 @@ cupomDescontoRouter.get(
  */
 cupomDescontoRouter.post(
   '/',
-  authMiddleware.ensureAuthenticated,
-  authorizeAdmin,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   cupomDescontoController.criarCupom,
 );
 
@@ -184,8 +177,7 @@ cupomDescontoRouter.post(
  */
 cupomDescontoRouter.put(
   '/:id',
-  authMiddleware.ensureAuthenticated,
-  authorizeAdmin,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   cupomDescontoController.atualizarCupom,
 );
 
@@ -216,8 +208,7 @@ cupomDescontoRouter.put(
  */
 cupomDescontoRouter.delete(
   '/:id',
-  authMiddleware.ensureAuthenticated,
-  authorizeAdmin,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   cupomDescontoController.deletarCupom,
 );
 
@@ -255,7 +246,6 @@ cupomDescontoRouter.delete(
  */
 cupomDescontoRouter.post(
   '/validar',
-  authMiddleware.ensureAuthenticated,
   cupomDescontoController.verificarValidadeCupom,
 );
 

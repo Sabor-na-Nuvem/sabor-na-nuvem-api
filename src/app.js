@@ -90,7 +90,12 @@ app.use(
   activeAuthMiddleware.ensureAuthenticated,
   cupomDescontoRouter,
 );
-app.use('/api/relatorios', relatorioRouter);
+app.use(
+  '/api/relatorios',
+  activeAuthMiddleware.ensureAuthenticated,
+  activeAuthMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  relatorioRouter,
+);
 app.use('/api/categorias-produto', categoriaProdutoRouter);
 
 // --- ROTA DA DOCUMENTACAO SWAGGER ---
