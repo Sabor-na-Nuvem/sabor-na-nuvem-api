@@ -18,7 +18,10 @@ tags:
     description: 'Operações de gerenciamento (CRUD) para lojas.'
 
   - name: Categorias de Produto
-    description: API para gerenciamento das categorias de produto.
+    description: Operações para visualização de categorias de produto.
+
+  - name: Categorias de Produto (Admin)
+    description: Operações de gerenciamento das categorias de produto.
 
   - name: Produtos
     description: API para gerenciamento de produtos.
