@@ -6,41 +6,28 @@ import carrinhoRouter from '../carrinho/carrinho.routes.js';
 import enderecoRouter from '../endereco/endereco.routes.js';
 import telefoneRouter from '../telefone/telefone.routes.js';
 
+// --- Importação do Auth (da nossa nova config) ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+
 const usuarioRouter = express.Router();
 
-// --- ROTA PÚBLICA ---
+// Middleware customizado para verificar se é o próprio usuário ou Admin
+const authorizeSelfOrAdmin = (req, res, next) => {
+  if (
+    req.user.cargo === RoleUsuario.ADMIN ||
+    req.user.id === req.params.usuarioId
+  ) {
+    return next();
+  }
+  return res.status(403).json({ message: 'Acesso negado.' });
+};
 
-/**
- * @swagger
- * /usuarios:
- *   post:
- *     summary: Cria um novo perfil de usuário (após registro no Auth Service)
- *     tags: [Usuarios]
- *     security: [] # Rota pública
- *     description: Cria o registro local do perfil. Requer ID e Email do Auth Service.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/NovoUsuarioInput'
- *     responses:
- *       201:
- *         description: Perfil criado.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Usuario'
- *       400:
- *         $ref: '#/components/responses/BadRequestError'
- *         description: Dados inválidos ou ID/Email já existe.
- *       500:
- *         $ref: '#/components/responses/InternalServerError'
+/*
+ *==================================
+ * ROTAS /me (CLIENTE LOGADO)
+ * Proteção: `ensureAuthenticated`
+ *==================================
  */
-usuarioRouter.post('/', usuarioController.criarUsuario);
-
-/* ROTAS /me */
-// TODO: Adicionar middleware authenticate
 
 /**
  * @swagger
@@ -61,10 +48,7 @@ usuarioRouter.post('/', usuarioController.criarUsuario);
  *       404: { $ref: '#/components/responses/NotFoundError' }
  *       500: { $ref: '#/components/responses/InternalServerError' }
  */
-usuarioRouter.get(
-  '/me',
-  /* authenticate, */ usuarioController.buscarUsuarioLogado,
-);
+usuarioRouter.get('/me', usuarioController.buscarUsuarioLogado);
 
 /**
  * @swagger
@@ -86,10 +70,7 @@ usuarioRouter.get(
  *       401: { $ref: '#/components/responses/UnauthorizedError' }
  *       500: { $ref: '#/components/responses/InternalServerError' }
  */
-usuarioRouter.get(
-  '/me/cupons',
-  /* authenticate, */ usuarioController.buscarCuponsDoUsuarioLogado,
-);
+usuarioRouter.get('/me/cupons', usuarioController.buscarCuponsDoUsuarioLogado);
 
 /**
  * @swagger
@@ -112,7 +93,7 @@ usuarioRouter.get(
  */
 usuarioRouter.get(
   '/me/relatorio',
-  /* authenticate, */ usuarioController.buscarRelatorioDoUsuarioLogado,
+  usuarioController.buscarRelatorioDoUsuarioLogado,
 );
 
 /**
@@ -142,10 +123,7 @@ usuarioRouter.get(
  *       404: { $ref: '#/components/responses/NotFoundError' }
  *       500: { $ref: '#/components/responses/InternalServerError' }
  */
-usuarioRouter.patch(
-  '/me',
-  /* authenticate, */ usuarioController.atualizarUsuarioLogado,
-);
+usuarioRouter.patch('/me', usuarioController.atualizarUsuarioLogado);
 
 /**
  * @swagger
@@ -162,13 +140,14 @@ usuarioRouter.patch(
  *       404: { $ref: '#/components/responses/NotFoundError' }
  *       500: { $ref: '#/components/responses/InternalServerError' }
  */
-usuarioRouter.delete(
-  '/me',
-  /* authenticate, */ usuarioController.deletarUsuarioLogado,
-);
+usuarioRouter.delete('/me', usuarioController.deletarUsuarioLogado);
 
-/* ROTAS ADMIN */
-// TODO: Adicionar middlewares authenticate e authorizeAdmin
+/*
+ *=================================================
+ * ROTAS / (ADMIN)
+ * Proteção: `ensureAuthenticated` + `ensureRole`
+ *=================================================
+ */
 
 /**
  * @swagger
@@ -198,7 +177,8 @@ usuarioRouter.delete(
  */
 usuarioRouter.get(
   '/',
-  /* authenticate, authorizeAdmin, */ usuarioController.buscarTodosOsUsuarios,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN, RoleUsuario.FUNCIONARIO]),
+  usuarioController.buscarTodosOsUsuarios,
 );
 
 /**
@@ -225,7 +205,8 @@ usuarioRouter.get(
  */
 usuarioRouter.get(
   '/:id/relatorio',
-  /* authenticate, authorizeAdmin, */ usuarioController.buscarRelatorioDoUsuarioPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  usuarioController.buscarRelatorioDoUsuarioPorId,
 );
 
 /**
@@ -252,7 +233,8 @@ usuarioRouter.get(
  */
 usuarioRouter.get(
   '/:id',
-  /* authenticate, authorizeAdmin, */ usuarioController.buscarUsuarioPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN, RoleUsuario.FUNCIONARIO]),
+  usuarioController.buscarUsuarioPorId,
 );
 
 /**
@@ -287,7 +269,8 @@ usuarioRouter.get(
  */
 usuarioRouter.patch(
   '/:id',
-  /* authenticate, authorizeAdmin, */ usuarioController.atualizarUsuarioPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  usuarioController.atualizarUsuarioPorId,
 );
 
 /**
@@ -313,30 +296,26 @@ usuarioRouter.patch(
  */
 usuarioRouter.delete(
   '/:id',
-  /* authenticate, authorizeAdmin, */ usuarioController.deletarUsuarioPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  usuarioController.deletarUsuarioPorId,
 );
 
 // --- Montagem Aninhada (Nível 2) ---
 
 // Monta o router de Carrinho sob o usuário logado
 // Path: /api/usuarios/me/carrinho
-usuarioRouter.use('/me/carrinho', /* authenticate, */ carrinhoRouter);
+usuarioRouter.use('/me/carrinho', carrinhoRouter);
 
 // Monta o router de Endereço sob um usuário específico
 // Path: /api/usuarios/:usuarioId/endereco
-usuarioRouter.use(
-  '/:usuarioId/endereco',
-  /* authenticate, authorizeSelfOrAdmin, */ enderecoRouter,
-);
+usuarioRouter.use('/:usuarioId/endereco', authorizeSelfOrAdmin, enderecoRouter);
 
 // Monta o router de Telefone sob um usuário específico
 // Path: /api/usuarios/:usuarioId/telefones
 usuarioRouter.use(
   '/:usuarioId/telefones',
-  /* authenticate, authorizeSelfOrAdmin, */ telefoneRouter,
+  authorizeSelfOrAdmin,
+  telefoneRouter,
 );
-
-// TODO: Adicionar rota para o relatório
-// usuarioRouter.get('/:usuarioId/relatorio' /* ... */);
 
 export default usuarioRouter;
