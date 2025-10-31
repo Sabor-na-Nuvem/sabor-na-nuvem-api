@@ -54,7 +54,10 @@ tags:
     description: Operações administrativas globais sobre todos os pedidos.
 
   - name: Cupons de Desconto
-    description: API para gerenciamento e validação de cupons de desconto.
+    description: Validação de cupons de desconto.
+
+  - name: Cupons de Desconto (Admin)
+    description: Operações de gerenciamento de cupons de desconto.
 
   - name: Telefones
     description: Gerenciamento de telefones associados a usuários ou lojas.

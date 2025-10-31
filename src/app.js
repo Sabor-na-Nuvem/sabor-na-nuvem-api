@@ -85,7 +85,11 @@ app.use('/api/lojas', lojaRoutes);
 app.use('/api/produtos', produtoRoutes);
 // Rotas independentes
 app.use('/api/pedidos', pedidoRoutes);
-app.use('/api/cupons', cupomDescontoRouter);
+app.use(
+  '/api/cupons',
+  activeAuthMiddleware.ensureAuthenticated,
+  cupomDescontoRouter,
+);
 app.use('/api/relatorios', relatorioRouter);
 app.use('/api/categorias-produto', categoriaProdutoRouter);
 

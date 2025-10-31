@@ -125,7 +125,7 @@ const cupomDescontoController = {
   async verificarValidadeCupom(req, res) {
     try {
       const { codCupom } = req.body;
-      const usuarioId = req.user?.id;
+      const usuarioId = req.user.id;
 
       if (!codCupom || typeof codCupom !== 'string' || codCupom.trim() === '') {
         return res
