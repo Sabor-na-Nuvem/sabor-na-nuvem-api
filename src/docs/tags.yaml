@@ -11,14 +11,20 @@ tags:
   - name: Relatorios de Usuario
     description: Rotas administrativas para análise e relatórios agregados (Top Clientes).
     
-  - name: Lojas
-    description: API para gerenciamento de lojas.
+  - name: 'Lojas'
+    description: 'Operações públicas para visualização e busca de lojas.'
+
+  - name: 'Lojas (Admin)'
+    description: 'Operações de gerenciamento (CRUD) para lojas.'
 
   - name: Categorias de Produto
     description: API para gerenciamento das categorias de produto.
 
   - name: Produtos
     description: API para gerenciamento de produtos.
+  
+  - name: 'Produtos (Admin)'
+    description: 'Operações de gerenciamento (CRUD) para produtos.'
 
   - name: Produtos - Personalização
     description: Gerenciamento dos grupos de personalização de produtos

@@ -4,7 +4,17 @@ import produtoController from './produto.controller.js';
 // --- Importação do Roteador Filho ---
 import personalizavelRouter from '../personalizavel/personalizavel.routes.js';
 
+// --- Importação do Auth ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+
 const produtoRouter = express.Router();
+
+/*
+ *==================================
+ * ROTAS PÚBLICAS (CLIENTE/VISITANTE)
+ * Proteção: Nenhuma
+ *==================================
+ */
 
 /**
  * @swagger
@@ -100,14 +110,21 @@ produtoRouter.get('/buscar/por-nome', produtoController.buscarProdutoPorNome);
  */
 produtoRouter.get('/:produtoId/lojas', produtoController.buscarLojasPorProduto);
 
+/*
+ *==================================
+ * ROTAS ADMINISTRATIVAS (ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole(ADMIN)
+ *==================================
+ */
+
 /**
  * @swagger
  * /produtos:
  *   post:
  *     summary: Cria um novo produto (Admin)
- *     tags: [Produtos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança
+ *     tags: [Produtos (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -128,7 +145,9 @@ produtoRouter.get('/:produtoId/lojas', produtoController.buscarLojasPorProduto);
  */
 produtoRouter.post(
   '/',
-  /* authenticate, authorizeAdmin, */ produtoController.criarProduto,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  produtoController.criarProduto,
 );
 
 /**
@@ -136,9 +155,9 @@ produtoRouter.post(
  * /produtos/{id}:
  *   put:
  *     summary: Atualiza um produto existente (Admin)
- *     tags: [Produtos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança
+ *     tags: [Produtos (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/produtoIdPathParam'
  *     requestBody:
@@ -163,7 +182,9 @@ produtoRouter.post(
  */
 produtoRouter.put(
   '/:id',
-  /* authenticate, authorizeAdmin, */ produtoController.atualizarProduto,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  produtoController.atualizarProduto,
 );
 
 /**
@@ -172,9 +193,9 @@ produtoRouter.put(
  *   delete:
  *     summary: Deleta um produto (Admin)
  *     description: CUIDADO - Verifica se o produto está associado a itens de pedido antes de deletar.
- *     tags: [Produtos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança
+ *     tags: [Produtos (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/produtoIdPathParam'
  *     responses:
@@ -189,7 +210,9 @@ produtoRouter.put(
  */
 produtoRouter.delete(
   '/:id',
-  /* authenticate, authorizeAdmin, */ produtoController.deletarProduto,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  produtoController.deletarProduto,
 );
 
 // --- Montagem Aninhada (Nível 2) ---
