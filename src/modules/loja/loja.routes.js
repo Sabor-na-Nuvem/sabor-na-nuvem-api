@@ -7,7 +7,46 @@ import telefoneRouter from '../telefone/telefone.routes.js';
 import produtosEmLojaRouter from '../produtos-em-loja/produtos-em-loja.routes.js';
 import modificadorEmLojaRouter from '../modificador-em-loja/modificador-em-loja.routes.js';
 
+// --- Importação do Auth ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+
+// --- Middleware de Autorização Customizado ---
+const authorizeAdminOrStoreOwner = (req, res, next) => {
+  const { cargo, funcionarioLojaId } = req.user;
+
+  const lojaIdParam = req.params.id || req.params.lojaId;
+
+  if (!lojaIdParam) {
+    return res.status(500).json({
+      message: 'Erro de configuração de rota: ID da loja não encontrado.',
+    });
+  }
+
+  if (cargo === RoleUsuario.ADMIN) {
+    return next();
+  }
+
+  // O usuário é FUNCIONARIO E o ID da sua loja bate com o ID da rota?
+  if (
+    cargo === RoleUsuario.FUNCIONARIO &&
+    funcionarioLojaId === Number(lojaIdParam)
+  ) {
+    return next();
+  }
+
+  return res.status(403).json({
+    message: 'Acesso negado. Você não tem permissão para gerenciar esta loja.',
+  });
+};
+
 const lojaRouter = express.Router();
+
+/*
+ *==================================
+ * ROTAS PÚBLICAS (CLIENTE/VISITANTE)
+ * Proteção: Nenhuma
+ *==================================
+ */
 
 /**
  * @swagger
@@ -58,7 +97,6 @@ lojaRouter.get('/', lojaController.buscarTodasAsLojas);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-// IMPORTANTE: Definir ANTES de '/:id'
 lojaRouter.get('/proximas', lojaController.buscarLojasProximas);
 
 /**
@@ -83,14 +121,21 @@ lojaRouter.get('/proximas', lojaController.buscarLojasProximas);
  */
 lojaRouter.get('/:id', lojaController.buscarLoja);
 
+/*
+ *==================================
+ * ROTAS ADMINISTRATIVAS (ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole(ADMIN)
+ *==================================
+ */
+
 /**
  * @swagger
  * /lojas:
  *   post:
  *     summary: Cria uma nova loja (incluindo seu endereço)
- *     tags: [Lojas]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança (Admin)
+ *     tags: [Lojas (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -114,7 +159,9 @@ lojaRouter.get('/:id', lojaController.buscarLoja);
  */
 lojaRouter.post(
   '/',
-  /* authenticate, authorizeAdmin, */ lojaController.criarLoja,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  lojaController.criarLoja,
 );
 
 /**
@@ -122,9 +169,9 @@ lojaRouter.post(
  * /lojas/{id}:
  *   put:
  *     summary: Atualiza uma loja existente
- *     tags: [Lojas]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança (Admin ou Dono?)
+ *     tags: [Lojas (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParam'
  *     requestBody:
@@ -152,7 +199,9 @@ lojaRouter.post(
  */
 lojaRouter.put(
   '/:id',
-  /* authenticate, authorizeAdmin, */ lojaController.atualizarLoja,
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
+  lojaController.atualizarLoja,
 );
 
 /**
@@ -161,8 +210,8 @@ lojaRouter.put(
  *   delete:
  *     summary: Deleta uma loja
  *     tags: [Lojas]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança (Admin)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParam'
  *     responses:
@@ -180,34 +229,52 @@ lojaRouter.put(
  */
 lojaRouter.delete(
   '/:id',
-  /* authenticate, authorizeAdmin, */ lojaController.deletarLoja,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  lojaController.deletarLoja,
 );
 
-// --- Montagem Aninhada (Nível 2) ---
+/*
+ *==================================
+ * ROTAS ANINHADAS (ADMIN / FUNCIONARIO)
+ * Proteção: ensureAuthenticated + ensureRole(ADMIN ou FUNCIONARIO)
+ *==================================
+ */
 
 // Monta o router de Endereço sob uma loja específica
 // Path: /api/lojas/:lojaId/endereco
 lojaRouter.use(
   '/:lojaId/endereco',
-  /* authenticate, authorizeAdminOrStoreOwner, */ enderecoRouter,
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
+  enderecoRouter,
 );
 
 // Monta o router de Telefone sob uma loja específica
 // Path: /api/lojas/:lojaId/telefones
 lojaRouter.use(
   '/:lojaId/telefones',
-  /* authenticate, authorizeAdminOrStoreOwner, */ telefoneRouter,
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
+  telefoneRouter,
 );
 
 // Monta o router de ProdutosEmLoja (catálogo da loja)
 // Path: /api/lojas/:lojaId/produtos-loja
-lojaRouter.use('/:lojaId/produtos-loja', /* ...auth... */ produtosEmLojaRouter);
+lojaRouter.use(
+  '/:lojaId/produtos-loja',
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
+  produtosEmLojaRouter,
+);
 
 // Monta o router de ModificadorEmLoja (opções da loja)
 // Path: /api/lojas/:lojaId/modificadores-loja
 lojaRouter.use(
   '/:lojaId/modificadores-loja',
-  /* ...auth... */ modificadorEmLojaRouter,
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
+  modificadorEmLojaRouter,
 );
 
 export default lojaRouter;
