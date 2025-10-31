@@ -18,14 +18,27 @@
     "type": "git",
     "url": "git+https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "nodejs",
+    "express",
+    "prisma",
+    "postgresql",
+    "docker",
+    "api",
+    "rest-api",
+    "white-label",
+    "fast-food",
+    "food-delivery",
+    "portfolio"
+  ],
+  "author": "João Matheus de Oliveira Schmitz",
+  "license": "SEE LICENSE IN LICENSE",
   "bugs": {
     "url": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api/issues"
   },
   "homepage": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api#readme",
   "dependencies": {
+    "@joaoschmitz/express-prisma-auth": "^1.0.0",
     "@prisma/client": "^6.16.2",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
