@@ -1,10 +1,19 @@
 import express from 'express';
 import modificadorEmLojaController from './modificador-em-loja.controller.js';
 
+// --- Importação do Auth ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+
 const modificadorEmLojaRouter = express.Router({ mergeParams: true });
 
 // --- ROTAS ANINHADAS SOB /api/lojas/:lojaId/modificadores-loja ---
 // O prefixo será definido no index.js ou loja.routes.js
+
+/*
+ *==================================
+ * ROTAS PÚBLICAS (CLIENTE/VISITANTE)
+ *==================================
+ */
 
 /**
  * @swagger
@@ -63,14 +72,35 @@ modificadorEmLojaRouter.get(
   modificadorEmLojaController.buscarModificadorNaLoja,
 );
 
+/*
+ *==================================
+ * ROTAS PROTEGIDAS (ADMIN / FUNCIONARIO)
+ *==================================
+ */
+
+// TODO: Idealmente, este middleware 'authorizeAdminOrStoreOwner' deveria
+// ser importado de um arquivo centralizado, assim como o 'loja.routes.js' faz.
+// Mover para 'shared/loja.middlewares.js' ou similar
+const authorizeAdminOrStoreOwner = (req, res, next) => {
+  const { cargo, funcionarioLojaId } = req.user;
+  const lojaIdParam = req.params.lojaId;
+  if (cargo === RoleUsuario.ADMIN) return next();
+  if (
+    cargo === RoleUsuario.FUNCIONARIO &&
+    funcionarioLojaId === Number(lojaIdParam)
+  )
+    return next();
+  return res.status(403).json({ message: 'Acesso negado a esta loja.' });
+};
+
 /**
  * @swagger
  * /lojas/{lojaId}/modificadores-loja:
  *   post:
  *     summary: Adiciona ou define a disponibilidade/preço de um modificador para uma loja (Admin/Dono da Loja)
- *     tags: [Modificador Em Loja]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Modificador Em Loja (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     requestBody:
@@ -97,7 +127,8 @@ modificadorEmLojaRouter.get(
  */
 modificadorEmLojaRouter.post(
   '/',
-  /* authenticate, authorizeAdminOrStoreOwner, */
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
   modificadorEmLojaController.adicionarModificadorEmLoja,
 );
 
@@ -106,9 +137,9 @@ modificadorEmLojaRouter.post(
  * /lojas/{lojaId}/modificadores-loja/{modificadorId}:
  *   put:
  *     summary: Atualiza os detalhes de um modificador em uma loja (disponibilidade, preço) (Admin/Dono da Loja)
- *     tags: [Modificador Em Loja]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Modificador Em Loja (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *       - $ref: '#/components/parameters/modificadorIdPathParam'
@@ -135,7 +166,8 @@ modificadorEmLojaRouter.post(
  */
 modificadorEmLojaRouter.put(
   '/:modificadorId',
-  /* authenticate, authorizeAdminOrStoreOwner, */
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
   modificadorEmLojaController.atualizarModificadorNaLoja,
 );
 
@@ -145,9 +177,9 @@ modificadorEmLojaRouter.put(
  *   delete:
  *     summary: Remove a configuração de um modificador de uma loja (Admin/Dono da Loja)
  *     description: Remove a entrada da tabela ModificadorEmLoja, fazendo com que a opção não apareça mais no cardápio desta loja.
- *     tags: [Modificador Em Loja]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Modificador Em Loja (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *       - $ref: '#/components/parameters/modificadorIdPathParam'
@@ -162,7 +194,8 @@ modificadorEmLojaRouter.put(
  */
 modificadorEmLojaRouter.delete(
   '/:modificadorId',
-  /* authenticate, authorizeAdminOrStoreOwner, */
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
   modificadorEmLojaController.deletarModificadorDaLoja,
 );
 

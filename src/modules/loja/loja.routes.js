@@ -261,20 +261,10 @@ lojaRouter.use(
 
 // Monta o router de ProdutosEmLoja (catálogo da loja)
 // Path: /api/lojas/:lojaId/produtos-loja
-lojaRouter.use(
-  '/:lojaId/produtos-loja',
-  authMiddleware.ensureAuthenticated,
-  authorizeAdminOrStoreOwner,
-  produtosEmLojaRouter,
-);
+lojaRouter.use('/:lojaId/produtos-loja', produtosEmLojaRouter);
 
 // Monta o router de ModificadorEmLoja (opções da loja)
 // Path: /api/lojas/:lojaId/modificadores-loja
-lojaRouter.use(
-  '/:lojaId/modificadores-loja',
-  authMiddleware.ensureAuthenticated,
-  authorizeAdminOrStoreOwner,
-  modificadorEmLojaRouter,
-);
+lojaRouter.use('/:lojaId/modificadores-loja', modificadorEmLojaRouter);
 
 export default lojaRouter;

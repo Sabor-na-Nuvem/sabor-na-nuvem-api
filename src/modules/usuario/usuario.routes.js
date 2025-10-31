@@ -44,9 +44,12 @@ const authorizeSelfOrAdmin = (req, res, next) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get('/me', usuarioController.buscarUsuarioLogado);
 
@@ -67,8 +70,10 @@ usuarioRouter.get('/me', usuarioController.buscarUsuarioLogado);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/CupomDesconto'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get('/me/cupons', usuarioController.buscarCuponsDoUsuarioLogado);
 
@@ -87,9 +92,13 @@ usuarioRouter.get('/me/cupons', usuarioController.buscarCuponsDoUsuarioLogado);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/RelatorioUsuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       404: { $ref: '#/components/responses/NotFoundError', description: 'Relatório não encontrado.' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError',
+ *         description: 'Relatório não encontrado.'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get(
   '/me/relatorio',
@@ -118,10 +127,14 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
- *       400: { $ref: '#/components/responses/BadRequestError' }
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.patch('/me', usuarioController.atualizarUsuarioLogado);
 
@@ -136,9 +149,12 @@ usuarioRouter.patch('/me', usuarioController.atualizarUsuarioLogado);
  *     responses:
  *       204:
  *         description: Usuário deletado com sucesso.
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.delete('/me', usuarioController.deletarUsuarioLogado);
 
@@ -171,9 +187,12 @@ usuarioRouter.delete('/me', usuarioController.deletarUsuarioLogado);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Usuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get(
   '/',
@@ -198,10 +217,14 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/RelatorioUsuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       404: { $ref: '#/components/responses/NotFoundError', description: 'Usuário ou Relatório não encontrado.' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError', description: 'Usuário ou Relatório não encontrado.'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get(
   '/:id/relatorio',
@@ -226,10 +249,14 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get(
   '/:id',
@@ -261,11 +288,16 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
- *       400: { $ref: '#/components/responses/BadRequestError' }
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.patch(
   '/:id',
@@ -289,10 +321,14 @@ usuarioRouter.patch(
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *         description: Não é possível deletar (usuário tem pedidos associados, por exemplo).
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.delete(
   '/:id',

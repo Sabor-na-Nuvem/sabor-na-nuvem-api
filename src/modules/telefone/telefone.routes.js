@@ -11,8 +11,8 @@ const telefoneRouter = express.Router({ mergeParams: true });
  *   get:
  *     summary: Lista todos os telefones de um usuário
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *     responses:
@@ -38,8 +38,8 @@ const telefoneRouter = express.Router({ mergeParams: true });
  *   get:
  *     summary: Lista todos os telefones de uma loja
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     responses:
@@ -69,8 +69,8 @@ telefoneRouter.get('/', telefoneController.listarTelefonesDoPai);
  *   get:
  *     summary: Busca um telefone específico de um usuário
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *       - $ref: '#/components/parameters/telefoneIdPathParam'
@@ -95,8 +95,8 @@ telefoneRouter.get('/', telefoneController.listarTelefonesDoPai);
  *   get:
  *     summary: Busca um telefone específico de uma loja
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *       - $ref: '#/components/parameters/telefoneIdPathParam'
@@ -125,8 +125,8 @@ telefoneRouter.get('/:telefoneId', telefoneController.buscarTelefoneDoPaiPorId);
  *   post:
  *     summary: Adiciona um novo telefone a um usuário
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *     requestBody:
@@ -159,8 +159,8 @@ telefoneRouter.get('/:telefoneId', telefoneController.buscarTelefoneDoPaiPorId);
  *   post:
  *     summary: Adiciona um novo telefone a uma loja
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     requestBody:
@@ -197,8 +197,8 @@ telefoneRouter.post('/', telefoneController.adicionarTelefoneAoPai);
  *   put: # Ou PATCH
  *     summary: Atualiza um telefone específico de um usuário
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *       - $ref: '#/components/parameters/telefoneIdPathParam'
@@ -232,8 +232,8 @@ telefoneRouter.post('/', telefoneController.adicionarTelefoneAoPai);
  *   put: # Ou PATCH
  *     summary: Atualiza um telefone específico de uma loja
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *       - $ref: '#/components/parameters/telefoneIdPathParam'
@@ -271,8 +271,8 @@ telefoneRouter.put('/:telefoneId', telefoneController.atualizarTelefoneDoPai);
  *   delete:
  *     summary: Deleta um telefone específico de um usuário
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *       - $ref: '#/components/parameters/telefoneIdPathParam'
@@ -293,8 +293,8 @@ telefoneRouter.put('/:telefoneId', telefoneController.atualizarTelefoneDoPai);
  *   delete:
  *     summary: Deleta um telefone específico de uma loja
  *     tags: [Telefones]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *       - $ref: '#/components/parameters/telefoneIdPathParam'

@@ -36,9 +36,15 @@ tags:
     description: Gerenciamento das opções (modificadores) dentro dos grupos de personalização.
 
   - name: Produtos Em Loja
+    description: Visualização do catálogo (produtos, preços, promoções) específico de cada loja.
+
+  - name: Produtos Em Loja (Admin)
     description: Gerenciamento do catálogo (produtos, preços, promoções) específico de cada loja.
 
   - name: Modificador Em Loja
+    description: Visualização da disponibilidade e preço dos modificadores (opções) em cada loja.
+
+  - name: Modificador Em Loja (Admin)
     description: Gerenciamento da disponibilidade e preço dos modificadores (opções) em cada loja.
 
   - name: Carrinho
