@@ -18,3 +18,6 @@ pnpm-debug.log
 *.sublime-workspace
 
 /src/generated/prisma
+
+# Ignora o arquivo de autenticação do NPM local
+.npmrc
