@@ -24,15 +24,21 @@ tags:
     description: Operações de gerenciamento das categorias de produto.
 
   - name: Produtos
-    description: API para gerenciamento de produtos.
+    description: Operações de visualização e busca de produtos.
   
   - name: 'Produtos (Admin)'
     description: 'Operações de gerenciamento (CRUD) para produtos.'
 
   - name: Produtos - Personalização
-    description: Gerenciamento dos grupos de personalização de produtos
+    description: Visualização dos grupos de personalização de produtos.
+
+  - name: Produtos - Personalização (Admin)
+    description: Gerenciamento dos grupos de personalização de produtos.
   
   - name: Produtos - Modificadores
+    description: Visualização das opções (modificadores) dentro dos grupos de personalização.
+
+  - name: Produtos - Modificadores (Admin)
     description: Gerenciamento das opções (modificadores) dentro dos grupos de personalização.
 
   - name: Produtos Em Loja

@@ -2,7 +2,11 @@ import express from 'express';
 import pedidoController from './pedido.controller.js';
 
 // --- Importação do Auth ---
-import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+import {
+  authMiddleware,
+  RoleUsuario,
+  authenticateOptional,
+} from '../../config/authModule.js';
 
 const pedidoRouter = express.Router();
 
@@ -48,7 +52,7 @@ const pedidoRouter = express.Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-pedidoRouter.post('/', pedidoController.criarPedido);
+pedidoRouter.post('/', authenticateOptional, pedidoController.criarPedido);
 
 /*
  *==================================

@@ -8,19 +8,10 @@ import telefoneRouter from '../telefone/telefone.routes.js';
 
 // --- Importação do Auth (da nossa nova config) ---
 import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+// --- Importação do Middleware Customizado ---
+import { authorizeSelfOrAdmin } from '../../middlewares/authorization.js';
 
 const usuarioRouter = express.Router();
-
-// Middleware customizado para verificar se é o próprio usuário ou Admin
-const authorizeSelfOrAdmin = (req, res, next) => {
-  if (
-    req.user.cargo === RoleUsuario.ADMIN ||
-    req.user.id === req.params.usuarioId
-  ) {
-    return next();
-  }
-  return res.status(403).json({ message: 'Acesso negado.' });
-};
 
 /*
  *==================================
@@ -95,7 +86,7 @@ usuarioRouter.get('/me/cupons', usuarioController.buscarCuponsDoUsuarioLogado);
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       404:
- *         $ref: '#/components/responses/NotFoundError',
+ *         $ref: '#/components/responses/NotFoundError'
  *         description: 'Relatório não encontrado.'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
@@ -222,7 +213,8 @@ usuarioRouter.get(
  *       403:
  *         $ref: '#/components/responses/ForbiddenError'
  *       404:
- *         $ref: '#/components/responses/NotFoundError', description: 'Usuário ou Relatório não encontrado.'
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: 'Usuário ou Relatório não encontrado.'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */

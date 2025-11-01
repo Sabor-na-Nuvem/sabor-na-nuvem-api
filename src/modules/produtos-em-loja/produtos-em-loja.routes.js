@@ -3,6 +3,8 @@ import produtosEmLojaController from './produtos-em-loja.controller.js';
 
 // --- Importação do Auth ---
 import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+// --- Importação do Middleware Customizado ---
+import { authorizeAdminOrStoreOwner } from '../../middlewares/authorization.js';
 
 const produtosEmLojaRouter = express.Router({ mergeParams: true });
 
@@ -79,21 +81,6 @@ produtosEmLojaRouter.get(
  * ROTAS PROTEGIDAS (ADMIN / FUNCIONARIO)
  *==================================
  */
-
-// TODO: Idealmente, este middleware 'authorizeAdminOrStoreOwner' deveria
-// ser importado de um arquivo centralizado, assim como o 'loja.routes.js' faz.
-// Mover para 'shared/loja.middlewares.js' ou similar
-const authorizeAdminOrStoreOwner = (req, res, next) => {
-  const { cargo, funcionarioLojaId } = req.user;
-  const lojaIdParam = req.params.lojaId;
-  if (cargo === RoleUsuario.ADMIN) return next();
-  if (
-    cargo === RoleUsuario.FUNCIONARIO &&
-    funcionarioLojaId === Number(lojaIdParam)
-  )
-    return next();
-  return res.status(403).json({ message: 'Acesso negado a esta loja.' });
-};
 
 /**
  * @swagger

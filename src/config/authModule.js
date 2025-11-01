@@ -43,6 +43,21 @@ const authModule = createAuthModule({
   onUserRegistered: hookCriarRelatorio,
 });
 
-// Exporte o módulo e o enum para uso em toda a aplicação
+/**
+ * Middleware de autenticação opcional.
+ * Tenta autenticar o usuário, mas não falha se não houver token.
+ * Apenas injeta req.user se for bem-sucedido.
+ */
+const authenticateOptional = async (req, res, next) => {
+  try {
+    await authModule.authMiddleware.ensureAuthenticated(req, res, (err) => {
+      next();
+    });
+  } catch (error) {
+    next();
+  }
+};
+
 export const { authRoutes, authMiddleware } = authModule;
 export { RoleUsuario };
+export { authenticateOptional };
