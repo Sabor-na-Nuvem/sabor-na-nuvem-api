@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import supertest from 'supertest';
+// eslint-disable-next-line no-unused-vars
 import { Prisma, RoleUsuario } from '@prisma/client';
 
 // Importa o app separado

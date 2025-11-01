@@ -50,6 +50,7 @@ const authModule = createAuthModule({
  */
 const authenticateOptional = async (req, res, next) => {
   try {
+    // eslint-disable-next-line no-unused-vars
     await authModule.authMiddleware.ensureAuthenticated(req, res, (err) => {
       next();
     });

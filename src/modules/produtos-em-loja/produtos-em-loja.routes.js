@@ -2,7 +2,7 @@ import express from 'express';
 import produtosEmLojaController from './produtos-em-loja.controller.js';
 
 // --- Importação do Auth ---
-import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+import { authMiddleware } from '../../config/authModule.js';
 // --- Importação do Middleware Customizado ---
 import { authorizeAdminOrStoreOwner } from '../../middlewares/authorization.js';
 
