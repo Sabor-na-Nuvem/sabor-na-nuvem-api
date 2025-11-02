@@ -1,6 +1,6 @@
 tags:
-  - name: Usuarios
-    description: Operações gerais sobre perfis de usuário
+  - name: Auth
+    description: Rotas de autenticação e gerenciamento de usuário (do pacote @joaoschmitz/express-prisma-auth)
 
   - name: Usuarios (Meu Perfil)
     description: Operações relacionadas ao perfil do usuário autenticado (/me)
@@ -65,7 +65,7 @@ tags:
   - name: Pedidos (Loja)
     description: Operações de funcionários/admins sobre os pedidos de uma loja específica.
 
-  - name: Pedidos (Admin Global)
+  - name: Pedidos (Admin)
     description: Operações administrativas globais sobre todos os pedidos.
 
   - name: Cupons de Desconto

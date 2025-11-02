@@ -23,8 +23,9 @@ const options = {
     // security: [ { bearerAuth: [] } ] // Segurança global (opcional)
   },
   apis: [
-    './src/modules/**/*.routes.js', // Arquivos de rotas com JSDoc
-    './src/docs/**/*.yaml', // <<< Nossos novos arquivos YAML
+    './src/modules/**/*.routes.js',
+    './src/docs/**/*.yaml',
+    './src/docs/**/*.docs.js',
   ],
 };
 

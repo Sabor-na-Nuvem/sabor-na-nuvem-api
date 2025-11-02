@@ -15,7 +15,7 @@ const categoriaProdutoRouter = express.Router();
 
 /**
  * @swagger
- * /api/categorias-produto:
+ * /categorias-produto:
  *   get:
  *     summary: Retorna a lista de todas as categorias de produto
  *     tags: [Categorias de Produto]
@@ -38,7 +38,7 @@ categoriaProdutoRouter.get(
 
 /**
  * @swagger
- * /api/categorias-produto/{id}:
+ * /categorias-produto/{id}:
  *   get:
  *     summary: Busca uma única categoria pelo ID
  *     tags: [Categorias de Produto]
@@ -63,7 +63,7 @@ categoriaProdutoRouter.get(
 
 /**
  * @swagger
- * /api/categorias-produto/buscar/por-nome:
+ * /categorias-produto/buscar/por-nome:
  *   get:
  *     summary: Busca uma única categoria pelo nome
  *     tags: [Categorias de Produto]
@@ -101,12 +101,12 @@ categoriaProdutoRouter.get(
 
 /**
  * @swagger
- * /api/categorias-produto:
+ * /categorias-produto:
  *   post:
  *     summary: Cria uma nova categoria de produto
- *     tags: [Categorias de Produto]
+ *     tags: [Categorias de Produto (Admin)]
  *     security:
- *      - bearerAuth: [] # TODO: Adicionar segurança
+ *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -138,12 +138,12 @@ categoriaProdutoRouter.post(
 
 /**
  * @swagger
- * /api/categorias-produto/{id}:
+ * /categorias-produto/{id}:
  *   put:
  *     summary: Atualiza uma categoria de produto existente
- *     tags: [Categorias de Produto]
+ *     tags: [Categorias de Produto (Admin)]
  *     security:
- *      - bearerAuth: [] # TODO: Adicionar segurança
+ *      - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/categoriaProdutoIdPathParam'
  *     requestBody:
@@ -179,12 +179,12 @@ categoriaProdutoRouter.put(
 
 /**
  * @swagger
- * /api/categorias-produto/{id}:
+ * /categorias-produto/{id}:
  *   delete:
  *     summary: Deleta uma categoria de produto
- *     tags: [Categorias de Produto]
+ *     tags: [Categorias de Produto (Admin)]
  *     security:
- *      - bearerAuth: [] # TODO: Adicionar segurança
+ *      - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/categoriaProdutoIdPathParam'
  *     responses:

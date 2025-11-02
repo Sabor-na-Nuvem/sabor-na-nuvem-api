@@ -311,7 +311,7 @@ pedidoRouter.patch(
  * /pedidos/admin:
  *   get:
  *     summary: Lista TODOS os pedidos de TODAS as lojas (Admin Global)
- *     tags: [Pedidos (Admin Global)]
+ *     tags: [Pedidos (Admin)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -349,7 +349,7 @@ pedidoRouter.get(
  * /pedidos/admin/{pedidoId}:
  *   get:
  *     summary: Busca qualquer pedido pelo ID (Admin Global)
- *     tags: [Pedidos (Admin Global)]
+ *     tags: [Pedidos (Admin)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
