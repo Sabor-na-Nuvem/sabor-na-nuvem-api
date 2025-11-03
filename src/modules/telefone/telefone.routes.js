@@ -10,7 +10,7 @@ const telefoneRouter = express.Router({ mergeParams: true });
  * /usuarios/{usuarioId}/telefones:
  *   get:
  *     summary: Lista todos os telefones de um usuário
- *     tags: [Telefones]
+ *     tags: [Telefones (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -37,7 +37,7 @@ const telefoneRouter = express.Router({ mergeParams: true });
  * /lojas/{lojaId}/telefones:
  *   get:
  *     summary: Lista todos os telefones de uma loja
- *     tags: [Telefones]
+ *     tags: [Telefones (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -68,7 +68,7 @@ telefoneRouter.get('/', telefoneController.listarTelefonesDoPai);
  * /usuarios/{usuarioId}/telefones/{telefoneId}:
  *   get:
  *     summary: Busca um telefone específico de um usuário
- *     tags: [Telefones]
+ *     tags: [Telefones (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -94,7 +94,7 @@ telefoneRouter.get('/', telefoneController.listarTelefonesDoPai);
  * /lojas/{lojaId}/telefones/{telefoneId}:
  *   get:
  *     summary: Busca um telefone específico de uma loja
- *     tags: [Telefones]
+ *     tags: [Telefones (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -124,7 +124,7 @@ telefoneRouter.get('/:telefoneId', telefoneController.buscarTelefoneDoPaiPorId);
  * /usuarios/{usuarioId}/telefones:
  *   post:
  *     summary: Adiciona um novo telefone a um usuário
- *     tags: [Telefones]
+ *     tags: [Telefones (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -158,7 +158,7 @@ telefoneRouter.get('/:telefoneId', telefoneController.buscarTelefoneDoPaiPorId);
  * /lojas/{lojaId}/telefones:
  *   post:
  *     summary: Adiciona um novo telefone a uma loja
- *     tags: [Telefones]
+ *     tags: [Telefones (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -196,7 +196,7 @@ telefoneRouter.post('/', telefoneController.adicionarTelefoneAoPai);
  * /usuarios/{usuarioId}/telefones/{telefoneId}:
  *   put: # Ou PATCH
  *     summary: Atualiza um telefone específico de um usuário
- *     tags: [Telefones]
+ *     tags: [Telefones (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -231,7 +231,7 @@ telefoneRouter.post('/', telefoneController.adicionarTelefoneAoPai);
  * /lojas/{lojaId}/telefones/{telefoneId}:
  *   put: # Ou PATCH
  *     summary: Atualiza um telefone específico de uma loja
- *     tags: [Telefones]
+ *     tags: [Telefones (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -270,7 +270,7 @@ telefoneRouter.put('/:telefoneId', telefoneController.atualizarTelefoneDoPai);
  * /usuarios/{usuarioId}/telefones/{telefoneId}:
  *   delete:
  *     summary: Deleta um telefone específico de um usuário
- *     tags: [Telefones]
+ *     tags: [Telefones (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -292,7 +292,7 @@ telefoneRouter.put('/:telefoneId', telefoneController.atualizarTelefoneDoPai);
  * /lojas/{lojaId}/telefones/{telefoneId}:
  *   delete:
  *     summary: Deleta um telefone específico de uma loja
- *     tags: [Telefones]
+ *     tags: [Telefones (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:

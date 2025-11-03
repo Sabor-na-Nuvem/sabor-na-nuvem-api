@@ -74,8 +74,14 @@ tags:
   - name: Cupons de Desconto (Admin)
     description: Operações de gerenciamento de cupons de desconto.
 
-  - name: Telefones
-    description: Gerenciamento de telefones associados a usuários ou lojas.
+  - name: Telefones (Usuario)
+    description: Gerenciamento de telefones associados a usuários.
 
-  - name: Enderecos
-    description: Gerenciamento de endereços associados a usuários ou lojas.
+  - name: Telefones (Loja)
+    description: Gerenciamento de telefones associados a lojas.
+
+  - name: Enderecos (Usuario)
+    description: Gerenciamento de endereços associados a usuários.
+
+  - name: Enderecos (Loja)
+    description: Gerenciamento de endereços associados a lojas.

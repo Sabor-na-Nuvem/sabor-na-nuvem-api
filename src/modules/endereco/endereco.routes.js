@@ -12,7 +12,7 @@ const enderecoRouter = express.Router({ mergeParams: true });
  * /usuarios/{usuarioId}/endereco:
  *   get:
  *     summary: Busca o endereço associado a um usuário
- *     tags: [Enderecos]
+ *     tags: [Enderecos (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -37,7 +37,7 @@ const enderecoRouter = express.Router({ mergeParams: true });
  * /lojas/{lojaId}/endereco:
  *   get:
  *     summary: Busca o endereço associado a uma loja
- *     tags: [Enderecos]
+ *     tags: [Enderecos (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -66,7 +66,7 @@ enderecoRouter.get('/', enderecoController.buscarEnderecoDoPai);
  * /usuarios/{usuarioId}/endereco:
  *   post:
  *     summary: Cria e associa um novo endereço a um usuário
- *     tags: [Enderecos]
+ *     tags: [Enderecos (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -100,7 +100,7 @@ enderecoRouter.get('/', enderecoController.buscarEnderecoDoPai);
  * /lojas/{lojaId}/endereco:
  *   post:
  *     summary: Cria e associa um novo endereço a uma loja
- *     tags: [Enderecos]
+ *     tags: [Enderecos (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -138,7 +138,7 @@ enderecoRouter.post('/', enderecoController.criarEnderecoParaPai);
  * /usuarios/{usuarioId}/endereco:
  *   put:
  *     summary: Atualiza o endereço associado a um usuário
- *     tags: [Enderecos]
+ *     tags: [Enderecos (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -171,7 +171,7 @@ enderecoRouter.post('/', enderecoController.criarEnderecoParaPai);
  * /lojas/{lojaId}/endereco:
  *   put:
  *     summary: Atualiza o endereço associado a uma loja
- *     tags: [Enderecos]
+ *     tags: [Enderecos (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -208,7 +208,7 @@ enderecoRouter.put('/', enderecoController.atualizarEnderecoDoPai);
  * /usuarios/{usuarioId}/endereco:
  *   delete:
  *     summary: Desassocia (e deleta, se possível) o endereço de um usuário
- *     tags: [Enderecos]
+ *     tags: [Enderecos (Usuario)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -229,7 +229,7 @@ enderecoRouter.put('/', enderecoController.atualizarEnderecoDoPai);
  * /lojas/{lojaId}/endereco:
  *   delete:
  *     summary: Operação não permitida - Endereço de loja é obrigatório
- *     tags: [Enderecos]
+ *     tags: [Enderecos (Loja)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
