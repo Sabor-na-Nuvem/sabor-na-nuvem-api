@@ -6,41 +6,19 @@ import carrinhoRouter from '../carrinho/carrinho.routes.js';
 import enderecoRouter from '../endereco/endereco.routes.js';
 import telefoneRouter from '../telefone/telefone.routes.js';
 
+// --- Importação do Auth (da nossa nova config) ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+// --- Importação do Middleware Customizado ---
+import { authorizeSelfOrAdmin } from '../../middlewares/authorization.js';
+
 const usuarioRouter = express.Router();
 
-// --- ROTA PÚBLICA ---
-
-/**
- * @swagger
- * /usuarios:
- *   post:
- *     summary: Cria um novo perfil de usuário (após registro no Auth Service)
- *     tags: [Usuarios]
- *     security: [] # Rota pública
- *     description: Cria o registro local do perfil. Requer ID e Email do Auth Service.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/NovoUsuarioInput'
- *     responses:
- *       201:
- *         description: Perfil criado.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Usuario'
- *       400:
- *         $ref: '#/components/responses/BadRequestError'
- *         description: Dados inválidos ou ID/Email já existe.
- *       500:
- *         $ref: '#/components/responses/InternalServerError'
+/*
+ *==================================
+ * ROTAS /me (CLIENTE LOGADO)
+ * Proteção: `ensureAuthenticated`
+ *==================================
  */
-usuarioRouter.post('/', usuarioController.criarUsuario);
-
-/* ROTAS /me */
-// TODO: Adicionar middleware authenticate
 
 /**
  * @swagger
@@ -57,14 +35,14 @@ usuarioRouter.post('/', usuarioController.criarUsuario);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-usuarioRouter.get(
-  '/me',
-  /* authenticate, */ usuarioController.buscarUsuarioLogado,
-);
+usuarioRouter.get('/me', usuarioController.buscarUsuarioLogado);
 
 /**
  * @swagger
@@ -83,13 +61,12 @@ usuarioRouter.get(
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/CupomDesconto'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-usuarioRouter.get(
-  '/me/cupons',
-  /* authenticate, */ usuarioController.buscarCuponsDoUsuarioLogado,
-);
+usuarioRouter.get('/me/cupons', usuarioController.buscarCuponsDoUsuarioLogado);
 
 /**
  * @swagger
@@ -106,13 +83,17 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/RelatorioUsuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       404: { $ref: '#/components/responses/NotFoundError', description: 'Relatório não encontrado.' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: 'Relatório não encontrado.'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get(
   '/me/relatorio',
-  /* authenticate, */ usuarioController.buscarRelatorioDoUsuarioLogado,
+  usuarioController.buscarRelatorioDoUsuarioLogado,
 );
 
 /**
@@ -137,15 +118,16 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
- *       400: { $ref: '#/components/responses/BadRequestError' }
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-usuarioRouter.patch(
-  '/me',
-  /* authenticate, */ usuarioController.atualizarUsuarioLogado,
-);
+usuarioRouter.patch('/me', usuarioController.atualizarUsuarioLogado);
 
 /**
  * @swagger
@@ -158,17 +140,21 @@ usuarioRouter.patch(
  *     responses:
  *       204:
  *         description: Usuário deletado com sucesso.
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-usuarioRouter.delete(
-  '/me',
-  /* authenticate, */ usuarioController.deletarUsuarioLogado,
-);
+usuarioRouter.delete('/me', usuarioController.deletarUsuarioLogado);
 
-/* ROTAS ADMIN */
-// TODO: Adicionar middlewares authenticate e authorizeAdmin
+/*
+ *=================================================
+ * ROTAS / (ADMIN)
+ * Proteção: `ensureAuthenticated` + `ensureRole`
+ *=================================================
+ */
 
 /**
  * @swagger
@@ -192,13 +178,17 @@ usuarioRouter.delete(
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Usuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get(
   '/',
-  /* authenticate, authorizeAdmin, */ usuarioController.buscarTodosOsUsuarios,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN, RoleUsuario.FUNCIONARIO]),
+  usuarioController.buscarTodosOsUsuarios,
 );
 
 /**
@@ -218,14 +208,20 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/RelatorioUsuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       404: { $ref: '#/components/responses/NotFoundError', description: 'Usuário ou Relatório não encontrado.' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *         description: 'Usuário ou Relatório não encontrado.'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get(
   '/:id/relatorio',
-  /* authenticate, authorizeAdmin, */ usuarioController.buscarRelatorioDoUsuarioPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  usuarioController.buscarRelatorioDoUsuarioPorId,
 );
 
 /**
@@ -245,14 +241,19 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.get(
   '/:id',
-  /* authenticate, authorizeAdmin, */ usuarioController.buscarUsuarioPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN, RoleUsuario.FUNCIONARIO]),
+  usuarioController.buscarUsuarioPorId,
 );
 
 /**
@@ -279,15 +280,21 @@ usuarioRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
- *       400: { $ref: '#/components/responses/BadRequestError' }
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.patch(
   '/:id',
-  /* authenticate, authorizeAdmin, */ usuarioController.atualizarUsuarioPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  usuarioController.atualizarUsuarioPorId,
 );
 
 /**
@@ -306,37 +313,37 @@ usuarioRouter.patch(
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *         description: Não é possível deletar (usuário tem pedidos associados, por exemplo).
- *       401: { $ref: '#/components/responses/UnauthorizedError' }
- *       403: { $ref: '#/components/responses/ForbiddenError' }
- *       404: { $ref: '#/components/responses/NotFoundError' }
- *       500: { $ref: '#/components/responses/InternalServerError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 usuarioRouter.delete(
   '/:id',
-  /* authenticate, authorizeAdmin, */ usuarioController.deletarUsuarioPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  usuarioController.deletarUsuarioPorId,
 );
 
 // --- Montagem Aninhada (Nível 2) ---
 
 // Monta o router de Carrinho sob o usuário logado
 // Path: /api/usuarios/me/carrinho
-usuarioRouter.use('/me/carrinho', /* authenticate, */ carrinhoRouter);
+usuarioRouter.use('/me/carrinho', carrinhoRouter);
 
 // Monta o router de Endereço sob um usuário específico
 // Path: /api/usuarios/:usuarioId/endereco
-usuarioRouter.use(
-  '/:usuarioId/endereco',
-  /* authenticate, authorizeSelfOrAdmin, */ enderecoRouter,
-);
+usuarioRouter.use('/:usuarioId/endereco', authorizeSelfOrAdmin, enderecoRouter);
 
 // Monta o router de Telefone sob um usuário específico
 // Path: /api/usuarios/:usuarioId/telefones
 usuarioRouter.use(
   '/:usuarioId/telefones',
-  /* authenticate, authorizeSelfOrAdmin, */ telefoneRouter,
+  authorizeSelfOrAdmin,
+  telefoneRouter,
 );
-
-// TODO: Adicionar rota para o relatório
-// usuarioRouter.get('/:usuarioId/relatorio' /* ... */);
 
 export default usuarioRouter;

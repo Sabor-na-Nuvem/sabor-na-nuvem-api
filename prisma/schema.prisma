@@ -78,12 +78,20 @@ model Usuario {
   id                String      @id @default(uuid()) @map("idUsuario")
   nome              String      @map("nomeUsuario") @db.VarChar(50)
   email             String      @unique @db.VarChar(30)
+  senha             String
   cargo             RoleUsuario @default(CLIENTE)
   enderecoId        Int?        @unique
   funcionarioLojaId Int?
+
+  // --- ADICIONADO PARA O PACOTE DE AUTH ---
+  emailVerificado   Boolean            @default(false)
+  authTokens        AuthToken[]
+  authRefreshTokens AuthRefreshToken[]
+  // ----------------------------------------
+
   // Timestamps
-  createdAt         DateTime    @default(now()) @map("criadoEm")
-  updatedAt         DateTime    @updatedAt @map("atualizadoEm")
+  createdAt DateTime @default(now()) @map("criadoEm")
+  updatedAt DateTime @updatedAt @map("atualizadoEm")
 
   pedido    Pedido[]
   carrinho  Carrinho?
@@ -339,7 +347,46 @@ model ItemCarrinhoModificadores {
   @@map("itemCarrinhoModificadores")
 }
 
+// --- ADICIONADO PARA O PACOTE DE AUTH ---
+
+model AuthToken {
+  id        String        @id @default(uuid())
+  token     String        @unique
+  tipo      AuthTokenType
+  expiresAt DateTime
+  usado     Boolean       @default(false)
+  payload   Json?
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("authToken")
+}
+
+model AuthRefreshToken {
+  id            String   @id @default(uuid())
+  selector      String   @unique
+  validatorHash String
+  expiresAt     DateTime
+  revogado      Boolean  @default(false)
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("authRefreshToken")
+}
+
 // --- ENUMs ---
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  EMAIL_UPDATE
+}
 
 enum EstadosBrasil {
   AC

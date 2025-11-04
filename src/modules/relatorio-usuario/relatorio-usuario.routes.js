@@ -3,8 +3,6 @@ import relatorioController from './relatorio-usuario.controller.js';
 
 const relatorioRouter = express.Router();
 
-// TODO: Aplicar 'authenticate' e 'authorizeAdmin' a todas estas rotas
-
 /**
  * @swagger
  * /relatorios/top-clientes/gastos-totais:
@@ -30,7 +28,6 @@ const relatorioRouter = express.Router();
  */
 relatorioRouter.get(
   '/top-clientes/gastos-totais',
-  /* authenticate, authorizeAdmin, */
   relatorioController.listarTopClientesPorGastoTotal,
 );
 
@@ -59,7 +56,6 @@ relatorioRouter.get(
  */
 relatorioRouter.get(
   '/top-clientes/gastos-mensais',
-  /* authenticate, authorizeAdmin, */
   relatorioController.listarTopClientesPorGastoMensal,
 );
 
@@ -86,10 +82,8 @@ relatorioRouter.get(
  *       403: { $ref: '#/components/responses/ForbiddenError' }
  *       500: { $ref: '#/components/responses/InternalServerError' }
  */
-// *** CORREÇÃO: Path alterado para evitar conflito ***
 relatorioRouter.get(
   '/top-clientes/qtd-pedidos-total',
-  /* authenticate, authorizeAdmin, */
   relatorioController.listarTopClientesPorQtdPedidosTotal,
 );
 
@@ -118,7 +112,6 @@ relatorioRouter.get(
  */
 relatorioRouter.get(
   '/top-clientes/qtd-pedidos-mensal',
-  /* authenticate, authorizeAdmin, */
   relatorioController.listarTopClientesPorQtdPedidosMensal,
 );
 

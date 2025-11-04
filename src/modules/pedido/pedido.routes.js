@@ -1,9 +1,22 @@
 import express from 'express';
 import pedidoController from './pedido.controller.js';
 
+// --- Importação do Auth ---
+import {
+  authMiddleware,
+  RoleUsuario,
+  authenticateOptional,
+} from '../../config/authModule.js';
+
 const pedidoRouter = express.Router();
 
-// --- ROTA PÚBLICA (CRIAÇÃO) ---
+/*
+ *==================================
+ * ROTA PÚBLICA (CRIAÇÃO)
+ * Proteção: Nenhuma (Autenticação é opcional no controller)
+ *==================================
+ */
+
 /**
  * @swagger
  * /pedidos:
@@ -15,8 +28,8 @@ const pedidoRouter = express.Router();
  *       - Se autenticado, usa o carrinho salvo no banco (ignora `carrinho` do body).
  *       - Se anônimo, o `carrinho` (mockado) é obrigatório no body.
  *       Revalida todos os preços e disponibilidade no momento da criação.
- *     # security:
- *     #   - bearerAuth: [] # Autenticação é OPCIONAL aqui
+ *     security:
+ *       - bearerAuth: [] # Autenticação é OPCIONAL aqui
  *     requestBody:
  *       required: true
  *       content:
@@ -39,13 +52,14 @@ const pedidoRouter = express.Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-pedidoRouter.post(
-  '/',
-  /* authenticate(optional), */ pedidoController.criarPedido,
-);
+pedidoRouter.post('/', authenticateOptional, pedidoController.criarPedido);
 
-// --- ROTAS DO CLIENTE (CLIENTE) ---
-// TODO: Adicionar middleware 'authenticate' (OBRIGATÓRIO)
+/*
+ *==================================
+ * ROTAS DO CLIENTE (CLIENTE)
+ * Proteção: ensureAuthenticated
+ *==================================
+ */
 
 /**
  * @swagger
@@ -75,7 +89,11 @@ pedidoRouter.post(
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-pedidoRouter.get('/me', /* authenticate, */ pedidoController.listarMeusPedidos);
+pedidoRouter.get(
+  '/me',
+  authMiddleware.ensureAuthenticated,
+  pedidoController.listarMeusPedidos,
+);
 
 /**
  * @swagger
@@ -106,7 +124,8 @@ pedidoRouter.get('/me', /* authenticate, */ pedidoController.listarMeusPedidos);
  */
 pedidoRouter.get(
   '/me/:pedidoId',
-  /* authenticate, authorizePedidoOwner, */ pedidoController.buscarMeuPedidoPorId,
+  authMiddleware.ensureAuthenticated,
+  pedidoController.buscarMeuPedidoPorId,
 );
 
 /**
@@ -141,11 +160,22 @@ pedidoRouter.get(
  */
 pedidoRouter.post(
   '/me/:pedidoId/cancelar',
-  /* authenticate, authorizePedidoOwner, */ pedidoController.cancelarMeuPedido,
+  authMiddleware.ensureAuthenticated,
+  pedidoController.cancelarMeuPedido,
 );
 
-// --- ROTAS DA LOJA (FUNCIONÁRIO/ADMIN) ---
-// TODO: Adicionar 'authenticate' e 'authorizeFuncionario'
+/*
+ *==================================
+ * ROTAS DA LOJA (FUNCIONÁRIO/ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole(FUNCIONARIO ou ADMIN)
+ *==================================
+ */
+
+// Middleware reutilizável para proteger rotas de gerenciamento de loja
+const authorizeFuncionario = authMiddleware.ensureRole([
+  RoleUsuario.ADMIN,
+  RoleUsuario.FUNCIONARIO,
+]);
 
 /**
  * @swagger
@@ -184,7 +214,9 @@ pedidoRouter.post(
  */
 pedidoRouter.get(
   '/loja/:lojaId',
-  /* authenticate, authorizeFuncionario, */ pedidoController.listarPedidosDaLoja,
+  authMiddleware.ensureAuthenticated,
+  authorizeFuncionario,
+  pedidoController.listarPedidosDaLoja,
 );
 
 /**
@@ -217,7 +249,9 @@ pedidoRouter.get(
  */
 pedidoRouter.get(
   '/loja/:lojaId/:pedidoId',
-  /* authenticate, authorizeFuncionario, */ pedidoController.buscarPedidoDaLoja,
+  authMiddleware.ensureAuthenticated,
+  authorizeFuncionario,
+  pedidoController.buscarPedidoDaLoja,
 );
 
 /**
@@ -260,18 +294,24 @@ pedidoRouter.get(
  */
 pedidoRouter.patch(
   '/loja/:lojaId/:pedidoId',
-  /* authenticate, authorizeFuncionario, */ pedidoController.atualizarStatusDoPedido,
+  authMiddleware.ensureAuthenticated,
+  authorizeFuncionario,
+  pedidoController.atualizarStatusDoPedido,
 );
 
-// --- ROTAS DE ADMIN GLOBAL (ADMIN) ---
-// TODO: Adicionar 'authenticate' e 'authorizeAdmin'
+/*
+ *==================================
+ * ROTAS DE ADMIN GLOBAL (ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole(ADMIN)
+ *==================================
+ */
 
 /**
  * @swagger
  * /pedidos/admin:
  *   get:
  *     summary: Lista TODOS os pedidos de TODAS as lojas (Admin Global)
- *     tags: [Pedidos (Admin Global)]
+ *     tags: [Pedidos (Admin)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -299,7 +339,9 @@ pedidoRouter.patch(
  */
 pedidoRouter.get(
   '/admin',
-  /* authenticate, authorizeAdmin, */ pedidoController.listarTodosOsPedidos,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  pedidoController.listarTodosOsPedidos,
 );
 
 /**
@@ -307,7 +349,7 @@ pedidoRouter.get(
  * /pedidos/admin/{pedidoId}:
  *   get:
  *     summary: Busca qualquer pedido pelo ID (Admin Global)
- *     tags: [Pedidos (Admin Global)]
+ *     tags: [Pedidos (Admin)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -330,7 +372,9 @@ pedidoRouter.get(
  */
 pedidoRouter.get(
   '/admin/:pedidoId',
-  /* authenticate, authorizeAdmin, */ pedidoController.buscarPedidoPorIdAdmin,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  pedidoController.buscarPedidoPorIdAdmin,
 );
 
 export default pedidoRouter;

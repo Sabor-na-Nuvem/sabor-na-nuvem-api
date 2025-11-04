@@ -4,11 +4,22 @@ name: CI - API Sabor na Nuvem
 # Define os gatilhos para rodar este workflow
 on: [push, pull_request]
 
+# Define as permissões da CI
+permissions:
+  contents: read
+  packages: read
+
 # Define os trabalhos (jobs) que serão executados
 jobs:
   # Nome do nosso job principal
   build-and-test:
     runs-on: ubuntu-latest
+
+    # Variáveis de ambiente para todo o job
+    env:
+      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/sabor_na_nuvem_test?schema=public
+      JWT_SECRET: ${{ secrets.JWT_SECRET }} 
+      NODE_ENV: test
 
     services:
       postgres:
@@ -37,30 +48,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@joaoschmitz'
           cache: 'npm' # Habilita o cache para o npm
 
       # 3. Instala as dependências de forma otimizada para CI
       - name: Install dependencies
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_READ_PACKAGES_TOKEN }}
 
-      # 4. Gera o Prisma Client
+      # 4. Roda o linter para verificar a qualidade do código
+      - name: Run linter
+        run: npm run lint
+
+      # 5. Roda os testes unitários
+      - name: Run unit tests
+        run: npm run test:unit
+
+      # 6. Gera o Prisma Client
       - name: Generate Prisma Client
         run: npx prisma generate
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/sabor_na_nuvem_test?schema=public
 
-      # 5. Aplica as migrações do banco de dados
+      # 7. Aplica as migrações do banco de dados
       - name: Run Prisma migrations
         run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/sabor_na_nuvem_test?schema=public
 
-      # 6. Roda o linter para verificar a qualidade do código
-      - name: Run linter
-        run: npm run lint
-
-      # 7. Roda os testes automatizados
-      - name: Run tests
-        run: npm test
-        env:
-          DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/sabor_na_nuvem_test?schema=public
+      # 7. Roda os testes de integração
+      - name: Run integration tests
+        run: npm run test:integration

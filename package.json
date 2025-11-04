@@ -8,7 +8,7 @@
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config=jest.config.unit.js --runInBand",
-    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config=jest.config.integration.js --runInBand",
+    "test:integration": "node node_modules/jest/bin/jest.js --config=jest.config.integration.js --runInBand",
     "test": "npm run test:unit",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config=jest.config.unit.js --watch --runInBand",
     "lint": "eslint .",
@@ -18,14 +18,27 @@
     "type": "git",
     "url": "git+https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "nodejs",
+    "express",
+    "prisma",
+    "postgresql",
+    "docker",
+    "api",
+    "rest-api",
+    "white-label",
+    "fast-food",
+    "food-delivery",
+    "portfolio"
+  ],
+  "author": "João Matheus de Oliveira Schmitz",
+  "license": "SEE LICENSE IN LICENSE",
   "bugs": {
     "url": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api/issues"
   },
   "homepage": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api#readme",
   "dependencies": {
+    "@joaoschmitz/express-prisma-auth": "^1.0.0",
     "@prisma/client": "^6.16.2",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
@@ -34,6 +47,7 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.5",
     "@jest/globals": "^30.2.0",
     "@types/node-cron": "^3.0.11",
     "eslint": "^8.57.1",

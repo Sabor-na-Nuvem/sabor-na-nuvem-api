@@ -2,7 +2,16 @@ import express from 'express';
 import modificadorRouter from '../modificador/modificador.routes.js';
 import personalizavelController from './personalizavel.controller.js';
 
+// --- Importação do Auth ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+
 const personalizavelRouter = express.Router({ mergeParams: true });
+
+/*
+ *==================================
+ * ROTAS PÚBLICAS (CLIENTE/VISITANTE)
+ *==================================
+ */
 
 /**
  * @swagger
@@ -57,14 +66,21 @@ personalizavelRouter.get(
   personalizavelController.buscarPersonalizavelPorId,
 );
 
+/*
+ *==================================
+ * ROTAS ADMINISTRATIVAS (ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole(ADMIN)
+ *==================================
+ */
+
 /**
  * @swagger
  * /produtos/{produtoId}/personalizaveis:
  *   post:
  *     summary: Cria um novo grupo de personalização para um produto (Admin)
- *     tags: [Produtos - Personalização]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Produtos - Personalização (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/produtoIdPathParamNested'
  *     requestBody:
@@ -89,7 +105,8 @@ personalizavelRouter.get(
  */
 personalizavelRouter.post(
   '/',
-  /* authenticate, authorizeAdmin, */
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   personalizavelController.criarPersonalizavelParaProduto,
 );
 
@@ -98,9 +115,9 @@ personalizavelRouter.post(
  * /produtos/{produtoId}/personalizaveis/{personalizavelId}:
  *   patch:
  *     summary: Atualiza (parcialmente) um grupo de personalização (Admin)
- *     tags: [Produtos - Personalização]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Produtos - Personalização (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/produtoIdPathParamNested'
  *       - $ref: '#/components/parameters/personalizavelIdPathParam'
@@ -126,7 +143,8 @@ personalizavelRouter.post(
  */
 personalizavelRouter.patch(
   '/:personalizavelId',
-  /* authenticate, authorizeAdmin, */
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   personalizavelController.atualizarPersonalizavel,
 );
 
@@ -136,9 +154,9 @@ personalizavelRouter.patch(
  *   delete:
  *     summary: Deleta um grupo de personalização (Admin)
  *     description: ATENÇÃO - Isso também deletará todos os Modificadores dentro deste grupo.
- *     tags: [Produtos - Personalização]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Produtos - Personalização (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/produtoIdPathParamNested'
  *       - $ref: '#/components/parameters/personalizavelIdPathParam'
@@ -152,7 +170,8 @@ personalizavelRouter.patch(
  */
 personalizavelRouter.delete(
   '/:personalizavelId',
-  /* authenticate, authorizeAdmin, */
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   personalizavelController.deletarPersonalizavel,
 );
 

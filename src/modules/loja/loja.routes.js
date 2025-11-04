@@ -7,7 +7,19 @@ import telefoneRouter from '../telefone/telefone.routes.js';
 import produtosEmLojaRouter from '../produtos-em-loja/produtos-em-loja.routes.js';
 import modificadorEmLojaRouter from '../modificador-em-loja/modificador-em-loja.routes.js';
 
+// --- Importação do Auth ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+// --- Importação do Middleware Customizado ---
+import { authorizeAdminOrStoreOwner } from '../../middlewares/authorization.js';
+
 const lojaRouter = express.Router();
+
+/*
+ *==================================
+ * ROTAS PÚBLICAS (CLIENTE/VISITANTE)
+ * Proteção: Nenhuma
+ *==================================
+ */
 
 /**
  * @swagger
@@ -58,7 +70,6 @@ lojaRouter.get('/', lojaController.buscarTodasAsLojas);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-// IMPORTANTE: Definir ANTES de '/:id'
 lojaRouter.get('/proximas', lojaController.buscarLojasProximas);
 
 /**
@@ -83,14 +94,21 @@ lojaRouter.get('/proximas', lojaController.buscarLojasProximas);
  */
 lojaRouter.get('/:id', lojaController.buscarLoja);
 
+/*
+ *==================================
+ * ROTAS ADMINISTRATIVAS (ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole(ADMIN)
+ *==================================
+ */
+
 /**
  * @swagger
  * /lojas:
  *   post:
  *     summary: Cria uma nova loja (incluindo seu endereço)
- *     tags: [Lojas]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança (Admin)
+ *     tags: [Lojas (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -114,7 +132,9 @@ lojaRouter.get('/:id', lojaController.buscarLoja);
  */
 lojaRouter.post(
   '/',
-  /* authenticate, authorizeAdmin, */ lojaController.criarLoja,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  lojaController.criarLoja,
 );
 
 /**
@@ -122,9 +142,9 @@ lojaRouter.post(
  * /lojas/{id}:
  *   put:
  *     summary: Atualiza uma loja existente
- *     tags: [Lojas]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança (Admin ou Dono?)
+ *     tags: [Lojas (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParam'
  *     requestBody:
@@ -152,7 +172,9 @@ lojaRouter.post(
  */
 lojaRouter.put(
   '/:id',
-  /* authenticate, authorizeAdmin, */ lojaController.atualizarLoja,
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
+  lojaController.atualizarLoja,
 );
 
 /**
@@ -161,8 +183,8 @@ lojaRouter.put(
  *   delete:
  *     summary: Deleta uma loja
  *     tags: [Lojas]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Adicionar segurança (Admin)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParam'
  *     responses:
@@ -180,34 +202,42 @@ lojaRouter.put(
  */
 lojaRouter.delete(
   '/:id',
-  /* authenticate, authorizeAdmin, */ lojaController.deletarLoja,
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  lojaController.deletarLoja,
 );
 
-// --- Montagem Aninhada (Nível 2) ---
+/*
+ *==================================
+ * ROTAS ANINHADAS (ADMIN / FUNCIONARIO)
+ * Proteção: ensureAuthenticated + ensureRole(ADMIN ou FUNCIONARIO)
+ *==================================
+ */
 
 // Monta o router de Endereço sob uma loja específica
 // Path: /api/lojas/:lojaId/endereco
 lojaRouter.use(
   '/:lojaId/endereco',
-  /* authenticate, authorizeAdminOrStoreOwner, */ enderecoRouter,
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
+  enderecoRouter,
 );
 
 // Monta o router de Telefone sob uma loja específica
 // Path: /api/lojas/:lojaId/telefones
 lojaRouter.use(
   '/:lojaId/telefones',
-  /* authenticate, authorizeAdminOrStoreOwner, */ telefoneRouter,
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
+  telefoneRouter,
 );
 
 // Monta o router de ProdutosEmLoja (catálogo da loja)
 // Path: /api/lojas/:lojaId/produtos-loja
-lojaRouter.use('/:lojaId/produtos-loja', /* ...auth... */ produtosEmLojaRouter);
+lojaRouter.use('/:lojaId/produtos-loja', produtosEmLojaRouter);
 
 // Monta o router de ModificadorEmLoja (opções da loja)
 // Path: /api/lojas/:lojaId/modificadores-loja
-lojaRouter.use(
-  '/:lojaId/modificadores-loja',
-  /* ...auth... */ modificadorEmLojaRouter,
-);
+lojaRouter.use('/:lojaId/modificadores-loja', modificadorEmLojaRouter);
 
 export default lojaRouter;

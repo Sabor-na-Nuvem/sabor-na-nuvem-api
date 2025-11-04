@@ -1,6 +1,6 @@
 tags:
-  - name: Usuarios
-    description: Operações gerais sobre perfis de usuário
+  - name: Auth
+    description: Rotas de autenticação e gerenciamento de usuário (do pacote @joaoschmitz/express-prisma-auth)
 
   - name: Usuarios (Meu Perfil)
     description: Operações relacionadas ao perfil do usuário autenticado (/me)
@@ -11,25 +11,46 @@ tags:
   - name: Relatorios de Usuario
     description: Rotas administrativas para análise e relatórios agregados (Top Clientes).
     
-  - name: Lojas
-    description: API para gerenciamento de lojas.
+  - name: 'Lojas'
+    description: 'Operações públicas para visualização e busca de lojas.'
+
+  - name: 'Lojas (Admin)'
+    description: 'Operações de gerenciamento (CRUD) para lojas.'
 
   - name: Categorias de Produto
-    description: API para gerenciamento das categorias de produto.
+    description: Operações para visualização de categorias de produto.
+
+  - name: Categorias de Produto (Admin)
+    description: Operações de gerenciamento das categorias de produto.
 
   - name: Produtos
-    description: API para gerenciamento de produtos.
+    description: Operações de visualização e busca de produtos.
+  
+  - name: 'Produtos (Admin)'
+    description: 'Operações de gerenciamento (CRUD) para produtos.'
 
   - name: Produtos - Personalização
-    description: Gerenciamento dos grupos de personalização de produtos
+    description: Visualização dos grupos de personalização de produtos.
+
+  - name: Produtos - Personalização (Admin)
+    description: Gerenciamento dos grupos de personalização de produtos.
   
   - name: Produtos - Modificadores
+    description: Visualização das opções (modificadores) dentro dos grupos de personalização.
+
+  - name: Produtos - Modificadores (Admin)
     description: Gerenciamento das opções (modificadores) dentro dos grupos de personalização.
 
   - name: Produtos Em Loja
+    description: Visualização do catálogo (produtos, preços, promoções) específico de cada loja.
+
+  - name: Produtos Em Loja (Admin)
     description: Gerenciamento do catálogo (produtos, preços, promoções) específico de cada loja.
 
   - name: Modificador Em Loja
+    description: Visualização da disponibilidade e preço dos modificadores (opções) em cada loja.
+
+  - name: Modificador Em Loja (Admin)
     description: Gerenciamento da disponibilidade e preço dos modificadores (opções) em cada loja.
 
   - name: Carrinho
@@ -44,14 +65,23 @@ tags:
   - name: Pedidos (Loja)
     description: Operações de funcionários/admins sobre os pedidos de uma loja específica.
 
-  - name: Pedidos (Admin Global)
+  - name: Pedidos (Admin)
     description: Operações administrativas globais sobre todos os pedidos.
 
   - name: Cupons de Desconto
-    description: API para gerenciamento e validação de cupons de desconto.
+    description: Validação de cupons de desconto.
 
-  - name: Telefones
-    description: Gerenciamento de telefones associados a usuários ou lojas.
+  - name: Cupons de Desconto (Admin)
+    description: Operações de gerenciamento de cupons de desconto.
 
-  - name: Enderecos
-    description: Gerenciamento de endereços associados a usuários ou lojas.
+  - name: Telefones (Usuario)
+    description: Gerenciamento de telefones associados a usuários.
+
+  - name: Telefones (Loja)
+    description: Gerenciamento de telefones associados a lojas.
+
+  - name: Enderecos (Usuario)
+    description: Gerenciamento de endereços associados a usuários.
+
+  - name: Enderecos (Loja)
+    description: Gerenciamento de endereços associados a lojas.

@@ -1,6 +1,9 @@
 import express from 'express';
 import cupomDescontoController from './cupom-desconto.controller.js';
 
+// --- Importação do Auth ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+
 const cupomDescontoRouter = express.Router();
 
 // -----------------------------------------------------------------------------
@@ -12,9 +15,9 @@ const cupomDescontoRouter = express.Router();
  * /cupons:
  *   get:
  *     summary: Lista todos os cupons de desconto (Admin)
- *     tags: [Cupons de Desconto]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Cupons de Desconto (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     # parameters: # TODO: Adicionar paginação e filtros (ativo, usuarioId, etc.)
  *     responses:
  *       200:
@@ -34,7 +37,8 @@ const cupomDescontoRouter = express.Router();
  */
 cupomDescontoRouter.get(
   '/',
-  /* authenticate, authorizeAdmin, */ cupomDescontoController.listarCupons,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  cupomDescontoController.listarCupons,
 );
 
 /**
@@ -42,9 +46,9 @@ cupomDescontoRouter.get(
  * /cupons/buscar/por-codigo:
  *   get:
  *     summary: Busca um cupom de desconto pelo seu código (Admin)
- *     tags: [Cupons de Desconto]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Cupons de Desconto (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/cupomCodigoQueryParam'
  *     responses:
@@ -65,7 +69,7 @@ cupomDescontoRouter.get(
  */
 cupomDescontoRouter.get(
   '/buscar/por-codigo',
-  /* authenticate, authorizeAdmin, */
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   cupomDescontoController.buscarCupomPorCodigo,
 );
 
@@ -74,9 +78,9 @@ cupomDescontoRouter.get(
  * /cupons/{id}:
  *   get:
  *     summary: Busca um cupom de desconto pelo ID (Admin)
- *     tags: [Cupons de Desconto]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Cupons de Desconto (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/cupomIdPathParam'
  *     responses:
@@ -97,7 +101,8 @@ cupomDescontoRouter.get(
  */
 cupomDescontoRouter.get(
   '/:id',
-  /* authenticate, authorizeAdmin, */ cupomDescontoController.buscarCupomPorId,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  cupomDescontoController.buscarCupomPorId,
 );
 
 /**
@@ -105,9 +110,9 @@ cupomDescontoRouter.get(
  * /cupons:
  *   post:
  *     summary: Cria um novo cupom de desconto (Admin)
- *     tags: [Cupons de Desconto]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Cupons de Desconto (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -132,7 +137,8 @@ cupomDescontoRouter.get(
  */
 cupomDescontoRouter.post(
   '/',
-  /* authenticate, authorizeAdmin, */ cupomDescontoController.criarCupom,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  cupomDescontoController.criarCupom,
 );
 
 /**
@@ -140,9 +146,9 @@ cupomDescontoRouter.post(
  * /cupons/{id}:
  *   put: # Ou PATCH
  *     summary: Atualiza um cupom de desconto existente (Admin)
- *     tags: [Cupons de Desconto]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Cupons de Desconto (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/cupomIdPathParam'
  *     requestBody:
@@ -171,7 +177,8 @@ cupomDescontoRouter.post(
  */
 cupomDescontoRouter.put(
   '/:id',
-  /* authenticate, authorizeAdmin, */ cupomDescontoController.atualizarCupom,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  cupomDescontoController.atualizarCupom,
 );
 
 /**
@@ -180,9 +187,9 @@ cupomDescontoRouter.put(
  *   delete:
  *     summary: Deleta um cupom de desconto (Admin)
  *     description: Use com cautela. Prefira desativar se o cupom já foi usado.
- *     tags: [Cupons de Desconto]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Cupons de Desconto (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/cupomIdPathParam'
  *     responses:
@@ -201,7 +208,8 @@ cupomDescontoRouter.put(
  */
 cupomDescontoRouter.delete(
   '/:id',
-  /* authenticate, authorizeAdmin, */ cupomDescontoController.deletarCupom,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  cupomDescontoController.deletarCupom,
 );
 
 // -----------------------------------------------------------------------------
@@ -214,8 +222,8 @@ cupomDescontoRouter.delete(
  *   post:
  *     summary: Valida um código de cupom para uso no carrinho/checkout
  *     tags: [Cupons de Desconto]
- *     # security:
- *     #   - bearerAuth: [] # Provavelmente requer autenticação do cliente
+ *     security:
+ *       - bearerAuth: [] # Provavelmente requer autenticação do cliente
  *     requestBody:
  *       required: true
  *       content:
@@ -232,13 +240,13 @@ cupomDescontoRouter.delete(
  *       400:
  *         $ref: '#/components/responses/BadRequestError' # Código do cupom não fornecido
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError' # Se aplicável
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
 cupomDescontoRouter.post(
   '/validar',
-  /* authenticate, */ cupomDescontoController.verificarValidadeCupom,
+  cupomDescontoController.verificarValidadeCupom,
 );
 
 export default cupomDescontoRouter;

@@ -1,5 +1,7 @@
+import { jest } from '@jest/globals';
 import supertest from 'supertest';
-import { Prisma, StatusPedido } from '@prisma/client';
+// eslint-disable-next-line no-unused-vars
+import { Prisma, StatusPedido, RoleUsuario } from '@prisma/client';
 
 // Importa o app (Express)
 import app from '../../../app.js';
@@ -10,6 +12,53 @@ import {
   setupTestDatabase,
   cleanupTestDatabase,
 } from '../../../config/prismaTestHelper.js';
+
+// --- INÍCIO DO MOCK MANUAL ---
+jest.mock(
+  '../../../config/authModule.js',
+  () => {
+    // Importa o enum real *dentro* do mock
+    const { RoleUsuario: MockedRoleUsuario } =
+      jest.requireActual('@prisma/client');
+
+    // Cria o middleware opcional mockado
+    const mockAuthenticateOptional = (req, res, next) => {
+      const testUserId = req.headers['x-test-user-id'];
+      if (testUserId) {
+        req.user = { id: testUserId, cargo: MockedRoleUsuario.ADMIN };
+      }
+      next(); // Nunca falha
+    };
+
+    const mockEnsureAuthenticated = (req, res, next) => {
+      const testUserId = req.headers['x-test-user-id'];
+      if (testUserId) {
+        req.user = { id: testUserId, cargo: MockedRoleUsuario.ADMIN };
+        return next();
+      }
+      return res.status(401).json({ message: 'Token não fornecido (mock)' });
+    };
+
+    const mockEnsureRole = (allowedRoles) => (req, res, next) => {
+      if (req.user && allowedRoles.includes(req.user.cargo)) {
+        return next();
+      }
+      return res.status(403).json({ message: 'Acesso negado (mock)' });
+    };
+
+    return {
+      authRoutes: jest.fn(),
+      authMiddleware: {
+        ensureAuthenticated: mockEnsureAuthenticated,
+        ensureRole: mockEnsureRole,
+      },
+      authenticateOptional: mockAuthenticateOptional,
+      RoleUsuario: MockedRoleUsuario,
+    };
+  },
+  { virtual: true },
+);
+// --- FIM DO MOCK MANUAL ---
 
 // Cria o "cliente" HTTP
 const request = supertest(app);
@@ -40,6 +89,7 @@ describe('Fluxo de Integração: Atualizar Status do Pedido (Fidelidade)', () =>
         id: 'uuid-user-fidelidade-123',
         nome: 'Usuario Cliente Fiel',
         email: 'fiel@teste.com',
+        senha: 'senha-de-teste-invalida',
       },
     });
 

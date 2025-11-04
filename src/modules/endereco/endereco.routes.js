@@ -12,9 +12,9 @@ const enderecoRouter = express.Router({ mergeParams: true });
  * /usuarios/{usuarioId}/endereco:
  *   get:
  *     summary: Busca o endereço associado a um usuário
- *     tags: [Enderecos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     tags: [Enderecos (Usuario)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *     responses:
@@ -37,9 +37,9 @@ const enderecoRouter = express.Router({ mergeParams: true });
  * /lojas/{lojaId}/endereco:
  *   get:
  *     summary: Busca o endereço associado a uma loja
- *     tags: [Enderecos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     tags: [Enderecos (Loja)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     responses:
@@ -66,9 +66,9 @@ enderecoRouter.get('/', enderecoController.buscarEnderecoDoPai);
  * /usuarios/{usuarioId}/endereco:
  *   post:
  *     summary: Cria e associa um novo endereço a um usuário
- *     tags: [Enderecos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     tags: [Enderecos (Usuario)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *     requestBody:
@@ -100,9 +100,9 @@ enderecoRouter.get('/', enderecoController.buscarEnderecoDoPai);
  * /lojas/{lojaId}/endereco:
  *   post:
  *     summary: Cria e associa um novo endereço a uma loja
- *     tags: [Enderecos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     tags: [Enderecos (Loja)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     requestBody:
@@ -138,9 +138,9 @@ enderecoRouter.post('/', enderecoController.criarEnderecoParaPai);
  * /usuarios/{usuarioId}/endereco:
  *   put:
  *     summary: Atualiza o endereço associado a um usuário
- *     tags: [Enderecos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     tags: [Enderecos (Usuario)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *     requestBody:
@@ -171,9 +171,9 @@ enderecoRouter.post('/', enderecoController.criarEnderecoParaPai);
  * /lojas/{lojaId}/endereco:
  *   put:
  *     summary: Atualiza o endereço associado a uma loja
- *     tags: [Enderecos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     tags: [Enderecos (Loja)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     requestBody:
@@ -208,9 +208,9 @@ enderecoRouter.put('/', enderecoController.atualizarEnderecoDoPai);
  * /usuarios/{usuarioId}/endereco:
  *   delete:
  *     summary: Desassocia (e deleta, se possível) o endereço de um usuário
- *     tags: [Enderecos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Self ou Admin)
+ *     tags: [Enderecos (Usuario)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/usuarioIdPathParamNested'
  *     responses:
@@ -229,9 +229,9 @@ enderecoRouter.put('/', enderecoController.atualizarEnderecoDoPai);
  * /lojas/{lojaId}/endereco:
  *   delete:
  *     summary: Operação não permitida - Endereço de loja é obrigatório
- *     tags: [Enderecos]
- *     # security:
- *     #   - bearerAuth: [] # TODO: Segurança (Admin ou Dono da Loja?)
+ *     tags: [Enderecos (Loja)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     responses:

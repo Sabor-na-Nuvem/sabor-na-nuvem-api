@@ -3,7 +3,8 @@
 
 # Variáveis de Ambiente e Segredos
 .env
-.env.test
+.env.*
+!.env.example
 
 # Logs
 npm-debug.log*
@@ -17,3 +18,6 @@ pnpm-debug.log
 *.sublime-workspace
 
 /src/generated/prisma
+
+# Ignora o arquivo de autenticação do NPM local
+.npmrc

@@ -4,9 +4,6 @@ import itemCarrinhoRouter from '../item-carrinho/item-carrinho.routes.js';
 
 const carrinhoRouter = express.Router({ mergeParams: true });
 
-// TODO: Aplicar autenticação a todas as rotas do carrinho
-// carrinhoRouter.use(authenticate);
-
 // --- Rotas que agem sobre o CARRINHO em si ---
 // O path base é /api/usuarios/me/carrinho (definido no usuario.routes.js)
 

@@ -1,7 +1,18 @@
 import express from 'express';
 import produtosEmLojaController from './produtos-em-loja.controller.js';
 
+// --- Importação do Auth ---
+import { authMiddleware } from '../../config/authModule.js';
+// --- Importação do Middleware Customizado ---
+import { authorizeAdminOrStoreOwner } from '../../middlewares/authorization.js';
+
 const produtosEmLojaRouter = express.Router({ mergeParams: true });
+
+/*
+ *==================================
+ * ROTAS PÚBLICAS (CLIENTE/VISITANTE)
+ *==================================
+ */
 
 /**
  * @swagger
@@ -65,14 +76,20 @@ produtosEmLojaRouter.get(
   produtosEmLojaController.buscarProdutoNaLoja,
 );
 
+/*
+ *==================================
+ * ROTAS PROTEGIDAS (ADMIN / FUNCIONARIO)
+ *==================================
+ */
+
 /**
  * @swagger
  * /lojas/{lojaId}/produtos-loja:
  *   post:
  *     summary: Adiciona um produto ao catálogo de uma loja (Admin/Dono da Loja)
- *     tags: [Produtos Em Loja]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Produtos Em Loja (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *     requestBody:
@@ -91,10 +108,10 @@ produtosEmLojaRouter.get(
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *         description: Dados inválidos ou produto já existe na loja.
- *       # 401:
- *       #   $ref: '#/components/responses/UnauthorizedError'
- *       # 403:
- *       #   $ref: '#/components/responses/ForbiddenError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  *         description: Loja ou Produto base não encontrado.
@@ -103,7 +120,8 @@ produtosEmLojaRouter.get(
  */
 produtosEmLojaRouter.post(
   '/',
-  /* authenticate, authorizeAdminOrStoreOwner, */
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
   produtosEmLojaController.adicionarProdutoEmLoja,
 );
 
@@ -112,9 +130,9 @@ produtosEmLojaRouter.post(
  * /lojas/{lojaId}/produtos-loja/{produtoId}:
  *   put:
  *     summary: Atualiza os detalhes de um produto em uma loja (Admin/Dono da Loja)
- *     tags: [Produtos Em Loja]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Produtos Em Loja (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *       - $ref: '#/components/parameters/produtoIdPathParamNested'
@@ -133,10 +151,10 @@ produtosEmLojaRouter.post(
  *               $ref: '#/components/schemas/ProdutosEmLoja'
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
- *       # 401:
- *       #   $ref: '#/components/responses/UnauthorizedError'
- *       # 403:
- *       #   $ref: '#/components/responses/ForbiddenError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  *         description: Loja ou Produto não encontrado nesta loja.
@@ -145,7 +163,8 @@ produtosEmLojaRouter.post(
  */
 produtosEmLojaRouter.put(
   '/:produtoId',
-  /* authenticate, authorizeAdminOrStoreOwner, */
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
   produtosEmLojaController.atualizarProdutoNaLoja,
 );
 
@@ -154,19 +173,19 @@ produtosEmLojaRouter.put(
  * /lojas/{lojaId}/produtos-loja/{produtoId}:
  *   delete:
  *     summary: Remove um produto do catálogo de uma loja (Admin/Dono da Loja)
- *     tags: [Produtos Em Loja]
- *     # security:
- *     #   - bearerAuth: []
+ *     tags: [Produtos Em Loja (Admin)]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParamNested'
  *       - $ref: '#/components/parameters/produtoIdPathParamNested'
  *     responses:
  *       204:
  *         description: Produto removido da loja com sucesso.
- *       # 401:
- *       #   $ref: '#/components/responses/UnauthorizedError'
- *       # 403:
- *       #   $ref: '#/components/responses/ForbiddenError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  *         description: Loja ou Produto não encontrado nesta loja.
@@ -175,7 +194,8 @@ produtosEmLojaRouter.put(
  */
 produtosEmLojaRouter.delete(
   '/:produtoId',
-  /* authenticate, authorizeAdminOrStoreOwner, */
+  authMiddleware.ensureAuthenticated,
+  authorizeAdminOrStoreOwner,
   produtosEmLojaController.deletarProdutoDaLoja,
 );
 

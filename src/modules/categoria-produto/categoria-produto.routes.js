@@ -1,11 +1,21 @@
 import express from 'express';
 import categoriaProdutoController from './categoria-produto.controller.js';
 
+// --- Importação do Auth ---
+import { authMiddleware, RoleUsuario } from '../../config/authModule.js';
+
 const categoriaProdutoRouter = express.Router();
+
+/*
+ *==================================
+ * ROTAS PÚBLICAS (CLIENTE/VISITANTE)
+ * Proteção: Nenhuma
+ *==================================
+ */
 
 /**
  * @swagger
- * /api/categorias-produto:
+ * /categorias-produto:
  *   get:
  *     summary: Retorna a lista de todas as categorias de produto
  *     tags: [Categorias de Produto]
@@ -28,7 +38,7 @@ categoriaProdutoRouter.get(
 
 /**
  * @swagger
- * /api/categorias-produto/{id}:
+ * /categorias-produto/{id}:
  *   get:
  *     summary: Busca uma única categoria pelo ID
  *     tags: [Categorias de Produto]
@@ -53,7 +63,7 @@ categoriaProdutoRouter.get(
 
 /**
  * @swagger
- * /api/categorias-produto/buscar/por-nome:
+ * /categorias-produto/buscar/por-nome:
  *   get:
  *     summary: Busca uma única categoria pelo nome
  *     tags: [Categorias de Produto]
@@ -82,14 +92,21 @@ categoriaProdutoRouter.get(
   categoriaProdutoController.buscarCategoriaPorNome,
 );
 
+/*
+ *==================================
+ * ROTAS ADMINISTRATIVAS (ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole(ADMIN)
+ *==================================
+ */
+
 /**
  * @swagger
- * /api/categorias-produto:
+ * /categorias-produto:
  *   post:
  *     summary: Cria uma nova categoria de produto
- *     tags: [Categorias de Produto]
- * # security:
- * #  - bearerAuth: [] # TODO: Adicionar segurança
+ *     tags: [Categorias de Produto (Admin)]
+ *     security:
+ *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -105,25 +122,28 @@ categoriaProdutoRouter.get(
  *               $ref: '#/components/schemas/CategoriaProduto'
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
- *       # 401: { $ref: '#/components/responses/UnauthorizedError' } # Adicionar se tiver segurança
- *       # 403: { $ref: '#/components/responses/ForbiddenError' } # Adicionar se tiver segurança
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
 categoriaProdutoRouter.post(
   '/',
-  /* authenticate, authorizeAdmin, */
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   categoriaProdutoController.criarCategoria,
 );
 
 /**
  * @swagger
- * /api/categorias-produto/{id}:
+ * /categorias-produto/{id}:
  *   put:
  *     summary: Atualiza uma categoria de produto existente
- *     tags: [Categorias de Produto]
- * # security:
- * #  - bearerAuth: [] # TODO: Adicionar segurança
+ *     tags: [Categorias de Produto (Admin)]
+ *     security:
+ *      - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/categoriaProdutoIdPathParam'
  *     requestBody:
@@ -143,25 +163,28 @@ categoriaProdutoRouter.post(
  *         $ref: '#/components/responses/BadRequestError'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
- *       # 401: { $ref: '#/components/responses/UnauthorizedError' }
- *       # 403: { $ref: '#/components/responses/ForbiddenError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
 categoriaProdutoRouter.put(
   '/:id',
-  /* authenticate, authorizeAdmin, */
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   categoriaProdutoController.atualizarCategoria,
 );
 
 /**
  * @swagger
- * /api/categorias-produto/{id}:
+ * /categorias-produto/{id}:
  *   delete:
  *     summary: Deleta uma categoria de produto
- *     tags: [Categorias de Produto]
- * # security:
- * #  - bearerAuth: [] # TODO: Adicionar segurança
+ *     tags: [Categorias de Produto (Admin)]
+ *     security:
+ *      - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/categoriaProdutoIdPathParam'
  *     responses:
@@ -175,14 +198,17 @@ categoriaProdutoRouter.put(
  *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
- *       # 401: { $ref: '#/components/responses/UnauthorizedError' }
- *       # 403: { $ref: '#/components/responses/ForbiddenError' }
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
 categoriaProdutoRouter.delete(
   '/:id',
-  /* authenticate, authorizeAdmin, */
+  authMiddleware.ensureAuthenticated,
+  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
   categoriaProdutoController.deletarCategoria,
 );
 

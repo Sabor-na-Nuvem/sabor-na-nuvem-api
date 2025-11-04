@@ -21,7 +21,10 @@ services:
   # API Node.js
   api:
     container_name: sabor-na-nuvem-api
-    build: .
+    build:
+      context: .
+      secrets:
+        - npmrc
     ports:
       - "${PORT}:3000"
     env_file:
@@ -35,3 +38,7 @@ services:
 
 volumes:
   pgdata:
+
+secrets:
+  npmrc:
+    file: .npmrc

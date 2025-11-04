@@ -1,15 +1,64 @@
+import { jest } from '@jest/globals';
 import supertest from 'supertest';
-import { Prisma } from '@prisma/client';
+// eslint-disable-next-line no-unused-vars
+import { Prisma, RoleUsuario } from '@prisma/client';
 
-// Importa o app separado (Passo 3)
+// Importa o app separado
 import app from '../../../app.js';
 
-// Importa os helpers de banco de dados (Passo 4)
+// Importa os helpers de banco de dados
 import {
   prismaTestClient,
   setupTestDatabase,
   cleanupTestDatabase,
 } from '../../../config/prismaTestHelper.js';
+
+// --- INÍCIO DO MOCK MANUAL ---
+jest.mock(
+  '../../../config/authModule.js',
+  () => {
+    // Importa o enum real *dentro* do mock
+    const { RoleUsuario: MockedRoleUsuario } =
+      jest.requireActual('@prisma/client');
+
+    // Cria o middleware opcional mockado
+    const mockAuthenticateOptional = (req, res, next) => {
+      const testUserId = req.headers['x-test-user-id'];
+      if (testUserId) {
+        req.user = { id: testUserId, cargo: MockedRoleUsuario.ADMIN };
+      }
+      next(); // Nunca falha
+    };
+
+    const mockEnsureAuthenticated = (req, res, next) => {
+      const testUserId = req.headers['x-test-user-id'];
+      if (testUserId) {
+        req.user = { id: testUserId, cargo: MockedRoleUsuario.ADMIN };
+        return next();
+      }
+      return res.status(401).json({ message: 'Token não fornecido (mock)' });
+    };
+
+    const mockEnsureRole = (allowedRoles) => (req, res, next) => {
+      if (req.user && allowedRoles.includes(req.user.cargo)) {
+        return next();
+      }
+      return res.status(403).json({ message: 'Acesso negado (mock)' });
+    };
+
+    return {
+      authRoutes: jest.fn(),
+      authMiddleware: {
+        ensureAuthenticated: mockEnsureAuthenticated,
+        ensureRole: mockEnsureRole,
+      },
+      authenticateOptional: mockAuthenticateOptional,
+      RoleUsuario: MockedRoleUsuario,
+    };
+  },
+  { virtual: true },
+);
+// --- FIM DO MOCK MANUAL ---
 
 // Cria o "cliente" HTTP
 const request = supertest(app);
@@ -41,6 +90,7 @@ describe('Fluxo de Integração: Adicionar Item ao Carrinho', () => {
         id: 'uuid-user-teste-123',
         nome: 'Usuario de Teste',
         email: 'teste@dominio.com',
+        senha: 'senha-de-teste-invalida',
       },
     });
 
@@ -226,6 +276,6 @@ describe('Fluxo de Integração: Adicionar Item ao Carrinho', () => {
       .send(dadosItem); // <-- Sem o header 'X-Test-User-Id'
 
     expect(response.status).toBe(401);
-    expect(response.body.message).toBe('Usuário não autenticado.');
+    expect(response.body.message).toBe('Token não fornecido (mock)');
   });
 });

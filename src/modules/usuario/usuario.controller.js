@@ -2,31 +2,10 @@ import usuarioServices from './usuario.services.js';
 import cupomDescontoServices from '../cupom-desconto/cupom-desconto.services.js';
 
 const usuarioController = {
-  // --- ROTAS PÚBLICAS ---
-  async criarUsuario(req, res) {
-    try {
-      // TODO: Conectar com API de autenticação
-      const dadosUsuario = req.body;
-
-      const novoUsuario = await usuarioServices.criarUsuario(dadosUsuario);
-
-      return res.status(201).json(novoUsuario);
-    } catch (error) {
-      if (error.message.includes('email já existe')) {
-        return res.status(400).json({ message: error.message });
-      }
-      return res
-        .status(500)
-        .json({ message: error.message || 'Erro interno ao criar usuário.' });
-    }
-  },
-
   // --- ROTAS PARA O USUÁRIO AUTENTICADO (/me) ---
-  // TODO: Adicionar middleware 'authenticate' a estas rotas
 
   async buscarUsuarioLogado(req, res) {
-    const usuarioId = req.user?.id;
-
+    const usuarioId = req.user.id;
     if (!usuarioId) {
       return res.status(401).json({ message: 'Usuário não autenticado.' });
     }
@@ -44,8 +23,7 @@ const usuarioController = {
   },
 
   async buscarCuponsDoUsuarioLogado(req, res) {
-    const usuarioId = req.user?.id;
-
+    const usuarioId = req.user.id;
     if (!usuarioId) {
       return res.status(401).json({ message: 'Usuário não autenticado.' });
     }
@@ -61,7 +39,7 @@ const usuarioController = {
   },
 
   async buscarRelatorioDoUsuarioLogado(req, res) {
-    const usuarioId = req.user?.id;
+    const usuarioId = req.user.id;
     if (!usuarioId) {
       return res.status(401).json({ message: 'Usuário não autenticado.' });
     }
@@ -78,7 +56,7 @@ const usuarioController = {
   },
 
   async atualizarUsuarioLogado(req, res) {
-    const usuarioId = req.user?.id;
+    const usuarioId = req.user.id;
     const novosDados = req.body;
 
     if (!usuarioId) {
@@ -115,8 +93,7 @@ const usuarioController = {
   },
 
   async deletarUsuarioLogado(req, res) {
-    const usuarioId = req.user?.id;
-
+    const usuarioId = req.user.id;
     if (!usuarioId) {
       return res.status(401).json({ message: 'Usuário não autenticado.' });
     }
