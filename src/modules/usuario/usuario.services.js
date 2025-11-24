@@ -1,4 +1,5 @@
 import { Prisma, RoleUsuario } from '@prisma/client';
+import bcrypt from 'bcrypt';
 import prisma from '../../config/prisma.js';
 
 const usuarioServices = {
@@ -121,7 +122,24 @@ const usuarioServices = {
     }
   },
 
-  // TODO: Deletar em conjunto com a API de autenticação.
+  async deletarUsuarioLogado(idUsuario, senhaInformada) {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: idUsuario },
+    });
+
+    if (!usuario) {
+      throw new Error('Usuário não encontrado.');
+    }
+
+    // VERIFICAÇÃO DE SEGURANÇA
+    const senhaValida = await bcrypt.compare(senhaInformada, usuario.senha);
+    if (!senhaValida) {
+      throw new Error('Senha incorreta.');
+    }
+
+    return this.deletarUsuario(idUsuario);
+  },
+
   async deletarUsuario(idUsuario) {
     try {
       const usuarioDeletado = await prisma.$transaction(async (tx) => {

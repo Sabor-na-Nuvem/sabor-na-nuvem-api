@@ -94,19 +94,27 @@ const usuarioController = {
 
   async deletarUsuarioLogado(req, res) {
     const usuarioId = req.user.id;
+    const { senha } = req.body;
+
     if (!usuarioId) {
       return res.status(401).json({ message: 'Usuário não autenticado.' });
     }
+    if (!senha) {
+      return res
+        .status(400)
+        .json({ message: 'A senha é obrigatória para excluir a conta.' });
+    }
 
     try {
-      await usuarioServices.deletarUsuario(usuarioId);
+      await usuarioServices.deletarUsuarioLogado(usuarioId, senha);
       return res.status(204).send();
     } catch (error) {
       if (error.code === 'P2025') {
         return res.status(404).json({ message: 'Usuário não encontrado.' });
       }
-
-      // TODO: Deletar em conjunto com a API de autenticação.
+      if (error.message.includes('incorreta')) {
+        return res.status(401).json({ message: error.message });
+      }
       return res.status(500).json({ message: error.message });
     }
   },
