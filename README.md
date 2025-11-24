@@ -135,6 +135,20 @@ Como a maioria das rotas da API é protegida, você precisará de um `accessToke
 
 Os cadeados em todas as rotas protegidas agora devem aparecer como "fechados". Você está autenticado e pode testar qualquer rota da API que o cargo do seu usuário tem acesso (como `GET /api/pedidos/me` ou `POST /api/usuarios/me/carrinho/itens`).
 
+## 🗄️ Gerenciando o Banco de Dados (Prisma Studio)
+
+O Prisma Studio é uma interface gráfica (GUI) visual que permite explorar, visualizar e manipular os dados do seu banco PostgreSQL diretamente pelo navegador.
+
+### Como acessar
+
+Com o ambiente Docker rodando, execute o seguinte comando no terminal:
+
+```bash
+docker compose exec api npx prisma studio
+```
+
+O terminal ficará aguardando conexões. Abra seu navegador e acesse **[http://localhost:5555](http://localhost:5555)** para visualizar seus dados.
+
 ## 🧪 Rodando os Testes
 
 Este projeto é configurado com dois tipos de testes: Testes de Unidade e Testes de Integração.

@@ -30,8 +30,55 @@ const authRedirectUrls = {
     'http://localhost:3001/perfil?error=email-atualizacao-falhou',
 };
 
-const hookCriarRelatorio = async (tx, novoUsuario) => {
-  await tx.relatorioUsuario.create({ data: { usuarioId: novoUsuario.id } });
+const hookPosRegistro = async (tx, novoUsuario, dadosExtras) => {
+  // Cria o relatório (obrigatório)
+  await tx.relatorioUsuario.create({
+    data: {
+      usuarioId: novoUsuario.id,
+    },
+  });
+
+  // Verifica e cria Endereço (se enviado pelo frontend)
+  if (dadosExtras?.endereco) {
+    await tx.usuario.update({
+      where: { id: novoUsuario.id },
+      data: {
+        endereco: {
+          create: {
+            cep: dadosExtras.endereco.cep,
+            estado: dadosExtras.endereco.estado,
+            cidade: dadosExtras.endereco.cidade,
+            bairro: dadosExtras.endereco.bairro,
+            logradouro: dadosExtras.endereco.logradouro,
+            numero: dadosExtras.endereco.numero,
+            complemento: dadosExtras.endereco.complemento || null,
+            pontoReferencia: dadosExtras.endereco.pontoReferencia || null,
+            latitude: dadosExtras.endereco.latitude
+              ? Number(dadosExtras.endereco.latitude)
+              : null,
+            longitude: dadosExtras.endereco.longitude
+              ? Number(dadosExtras.endereco.longitude)
+              : null,
+          },
+        },
+      },
+    });
+  }
+
+  // Verifica e cria Telefones (se enviado pelo frontend)
+  if (dadosExtras?.telefones && Array.isArray(dadosExtras.telefones)) {
+    await Promise.all(
+      dadosExtras.telefones.map((tel) =>
+        tx.telefone.create({
+          data: {
+            ddd: tel.ddd,
+            numero: tel.numero,
+            usuarioId: novoUsuario.id,
+          },
+        }),
+      ),
+    );
+  }
 };
 
 const authModule = createAuthModule({
@@ -40,7 +87,7 @@ const authModule = createAuthModule({
   defaultUserRole: RoleUsuario.CLIENTE,
   emailService,
   urls: authRedirectUrls,
-  onUserRegistered: hookCriarRelatorio,
+  onUserRegistered: hookPosRegistro,
 });
 
 /**
@@ -59,6 +106,6 @@ const authenticateOptional = async (req, res, next) => {
   }
 };
 
-export const { authRoutes, authMiddleware } = authModule;
+export const { authRoutes, authMiddleware, authService } = authModule;
 export { RoleUsuario };
 export { authenticateOptional };

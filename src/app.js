@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 
 // --- IMPORTAÇÃO DE AUTH ---
 import { RoleUsuario } from '@prisma/client';
@@ -21,6 +22,13 @@ import categoriaProdutoRouter from './modules/categoria-produto/categoria-produt
 
 // --- CONFIGURAÇÃO DO APP ---
 const app = express();
+// --- CONFIGURAÇÃO DO CORS ---
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // URL do Frontend
+    credentials: true, // IMPORTANTE: Permite enviar/receber Cookies (Refresh Token)
+  }),
+);
 app.use(express.json());
 
 // --- ROTAS DA APLICACAO ---
