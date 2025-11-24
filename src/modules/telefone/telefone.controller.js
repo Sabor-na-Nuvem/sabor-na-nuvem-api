@@ -3,14 +3,8 @@ import telefoneServices from './telefone.services.js';
 const telefoneController = {
   async listarTelefonesDoPai(req, res) {
     const { usuarioId, lojaId } = req.params;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai)) {
-      return res.status(400).json({
-        message: `O ID ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} deve ser um número.`,
-      });
-    }
 
     try {
       const telefones = await telefoneServices.listarTelefonesDoPai(
@@ -26,14 +20,8 @@ const telefoneController = {
 
   async buscarTelefoneDoPaiPorId(req, res) {
     const { usuarioId, lojaId, telefoneId } = req.params;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai) || Number.isNaN(Number(telefoneId))) {
-      return res.status(400).json({
-        message: `Os IDs ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} e do telefone devem ser números.`,
-      });
-    }
 
     try {
       const telefone = await telefoneServices.buscarTelefoneDoPaiPorId(
@@ -57,14 +45,8 @@ const telefoneController = {
   async adicionarTelefoneAoPai(req, res) {
     const { usuarioId, lojaId } = req.params;
     const dadosTelefone = req.body;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai)) {
-      return res.status(400).json({
-        message: `O ID ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} deve ser um número.`,
-      });
-    }
 
     try {
       const novoTelefone = await telefoneServices.adicionarTelefoneAoPai(
@@ -92,14 +74,8 @@ const telefoneController = {
   async atualizarTelefoneDoPai(req, res) {
     const { usuarioId, lojaId, telefoneId } = req.params;
     const novosDados = req.body;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai) || Number.isNaN(Number(telefoneId))) {
-      return res.status(400).json({
-        message: `Os IDs ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} e do telefone devem ser números.`,
-      });
-    }
 
     try {
       const telefoneAtualizado = await telefoneServices.atualizarTelefoneDoPai(
@@ -120,14 +96,8 @@ const telefoneController = {
 
   async deletarTelefoneDoPai(req, res) {
     const { usuarioId, lojaId, telefoneId } = req.params;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai) || Number.isNaN(Number(telefoneId))) {
-      return res.status(400).json({
-        message: `Os IDs ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} e do telefone devem ser números.`,
-      });
-    }
 
     try {
       await telefoneServices.deletarTelefoneDoPai(

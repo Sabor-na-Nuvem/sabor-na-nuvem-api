@@ -3,14 +3,8 @@ import enderecoServices from './endereco.services.js';
 const enderecoController = {
   async buscarEnderecoDoPai(req, res) {
     const { usuarioId, lojaId } = req.params;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai)) {
-      return res.status(400).json({
-        message: `O ID ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} deve ser um número.`,
-      });
-    }
 
     try {
       const endereco = await enderecoServices.buscarEnderecoDoPai(
@@ -33,14 +27,8 @@ const enderecoController = {
   async criarEnderecoParaPai(req, res) {
     const { usuarioId, lojaId } = req.params;
     const dadosEndereco = req.body;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai)) {
-      return res.status(400).json({
-        message: `O ID ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} deve ser um número.`,
-      });
-    }
 
     try {
       const novoEndereco = await enderecoServices.criarEnderecoParaPai(
@@ -68,14 +56,8 @@ const enderecoController = {
   async atualizarEnderecoDoPai(req, res) {
     const { usuarioId, lojaId } = req.params;
     const novosDados = req.body;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai)) {
-      return res.status(400).json({
-        message: `O ID ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} deve ser um número.`,
-      });
-    }
 
     try {
       const enderecoAtualizado = await enderecoServices.atualizarEnderecoDoPai(
@@ -95,14 +77,8 @@ const enderecoController = {
 
   async deletarEnderecoDoPai(req, res) {
     const { usuarioId, lojaId } = req.params;
-    const idDoPai = usuarioId ? Number(usuarioId) : Number(lojaId);
+    const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
-
-    if (Number.isNaN(idDoPai)) {
-      return res.status(400).json({
-        message: `O ID ${tipoDoPai === 'usuario' ? 'do' : 'da'} ${tipoDoPai} deve ser um número.`,
-      });
-    }
 
     try {
       await enderecoServices.deletarEnderecoDoPai(idDoPai, tipoDoPai);
