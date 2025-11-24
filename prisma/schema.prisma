@@ -69,7 +69,6 @@ model Loja {
   modificadoresEmEstoque ModificadorEmLoja[]
 
   endereco   Endereco @relation(fields: [enderecoId], references: [id], map: "loja_endereco_fk", onDelete: Restrict)
-  carrinhoId String
 
   @@map("loja")
 }
