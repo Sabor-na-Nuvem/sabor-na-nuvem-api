@@ -97,12 +97,26 @@ const telefoneServices = {
         numero: novosDados.numero,
       };
 
-      const novoTelefone = await prisma.telefone.update({
+      const telefoneExistente = await prisma.telefone.findFirst({
         where: {
           id: telefoneId,
+          // Verifica dinamicamente se pertence ao usuário ou loja
           ...(tipoDoPai === 'usuario'
             ? { usuarioId: idDoPai }
             : { lojaId: idDoPai }),
+        },
+      });
+
+      if (!telefoneExistente) {
+        // Lança um erro manual simulando o erro P2025 do Prisma
+        const error = new Error('Telefone não encontrado ou permissão negada.');
+        error.code = 'P2025';
+        throw error;
+      }
+
+      const novoTelefone = await prisma.telefone.update({
+        where: {
+          id: telefoneId,
         },
         data: dadosParaAtualizar,
       });
@@ -131,12 +145,25 @@ const telefoneServices = {
 
   async deletarTelefoneDoPai(idDoPai, tipoDoPai, telefoneId) {
     try {
-      const telefoneDeletado = await prisma.telefone.delete({
+      const telefoneExistente = await prisma.telefone.findFirst({
         where: {
           id: telefoneId,
           ...(tipoDoPai === 'usuario'
             ? { usuarioId: idDoPai }
             : { lojaId: idDoPai }),
+        },
+      });
+
+      if (!telefoneExistente) {
+        const error = new Error('Telefone não encontrado ou permissão negada.');
+        error.code = 'P2025'; // Simula erro de "Record not found"
+        throw error;
+      }
+
+      // 2. DELEÇÃO SEGURA (Apenas pelo ID)
+      const telefoneDeletado = await prisma.telefone.delete({
+        where: {
+          id: telefoneId,
         },
       });
 

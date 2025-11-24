@@ -23,11 +23,15 @@ const telefoneController = {
     const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
 
+    if (Number.isNaN(Number(telefoneId))) {
+      return res.status(400).json({ message: 'ID do telefone inválido.' });
+    }
+
     try {
       const telefone = await telefoneServices.buscarTelefoneDoPaiPorId(
         idDoPai,
         tipoDoPai,
-        telefoneId,
+        Number(telefoneId),
       );
 
       if (!telefone) {
@@ -77,11 +81,15 @@ const telefoneController = {
     const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
 
+    if (Number.isNaN(Number(telefoneId))) {
+      return res.status(400).json({ message: 'ID do telefone inválido.' });
+    }
+
     try {
       const telefoneAtualizado = await telefoneServices.atualizarTelefoneDoPai(
         idDoPai,
         tipoDoPai,
-        telefoneId,
+        Number(telefoneId),
         novosDados,
       );
 
@@ -99,11 +107,15 @@ const telefoneController = {
     const idDoPai = usuarioId || Number(lojaId);
     const tipoDoPai = usuarioId ? 'usuario' : 'loja';
 
+    if (Number.isNaN(Number(telefoneId))) {
+      return res.status(400).json({ message: 'ID do telefone inválido.' });
+    }
+
     try {
       await telefoneServices.deletarTelefoneDoPai(
         idDoPai,
         tipoDoPai,
-        telefoneId,
+        Number(telefoneId),
       );
 
       return res.status(204).send();
