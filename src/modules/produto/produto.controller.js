@@ -7,7 +7,7 @@ const produtoController = {
       let idCategoriaNumerico;
 
       if (categoriaId !== undefined) {
-        idCategoriaNumerico = Number(idCategoriaNumerico);
+        idCategoriaNumerico = Number(categoriaId);
         if (Number.isNaN(idCategoriaNumerico)) {
           return res
             .status(400)

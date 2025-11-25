@@ -28,17 +28,17 @@ const produtosEmLojaController = {
 
   async buscarProdutoNaLoja(req, res) {
     try {
-      const { idLoja, idProduto } = req.params;
+      const { lojaId, produtoId } = req.params;
 
-      if (Number.isNaN(Number(idLoja)) || Number.isNaN(Number(idProduto))) {
+      if (Number.isNaN(Number(lojaId)) || Number.isNaN(Number(produtoId))) {
         return res
           .status(400)
           .json({ message: 'O ID do produto e da loja devem ser números.' });
       }
 
       const produto = await produtosEmLojaServices.buscarProdutoNaLoja(
-        Number(idLoja),
-        Number(idProduto),
+        Number(lojaId),
+        Number(produtoId),
       );
 
       if (!produto) {
@@ -57,11 +57,11 @@ const produtosEmLojaController = {
 
   async adicionarProdutoEmLoja(req, res) {
     try {
-      const { idLoja } = req.params;
+      const { lojaId } = req.params;
       const dadosProdutoEmLoja = req.body;
 
       if (
-        Number.isNaN(Number(idLoja)) ||
+        Number.isNaN(Number(lojaId)) ||
         Number.isNaN(Number(dadosProdutoEmLoja.produtoId))
       ) {
         return res
@@ -71,7 +71,7 @@ const produtosEmLojaController = {
 
       const novoProdutoNaLoja =
         await produtosEmLojaServices.adicionarProdutoEmLoja(
-          Number(idLoja),
+          Number(lojaId),
           dadosProdutoEmLoja,
         );
 
@@ -91,10 +91,10 @@ const produtosEmLojaController = {
 
   async atualizarProdutoNaLoja(req, res) {
     try {
-      const { idLoja, idProduto } = req.params;
+      const { lojaId, produtoId } = req.params;
       const novosDados = req.body;
 
-      if (Number.isNaN(Number(idLoja)) || Number.isNaN(Number(idProduto))) {
+      if (Number.isNaN(Number(lojaId)) || Number.isNaN(Number(produtoId))) {
         return res
           .status(400)
           .json({ message: 'O ID do produto e da loja devem ser números.' });
@@ -102,8 +102,8 @@ const produtosEmLojaController = {
 
       const produtoAtualizado =
         await produtosEmLojaServices.atualizarProdutoNaLoja(
-          Number(idLoja),
-          Number(idProduto),
+          Number(lojaId),
+          Number(produtoId),
           novosDados,
         );
 
@@ -120,17 +120,17 @@ const produtosEmLojaController = {
 
   async deletarProdutoDaLoja(req, res) {
     try {
-      const { idLoja, idProduto } = req.params;
+      const { lojaId, produtoId } = req.params;
 
-      if (Number.isNaN(Number(idLoja)) || Number.isNaN(Number(idProduto))) {
+      if (Number.isNaN(Number(lojaId)) || Number.isNaN(Number(produtoId))) {
         return res
           .status(400)
           .json({ message: 'O ID do produto deve ser um número.' });
       }
 
       await produtosEmLojaServices.deletarProdutoDaLoja(
-        Number(idLoja),
-        Number(idProduto),
+        Number(lojaId),
+        Number(produtoId),
       );
 
       return res.status(204).send();
