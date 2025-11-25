@@ -299,6 +299,8 @@ async function main() {
       bairro: 'Asa Norte',
       logradouro: 'CLN 408/409',
       numero: '15',
+      latitude: -15.759525,
+      longitude: -47.87919,
     },
   });
 

@@ -9,6 +9,7 @@ import {
   buscarPedidoDetalhado,
   listarPedidos,
   transicoesPermitidas,
+  includeListagemPedidos,
 } from './pedido.helpers.js';
 
 const pedidoServices = {
@@ -18,73 +19,65 @@ const pedidoServices = {
 
     try {
       const novoPedidoCompleto = await prisma.$transaction(async (tx) => {
-        // Dados do Carrinho
+        // 1. PREPARAÇÃO DOS DADOS (Logado vs Anônimo)
         let carrinhoFonte;
+        let dadosEnderecoEntrega = null;
+
         if (idUsuario) {
-          // Usuário Logado: Busca o carrinho do banco
+          // Logado: Busca do banco
           carrinhoFonte = await tx.carrinho.findUnique({
             where: { id: idUsuario },
             include: {
               itensNoCarrinho: {
                 include: {
+                  // Includes mínimos necessários para a validação de preço
                   produto: { select: { nome: true } },
-                  modificadoresSelecionados: {
-                    include: {
-                      modificador: { select: { nome: true } },
-                    },
-                  },
+                  modificadoresSelecionados: true,
                 },
               },
             },
           });
+          dadosEnderecoEntrega = dadosInput.enderecoEntrega;
         } else {
-          // Usuário Anônimo: Usa o carrinho mockado do body
+          // Anônimo: Usa do body
           carrinhoFonte = dadosInput.carrinho;
+          dadosEnderecoEntrega = carrinhoFonte?.enderecoEntrega;
         }
 
-        if (!carrinhoFonte || !carrinhoFonte.lojaId) {
+        // Validações
+        if (!carrinhoFonte || !carrinhoFonte.lojaId)
           throw new Error('Carrinho inválido ou loja não definida.');
-        }
-        if (!carrinhoFonte.tipo) {
+        if (!carrinhoFonte.tipo)
           throw new Error('Carrinho inválido (não possui tipo de pedido).');
-        }
-        if (
-          !carrinhoFonte.itensNoCarrinho ||
-          carrinhoFonte.itensNoCarrinho.length === 0
-        ) {
+        if (!carrinhoFonte.itensNoCarrinho?.length)
           throw new Error('O carrinho está vazio.');
-        }
 
         const { lojaId, tipo, itensNoCarrinho } = carrinhoFonte;
 
-        // Revalidar Itens e Calcular Totais
+        if (tipo === 'ENTREGA' && !dadosEnderecoEntrega) {
+          throw new Error(
+            'Endereço de entrega é obrigatório para pedidos de entrega.',
+          );
+        }
+
+        // 2. REVALIDAÇÃO DE ITENS E PREÇOS
         let valorBaseCalculado = new Prisma.Decimal(0);
         const itensDataParaCriar = [];
 
         for (const item of itensNoCarrinho) {
-          // Revalida Produto Base
           const produtoEmLoja = await tx.produtosEmLoja.findFirst({
-            where: {
-              lojaId,
-              produtoId: item.produtoId,
-              disponivel: true,
-            },
+            where: { lojaId, produtoId: item.produtoId, disponivel: true },
           });
-          if (!produtoEmLoja) {
+
+          if (!produtoEmLoja)
             throw new Error(
-              `O produto "${item.produto?.nome || item.produtoId}" não está mais disponível nesta loja.`,
+              `O produto ${item.produto.nome} não está mais disponível nesta loja.`,
             );
-          }
 
-          // Confia no preço congelado do produto no carrinho
-          let valorItem = item.valorUnitarioProduto;
-
-          // Modificadores
+          let valorItem = produtoEmLoja.valorBase;
           const modsDataParaCriar = [];
-          if (
-            item.modificadoresSelecionados &&
-            item.modificadoresSelecionados.length > 0
-          ) {
+
+          if (item.modificadoresSelecionados?.length > 0) {
             for (const modSel of item.modificadoresSelecionados) {
               const modEmLoja = await tx.modificadorEmLoja.findUnique({
                 where: {
@@ -95,35 +88,33 @@ const pedidoServices = {
                   disponivel: true,
                 },
               });
-              if (!modEmLoja) {
+
+              if (!modEmLoja)
                 throw new Error(
-                  `A opção "${modSel.modificador?.nome || modSel.modificadorId}" não está mais disponível.`,
+                  `A opção ${modSel.modificadorId} está indisponível.`,
                 );
-              }
-              // Confia no preço congelado do modificador no carrinho
-              valorItem = valorItem.plus(modSel.valorAdicionalCobrado);
+
+              valorItem = valorItem.plus(modEmLoja.valorAdicional);
               modsDataParaCriar.push({
                 modificadorId: modSel.modificadorId,
-                valorAdicionalCobrado: modSel.valorAdicionalCobrado,
+                valorAdicionalCobrado: modEmLoja.valorAdicional,
               });
             }
           }
 
-          // Adiciona ao total
           valorBaseCalculado = valorBaseCalculado.plus(
             valorItem.times(item.qtdProduto),
           );
 
-          // Guarda os dados para a criação do ItemPedido
           itensDataParaCriar.push({
             produtoId: item.produtoId,
             qtdProduto: item.qtdProduto,
-            valorUnitarioProduto: item.valorUnitarioProduto,
+            valorUnitarioProduto: produtoEmLoja.valorBase,
             modificadores: modsDataParaCriar,
           });
-        } // Fim do loop de itens
+        }
 
-        // Validar e Aplicar Cupom
+        // 3. APLICAÇÃO DE CUPOM
         let valorCobrado = valorBaseCalculado;
         let cupomIdParaAssociar = null;
 
@@ -132,10 +123,7 @@ const pedidoServices = {
             codCupom,
             tx,
             idUsuario,
-            // { valorCarrinho: valorBaseCalculado } // TODO: Cupom precisa de um valor mínimo na compra?
           );
-
-          // Se válido, calcula o desconto
           valorCobrado = calcularDesconto(
             valorBaseCalculado,
             resultadoCupom.tipoDesconto,
@@ -144,22 +132,42 @@ const pedidoServices = {
           cupomIdParaAssociar = resultadoCupom.cupomId;
         }
 
-        // Criar o Pedido
+        // 4. CRIAÇÃO DO ENDEREÇO SNAPSHOT (Se Entrega)
+        let enderecoSnapshotId = null;
+        if (tipo === 'ENTREGA' && dadosEnderecoEntrega) {
+          const novoEndereco = await tx.endereco.create({
+            data: {
+              cep: dadosEnderecoEntrega.cep,
+              logradouro: dadosEnderecoEntrega.logradouro,
+              numero: dadosEnderecoEntrega.numero,
+              complemento: dadosEnderecoEntrega.complemento,
+              bairro: dadosEnderecoEntrega.bairro,
+              cidade: dadosEnderecoEntrega.cidade,
+              estado: dadosEnderecoEntrega.estado,
+              pontoReferencia: dadosEnderecoEntrega.pontoReferencia,
+              latitude: dadosEnderecoEntrega.latitude,
+              longitude: dadosEnderecoEntrega.longitude,
+            },
+          });
+          enderecoSnapshotId = novoEndereco.id;
+        }
+
+        // 5. CRIAÇÃO DO PEDIDO
         const novoPedido = await tx.pedido.create({
           data: {
-            clienteId: idUsuario, // Será null se for anônimo
+            clienteId: idUsuario,
             lojaId,
-            dataHora: new Date(),
             valorBase: valorBaseCalculado,
             valorCobrado,
             cupomUsadoId: cupomIdParaAssociar,
             tipo,
             observacoes: observacoes || null,
-            status: StatusPedido.PENDENTE, // TODO: Ou AGUARDANDO_PAGAMENTO se a lógica mudar
+            status: StatusPedido.PENDENTE,
+            enderecoEntregaId: enderecoSnapshotId,
           },
         });
 
-        // Criar os Itens do Pedido (ItemPedido e ItemPedidoModificadores)
+        // 6. CRIAÇÃO DOS ITENS DO PEDIDO
         for (const itemData of itensDataParaCriar) {
           const novoItemPedido = await tx.itemPedido.create({
             data: {
@@ -170,7 +178,6 @@ const pedidoServices = {
             },
           });
 
-          // Cria os modificadores associados a este ItemPedido
           if (itemData.modificadores.length > 0) {
             await tx.itemPedidoModificadores.createMany({
               data: itemData.modificadores.map((mod) => ({
@@ -180,50 +187,38 @@ const pedidoServices = {
               })),
             });
           }
-        } // Fim do loop de criação de itens
+        }
 
-        // Limpar Carrinho (se for usuário logado)
+        // 7. LIMPEZA DO CARRINHO (Apenas Logado)
         if (idUsuario) {
           await tx.itemCarrinho.deleteMany({
             where: { carrinhoId: idUsuario },
           });
         }
 
-        // Retornar o Pedido completo
-        const pedidoCompleto = await tx.pedido.findUnique({
+        // Retorna usando seu include detalhado
+        const pedidoParaRetornar = await tx.pedido.findUnique({
           where: { id: novoPedido.id },
           include: includeDetalhesPedido,
         });
 
-        return pedidoCompleto;
-      }); // --- FIM DA TRANSAÇÃO ---
+        return pedidoParaRetornar;
+      });
 
       return novoPedidoCompleto;
     } catch (error) {
+      // Tratamento de erros (Mantido igual)
+      if (error.code === 'P2003')
+        throw new Error('Falha de referência: Loja ou produto não existe.');
+      // Propaga erros de negócio conhecidos
       if (
-        error.message.includes('Carrinho inválido') ||
-        error.message.includes('não está mais disponível') ||
-        error.message.includes('não encontrado') ||
-        error.message.includes('indisponível') ||
-        error.message.includes('inválido') ||
-        error.message.includes('Loja não definida') ||
-        error.message.includes('vazio') ||
-        error.message.includes('Cupom')
+        !error.message.includes('inválido') &&
+        !error.message.includes('vazio') &&
+        !error.message.includes('indisponível')
       ) {
-        throw error;
+        console.error(`Erro ao criar pedido:`, error);
       }
-
-      if (error.code === 'P2003') {
-        throw new Error(
-          'Falha de referência: A loja ou produto/modificador não existe.',
-        );
-      }
-
-      console.error(
-        `Erro ao criar pedido para usuário ${idUsuario || 'anônimo'}: `,
-        error,
-      );
-      throw new Error('Não foi possível processar o seu pedido.');
+      throw error;
     }
   },
 
@@ -231,8 +226,7 @@ const pedidoServices = {
 
   async listarMeusPedidos(idUsuario, filtros) {
     const whereBase = { clienteId: idUsuario };
-    const include = { loja: { select: { nome: true } } };
-    return listarPedidos(whereBase, filtros, include, prisma);
+    return listarPedidos(whereBase, filtros, includeListagemPedidos, prisma);
   },
 
   async buscarMeuPedidoPorId(idPedido, idUsuario) {
@@ -301,8 +295,7 @@ const pedidoServices = {
 
   async listarPedidosDaLoja(idLoja, filtros) {
     const whereBase = { lojaId: idLoja };
-    const include = { cliente: { select: { nome: true } } };
-    return listarPedidos(whereBase, filtros, include, prisma);
+    return listarPedidos(whereBase, filtros, includeListagemPedidos, prisma);
   },
 
   async buscarPedidoDaLoja(idPedido, idLoja) {
@@ -430,11 +423,7 @@ const pedidoServices = {
 
   async listarTodosOsPedidos(filtros) {
     const whereBase = {};
-    const include = {
-      loja: { select: { nome: true } },
-      cliente: { select: { nome: true } },
-    };
-    return listarPedidos(whereBase, filtros, include, prisma);
+    return listarPedidos(whereBase, filtros, includeListagemPedidos, prisma);
   },
 
   async buscarPedidoPorIdAdmin(idPedido) {

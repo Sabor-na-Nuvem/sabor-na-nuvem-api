@@ -1,7 +1,7 @@
 import express from 'express';
 import pedidoController from './pedido.controller.js';
 
-// --- Importação do Auth ---
+// --- Importação do Auth e Middlewares ---
 import {
   authMiddleware,
   RoleUsuario,
@@ -10,10 +10,16 @@ import {
 
 const pedidoRouter = express.Router();
 
-/*
- *==================================
+// Middlewares de autorização locais
+const authorizeFuncionario = authMiddleware.ensureRole([
+  RoleUsuario.ADMIN,
+  RoleUsuario.FUNCIONARIO,
+]);
+const authorizeAdmin = authMiddleware.ensureRole([RoleUsuario.ADMIN]);
+
+/* ==================================
  * ROTA PÚBLICA (CRIAÇÃO)
- * Proteção: Nenhuma (Autenticação é opcional no controller)
+ * Proteção: Autenticação Opcional
  *==================================
  */
 
@@ -25,9 +31,9 @@ const pedidoRouter = express.Router();
  *     tags: [Pedidos (Cliente)]
  *     description: |
  *       Cria um novo pedido.
- *       - Se autenticado, usa o carrinho salvo no banco (ignora `carrinho` do body).
- *       - Se anônimo, o `carrinho` (mockado) é obrigatório no body.
- *       Revalida todos os preços e disponibilidade no momento da criação.
+ *       - **Usuário Logado:** O `carrinho` é ignorado (busca do banco). Deve enviar `enderecoEntrega` se o tipo for ENTREGA.
+ *       - **Usuário Anônimo:** O objeto `carrinho` é obrigatório e deve conter os itens e o `enderecoEntrega` (se for ENTREGA).
+ *       - O sistema cria um "Snapshot" do endereço no momento do pedido, garantindo histórico.
  *     security:
  *       - bearerAuth: [] # Autenticação é OPCIONAL aqui
  *     requestBody:
@@ -45,17 +51,14 @@ const pedidoRouter = express.Router();
  *               $ref: '#/components/schemas/PedidoDetalhado'
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
- *         description: Erro de validação (carrinho vazio, loja não definida, item indisponível, regra de cupom falhou, etc.).
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
- *         description: Loja, produto ou modificador não encontrado.
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
 pedidoRouter.post('/', authenticateOptional, pedidoController.criarPedido);
 
-/*
- *==================================
+/* ==================================
  * ROTAS DO CLIENTE (CLIENTE)
  * Proteção: ensureAuthenticated
  *==================================
@@ -71,19 +74,16 @@ pedidoRouter.post('/', authenticateOptional, pedidoController.criarPedido);
  *       - bearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/statusQueryParam'
- *       - $ref: '#/components/parameters/lojaIdQueryParam'
- *       - $ref: '#/components/parameters/tipoQueryParam'
- *       - $ref: '#/components/parameters/dataDeQueryParam'
- *       - $ref: '#/components/parameters/dataAteQueryParam'
- *       - $ref: '#/components/parameters/pageQueryParam'
  *       - $ref: '#/components/parameters/limitQueryParam'
  *     responses:
  *       200:
- *         description: Lista de pedidos do usuário com paginação.
+ *         description: Lista de pedidos.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ListaPedidosResponse'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PedidoParaLista'
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
@@ -116,7 +116,6 @@ pedidoRouter.get(
  *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
  *         $ref: '#/components/responses/ForbiddenError'
- *         description: Pedido não pertence a este usuário.
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  *       500:
@@ -140,21 +139,15 @@ pedidoRouter.get(
  *       - $ref: '#/components/parameters/pedidoIdPathParam'
  *     responses:
  *       200:
- *         description: Pedido cancelado com sucesso. Retorna o pedido atualizado.
+ *         description: Pedido cancelado.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/PedidoDetalhado'
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
- *         description: Pedido não pode mais ser cancelado (status avançado).
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
- *         description: Pedido não pertence a este usuário.
- *       404:
- *         $ref: '#/components/responses/NotFoundError'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -164,18 +157,11 @@ pedidoRouter.post(
   pedidoController.cancelarMeuPedido,
 );
 
-/*
- *==================================
+/* ==================================
  * ROTAS DA LOJA (FUNCIONÁRIO/ADMIN)
- * Proteção: ensureAuthenticated + ensureRole(FUNCIONARIO ou ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole
  *==================================
  */
-
-// Middleware reutilizável para proteger rotas de gerenciamento de loja
-const authorizeFuncionario = authMiddleware.ensureRole([
-  RoleUsuario.ADMIN,
-  RoleUsuario.FUNCIONARIO,
-]);
 
 /**
  * @swagger
@@ -188,15 +174,9 @@ const authorizeFuncionario = authMiddleware.ensureRole([
  *     parameters:
  *       - $ref: '#/components/parameters/lojaIdPathParam'
  *       - $ref: '#/components/parameters/statusQueryParam'
- *       - $ref: '#/components/parameters/clienteIdQueryParam'
- *       - $ref: '#/components/parameters/tipoQueryParam'
- *       - $ref: '#/components/parameters/dataDeQueryParam'
- *       - $ref: '#/components/parameters/dataAteQueryParam'
- *       - $ref: '#/components/parameters/pageQueryParam'
- *       - $ref: '#/components/parameters/limitQueryParam'
  *     responses:
  *       200:
- *         description: Lista de pedidos da loja com paginação.
+ *         description: Lista de pedidos da loja.
  *         content:
  *           application/json:
  *             schema:
@@ -205,10 +185,6 @@ const authorizeFuncionario = authMiddleware.ensureRole([
  *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
  *         $ref: '#/components/responses/ForbiddenError'
- *         description: Usuário não tem permissão para ver pedidos desta loja.
- *       404:
- *         $ref: '#/components/responses/NotFoundError'
- *         description: Loja não encontrada.
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -223,7 +199,7 @@ pedidoRouter.get(
  * @swagger
  * /pedidos/loja/{lojaId}/{pedidoId}:
  *   get:
- *     summary: Busca um pedido específico no contexto da loja (Painel da Loja)
+ *     summary: Busca um pedido específico no contexto da loja
  *     tags: [Pedidos (Loja)]
  *     security:
  *       - bearerAuth: []
@@ -243,7 +219,6 @@ pedidoRouter.get(
  *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
- *         description: Pedido não encontrado ou não pertence a esta loja.
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -258,9 +233,8 @@ pedidoRouter.get(
  * @swagger
  * /pedidos/loja/{lojaId}/{pedidoId}:
  *   patch:
- *     summary: Atualiza o status de um pedido (Painel da Loja)
+ *     summary: Atualiza o status de um pedido
  *     tags: [Pedidos (Loja)]
- *     description: Move o pedido no fluxo (PENDENTE -> EM_PREPARO, por exemplo). Valida a transição de status.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -274,21 +248,19 @@ pedidoRouter.get(
  *             $ref: '#/components/schemas/AtualizarStatusPedidoInput'
  *     responses:
  *       200:
- *         description: Status atualizado. Retorna o pedido completo.
+ *         description: Status atualizado.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/PedidoDetalhado'
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
- *         description: Status inválido ou transição de status não permitida.
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
  *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
- *         description: Pedido não encontrado ou não pertence a esta loja.
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -299,10 +271,9 @@ pedidoRouter.patch(
   pedidoController.atualizarStatusDoPedido,
 );
 
-/*
- *==================================
+/* ==================================
  * ROTAS DE ADMIN GLOBAL (ADMIN)
- * Proteção: ensureAuthenticated + ensureRole(ADMIN)
+ * Proteção: ensureAuthenticated + ensureRole
  *==================================
  */
 
@@ -310,22 +281,13 @@ pedidoRouter.patch(
  * @swagger
  * /pedidos/admin:
  *   get:
- *     summary: Lista TODOS os pedidos de TODAS as lojas (Admin Global)
- *     tags: [Pedidos (Admin)]
+ *     summary: Lista TODOS os pedidos de TODAS as lojas
+ *     tags: [Pedidos (Admin Global)]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - $ref: '#/components/parameters/lojaIdQueryParam'
- *       - $ref: '#/components/parameters/clienteIdQueryParam'
- *       - $ref: '#/components/parameters/statusQueryParam'
- *       - $ref: '#/components/parameters/tipoQueryParam'
- *       - $ref: '#/components/parameters/dataDeQueryParam'
- *       - $ref: '#/components/parameters/dataAteQueryParam'
- *       - $ref: '#/components/parameters/pageQueryParam'
- *       - $ref: '#/components/parameters/limitQueryParam'
  *     responses:
  *       200:
- *         description: Lista de pedidos com paginação.
+ *         description: Lista de todos os pedidos.
  *         content:
  *           application/json:
  *             schema:
@@ -340,7 +302,7 @@ pedidoRouter.patch(
 pedidoRouter.get(
   '/admin',
   authMiddleware.ensureAuthenticated,
-  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  authorizeAdmin,
   pedidoController.listarTodosOsPedidos,
 );
 
@@ -348,8 +310,8 @@ pedidoRouter.get(
  * @swagger
  * /pedidos/admin/{pedidoId}:
  *   get:
- *     summary: Busca qualquer pedido pelo ID (Admin Global)
- *     tags: [Pedidos (Admin)]
+ *     summary: Busca qualquer pedido pelo ID
+ *     tags: [Pedidos (Admin Global)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -373,7 +335,7 @@ pedidoRouter.get(
 pedidoRouter.get(
   '/admin/:pedidoId',
   authMiddleware.ensureAuthenticated,
-  authMiddleware.ensureRole([RoleUsuario.ADMIN]),
+  authorizeAdmin,
   pedidoController.buscarPedidoPorIdAdmin,
 );
 

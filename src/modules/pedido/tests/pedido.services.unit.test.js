@@ -18,6 +18,7 @@ const mockTx = {
   itemPedidoModificadores: { createMany: jest.fn() },
   itemCarrinho: { deleteMany: jest.fn() },
   relatorioUsuario: { update: jest.fn() },
+  endereco: { create: jest.fn().mockResolvedValue({ id: 888 }) },
 };
 // --- FIM DOS MOCKS ---
 
@@ -54,7 +55,7 @@ describe('Pedido Service', () => {
       }),
     );
 
-    // --- 3. Helpers Mock (NOVO) ---
+    // --- 3. Helpers Mock ---
     const mockHelpers = {
       calcularDesconto: jest.fn((val, tipo, desc) => val.minus(desc)),
       buscarPedidoDetalhado: jest.fn(),
@@ -64,6 +65,9 @@ describe('Pedido Service', () => {
         loja: true,
         cliente: true,
         itensNoPedido: true,
+      },
+      includeListagemPedidos: {
+        loja: true,
       },
       transicoesPermitidas: {
         AGUARDANDO_PAGAMENTO: [StatusPedido.PENDENTE, StatusPedido.CANCELADO],
@@ -96,9 +100,15 @@ describe('Pedido Service', () => {
   beforeEach(() => {
     jest.clearAllMocks(); // Este é o ideal
 
-    Object.values(mockTx).forEach((table) =>
-      Object.values(table).forEach((fn) => fn.mockReset()),
-    );
+    Object.values(mockTx).forEach((table) => {
+      if (typeof table === 'object') {
+        Object.values(table).forEach((fn) => {
+          if (fn.mockReset) fn.mockReset();
+        });
+      }
+    });
+
+    mockTx.endereco.create.mockResolvedValue({ id: 888 });
 
     prisma.$transaction.mockImplementation(
       async (callback) => await callback(mockTx),
@@ -113,7 +123,7 @@ describe('Pedido Service', () => {
       expect(helpers.listarPedidos).toHaveBeenCalledWith(
         { clienteId: 'uuid-user-1' },
         { page: 1 },
-        { loja: { select: { nome: true } } },
+        { loja: true },
         prisma,
       );
     });
@@ -142,6 +152,16 @@ describe('Pedido Service', () => {
 
     // --- Mocks de Dados Padrão ---
     const mockUsuarioLogado = 'uuid-user-123';
+    const mockEndereco = {
+      cep: '70000000',
+      logradouro: 'Rua Teste',
+      numero: '10',
+      bairro: 'Bairro',
+      cidade: 'Cidade',
+      estado: 'UF',
+      complemento: '',
+      pontoReferencia: '',
+    };
     const mockCarrinhoDB = {
       id: mockUsuarioLogado,
       lojaId: 1,
@@ -198,10 +218,17 @@ describe('Pedido Service', () => {
       mockTx.modificadorEmLoja.findUnique.mockResolvedValue(mockModEmLoja);
       mockTx.pedido.create.mockResolvedValue(mockPedidoCriado);
       mockTx.itemPedido.create.mockResolvedValue(mockItemPedidoCriado);
+      mockTx.endereco.create.mockResolvedValue({
+        id: 888,
+        ...mockEndereco,
+      });
       // (cupomDescontoServices.validarEUsarCupom não será chamado)
 
       // 2. Execução
-      const dadosInput = { observacoes: 'Capricha!' };
+      const dadosInput = {
+        observacoes: 'Capricha!',
+        enderecoEntrega: mockEndereco,
+      };
       await pedidoServices.criarPedido(mockUsuarioLogado, dadosInput);
 
       // 3. Verificação
@@ -217,6 +244,19 @@ describe('Pedido Service', () => {
       expect(mockTx.itemPedidoModificadores.createMany).toHaveBeenCalledTimes(
         1,
       );
+      expect(mockTx.endereco.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          cep: mockEndereco.cep,
+          logradouro: mockEndereco.logradouro,
+        }),
+      });
+      expect(mockTx.pedido.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            enderecoEntregaId: 888,
+          }),
+        }),
+      );
       expect(mockTx.itemCarrinho.deleteMany).toHaveBeenCalledWith({
         where: { carrinhoId: mockUsuarioLogado },
       });
@@ -228,13 +268,17 @@ describe('Pedido Service', () => {
       // 1. Setup (mockCarrinhoDB é usado como o carrinho mockado)
       const dadosInput = {
         observacoes: 'Entrega rápida',
-        carrinho: mockCarrinhoDB, // Passa o carrinho no input
+        carrinho: {
+          ...mockCarrinhoDB,
+          enderecoEntrega: mockEndereco,
+        },
       };
 
       mockTx.produtosEmLoja.findFirst.mockResolvedValue(mockProdutoEmLoja);
       mockTx.modificadorEmLoja.findUnique.mockResolvedValue(mockModEmLoja);
       mockTx.pedido.create.mockResolvedValue(mockPedidoCriado);
       mockTx.itemPedido.create.mockResolvedValue(mockItemPedidoCriado);
+      mockTx.endereco.create.mockResolvedValue(mockEndereco);
 
       // 2. Execução
       await pedidoServices.criarPedido(null, dadosInput); // idUsuario é null
@@ -242,6 +286,7 @@ describe('Pedido Service', () => {
       // 3. Verificação
       expect(prisma.$transaction).toHaveBeenCalledTimes(1);
       expect(mockTx.carrinho.findUnique).not.toHaveBeenCalled(); // Não busca carrinho do banco
+      expect(mockTx.endereco.create).toHaveBeenCalled();
       expect(mockTx.pedido.create).toHaveBeenCalledTimes(1);
       expect(mockTx.itemPedido.create).toHaveBeenCalledTimes(1);
       expect(mockTx.itemPedidoModificadores.createMany).toHaveBeenCalledTimes(
@@ -249,6 +294,20 @@ describe('Pedido Service', () => {
       );
       // NÃO deve limpar o carrinho, pois é anônimo
       expect(mockTx.itemCarrinho.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('deve falhar se o tipo for ENTREGA e não houver endereço', async () => {
+      mockTx.carrinho.findUnique.mockResolvedValue(mockCarrinhoDB);
+
+      await expect(
+        pedidoServices.criarPedido(mockUsuarioLogado, {
+          observacoes: 'Sem endereço',
+        }),
+      ).rejects.toThrow(
+        'Endereço de entrega é obrigatório para pedidos de entrega.',
+      );
+
+      expect(mockTx.pedido.create).not.toHaveBeenCalled();
     });
 
     it('deve lançar erro se o carrinho estiver vazio (usuário logado)', async () => {
@@ -278,13 +337,15 @@ describe('Pedido Service', () => {
     it('deve lançar erro se um produto estiver indisponível', async () => {
       // 1. Setup
       mockTx.carrinho.findUnique.mockResolvedValue(mockCarrinhoDB);
+      const input = { enderecoEntrega: mockEndereco };
+
       mockTx.produtosEmLoja.findFirst.mockResolvedValue(null); // Produto indisponível
 
       // 2. Execução e 3. Verificação
       await expect(
-        pedidoServices.criarPedido(mockUsuarioLogado, {}),
+        pedidoServices.criarPedido(mockUsuarioLogado, input),
       ).rejects.toThrow(
-        `O produto "${mockCarrinhoDB.itensNoCarrinho[0].produto.nome}" não está mais disponível nesta loja.`,
+        `O produto ${mockCarrinhoDB.itensNoCarrinho[0].produto.nome} não está mais disponível nesta loja.`,
       );
       expect(mockTx.pedido.create).not.toHaveBeenCalled();
     });
@@ -295,11 +356,15 @@ describe('Pedido Service', () => {
       mockTx.produtosEmLoja.findFirst.mockResolvedValue(mockProdutoEmLoja);
       mockTx.modificadorEmLoja.findFirst.mockResolvedValue(null); // Modificador indisponível
 
+      const dadosInput = {
+        enderecoEntrega: mockEndereco,
+      };
+
       // 2. Execução e 3. Verificação
       await expect(
-        pedidoServices.criarPedido(mockUsuarioLogado, {}),
+        pedidoServices.criarPedido(mockUsuarioLogado, dadosInput),
       ).rejects.toThrow(
-        `A opção "${mockCarrinhoDB.itensNoCarrinho[0].modificadoresSelecionados[0].modificador.nome}" não está mais disponível.`,
+        `A opção ${mockCarrinhoDB.itensNoCarrinho[0].modificadoresSelecionados[0].modificadorId} está indisponível.`,
       );
       expect(mockTx.pedido.create).not.toHaveBeenCalled();
     });
@@ -311,6 +376,7 @@ describe('Pedido Service', () => {
       mockTx.modificadorEmLoja.findUnique.mockResolvedValue(mockModEmLoja);
       mockTx.pedido.create.mockResolvedValue(mockPedidoCriado);
       mockTx.itemPedido.create.mockResolvedValue(mockItemPedidoCriado);
+      mockTx.endereco.create.mockResolvedValue(mockEndereco);
 
       // Mock do cupom
       const mockCupomResultado = {
@@ -324,7 +390,10 @@ describe('Pedido Service', () => {
       );
 
       // 2. Execução
-      const dadosInput = { codCupom: 'DEZREAIS' };
+      const dadosInput = {
+        codCupom: 'DEZREAIS',
+        enderecoEntrega: mockEndereco,
+      };
       await pedidoServices.criarPedido(mockUsuarioLogado, dadosInput);
 
       // 3. Verificação
@@ -355,7 +424,10 @@ describe('Pedido Service', () => {
       );
 
       // 2. Execução e 3. Verificação
-      const dadosInput = { codCupom: 'EXPIRADO' };
+      const dadosInput = {
+        codCupom: 'EXPIRADO',
+        enderecoEntrega: mockEndereco,
+      };
       await expect(
         pedidoServices.criarPedido(mockUsuarioLogado, dadosInput),
       ).rejects.toThrow('Cupom expirado.');

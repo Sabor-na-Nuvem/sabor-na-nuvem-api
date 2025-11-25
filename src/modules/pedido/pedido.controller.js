@@ -7,8 +7,9 @@ const pedidoController = {
   async criarPedido(req, res) {
     try {
       const usuarioId = req.user?.id || null; // Pega ID do usuário logado (se houver)
-      const dadosInput = req.body; // Pode conter o carrinho mockado ou apenas observações
+      const dadosInput = req.body;
 
+      // Validação básica para anônimos
       if (!usuarioId && !dadosInput.carrinho) {
         return res.status(400).json({
           message: 'Dados do carrinho são obrigatórios para pedidos anônimos.',
@@ -31,7 +32,8 @@ const pedidoController = {
       if (
         error.message.includes('indisponível') ||
         error.message.includes('obrigatória') ||
-        error.message.includes('carrinho')
+        error.message.includes('carrinho') ||
+        error.message.includes('Endereço')
       ) {
         return res.status(400).json({ message: error.message });
       }

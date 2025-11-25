@@ -43,8 +43,9 @@ model Endereco {
   createdAt       DateTime      @default(now()) @map("criadoEm")
   updatedAt       DateTime      @updatedAt @map("atualizadoEm")
 
-  usuario Usuario?
-  loja    Loja?
+  usuario  Usuario?
+  loja     Loja?
+  pedido   Pedido?
 
   @@map("endereco")
 }
@@ -68,7 +69,7 @@ model Loja {
   produtosEmEstoque      ProdutosEmLoja[]
   modificadoresEmEstoque ModificadorEmLoja[]
 
-  endereco   Endereco @relation(fields: [enderecoId], references: [id], map: "loja_endereco_fk", onDelete: Restrict)
+  endereco Endereco @relation(fields: [enderecoId], references: [id], map: "loja_endereco_fk", onDelete: Restrict)
 
   @@map("loja")
 }
@@ -247,25 +248,27 @@ model ModificadorEmLoja {
 }
 
 model Pedido {
-  id           Int          @id @default(autoincrement()) @map("idPedido")
-  clienteId    String?
-  lojaId       Int
-  dataHora     DateTime     @default(now()) @map("dataHoraPedido")
-  valorBase    Decimal      @db.Decimal(7, 2)
-  valorCobrado Decimal      @db.Decimal(7, 2)
-  cupomUsadoId Int?
-  tipo         TipoPedido   @map("tipoPedido")
-  observacoes  String?      @map("observacoesPedido")
-  status       StatusPedido @default(PENDENTE)
+  id                Int          @id @default(autoincrement()) @map("idPedido")
+  clienteId         String?
+  lojaId            Int
+  dataHora          DateTime     @default(now()) @map("dataHoraPedido")
+  valorBase         Decimal      @db.Decimal(7, 2)
+  valorCobrado      Decimal      @db.Decimal(7, 2)
+  cupomUsadoId      Int?
+  tipo              TipoPedido   @map("tipoPedido")
+  observacoes       String?      @map("observacoesPedido")
+  status            StatusPedido @default(PENDENTE)
+  enderecoEntregaId Int?         @unique
   // Timestamps
-  createdAt    DateTime     @default(now()) @map("criadoEm")
-  updatedAt    DateTime     @updatedAt @map("atualizadoEm")
+  createdAt         DateTime     @default(now()) @map("criadoEm")
+  updatedAt         DateTime     @updatedAt @map("atualizadoEm")
 
   itensNoPedido ItemPedido[]
 
-  loja    Loja           @relation(fields: [lojaId], references: [id], map: "pedido_loja_fk", onDelete: Restrict)
-  cliente Usuario?       @relation(fields: [clienteId], references: [id], map: "pedido_usuario_fk", onDelete: SetNull)
-  cupom   CupomDesconto? @relation(fields: [cupomUsadoId], references: [id], map: "pedido_cupom_fk", onDelete: SetNull)
+  loja     Loja           @relation(fields: [lojaId], references: [id], map: "pedido_loja_fk", onDelete: Restrict)
+  cliente  Usuario?       @relation(fields: [clienteId], references: [id], map: "pedido_usuario_fk", onDelete: SetNull)
+  cupom    CupomDesconto? @relation(fields: [cupomUsadoId], references: [id], map: "pedido_cupom_fk", onDelete: SetNull)
+  endereco Endereco?      @relation(fields: [enderecoEntregaId], references: [id], map: "pedido_endereco_fk", onDelete: Restrict)
 
   @@map("pedido")
 }

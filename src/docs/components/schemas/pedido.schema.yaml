@@ -1,6 +1,23 @@
 components:
   schemas:
-    # --- Schemas de Resposta (Detalhes Aninhados) ---
+
+    # --- NOVO: Input de Endereço Reutilizável ---
+    EnderecoInput:
+      type: object
+      required: [cep, logradouro, numero, bairro, cidade, estado]
+      properties:
+        cep: { type: string, example: "70000000" }
+        logradouro: { type: string, example: "Av. Paulista" }
+        numero: { type: string, example: "1000" }
+        complemento: { type: string, nullable: true }
+        bairro: { type: string, example: "Bela Vista" }
+        cidade: { type: string, example: "São Paulo" }
+        estado: { type: string, example: "SP" }
+        pontoReferencia: { type: string, nullable: true }
+        latitude: { type: number, format: float, nullable: true }
+        longitude: { type: number, format: float, nullable: true }
+
+    # --- Schemas de Resposta ---
     ItemPedidoModificadorDetalhado:
       type: object
       properties:
@@ -23,19 +40,23 @@ components:
           type: object
           properties:
             nome: { type: string }
-            imagemUrl: { type: string, format: url }
-            categoria: { type: object, properties: { nome: { type: string } } }
-            personalizacao:
-              type: array
-              items:
-                type: object
-                properties: { id: { type: integer }, nome: { type: string } }
+            imagemUrl: { type: string, format: url, nullable: true }
+            categoria:
+              type: object
+              properties:
+                nome: { type: string }
+        personalizacao:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              nome: { type: string }
         modificadoresSelecionados:
           type: array
           items:
             $ref: '#/components/schemas/ItemPedidoModificadorDetalhado'
 
-    # Schema de Resposta para GET /:id (Completo)
     PedidoDetalhado:
       type: object
       properties:
@@ -52,73 +73,27 @@ components:
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
         cupom:
-          {
-            type: object,
-            nullable: true,
-            properties: { codCupom: { type: string } },
-          }
-        loja: { type: object, properties: { nome: { type: string } } }
+          type: object
+          nullable: true
+          properties:
+            codCupom: { type: string }
+        loja:
+          type: object
+          properties:
+            nome: { type: string }
         cliente:
-          {
-            type: object,
-            nullable: true,
-            properties: { nome: { type: string } },
-          }
+          type: object
+          nullable: true
+          properties:
+            nome: { type: string }
+        endereco:
+          $ref: '#/components/schemas/EnderecoInput'
+          nullable: true
         itensNoPedido:
           type: array
           items:
             $ref: '#/components/schemas/ItemPedidoDetalhado'
-      example:
-        id: 1
-        clienteId: 'f47ac10b-...'
-        lojaId: 1
-        dataHora: '2025-10-30T10:00:00Z'
-        valorBase: 32.00
-        valorCobrado: 32.00
-        cupomUsadoId: null
-        tipo: 'ENTREGA'
-        observacoes: 'Sem cebola'
-        status: 'EM_PREPARO'
-        createdAt: '2025-10-30T10:00:00Z'
-        updatedAt: '2025-10-30T10:05:00Z'
-        cupom: null
-        loja: { nome: 'Loja Central' }
-        cliente: { nome: 'João da Silva' }
-        itensNoPedido:
-          - id: 50 # ID do ItemPedido (não do produto)
-            produtoId: 5
-            qtdProduto: 1
-            valorUnitarioProduto: 25.50 # Preço base "congelado" do X-Burger
-            produto:
-              nome: 'X-Burger Especial'
-              imagemUrl: 'http://example.com/x-burger.jpg'
-              categoria: { nome: 'Lanches' }
-              personalizacao: # Os grupos que este produto OFERECE
-                - { id: 1, nome: 'Adicionais' }
-                - { id: 2, nome: 'Ponto da Carne' }
-            modificadoresSelecionados: # As opções que o cliente ESCOLHEU
-              - valorAdicionalCobrado: 6.50 # Preço "congelado" do Bacon Extra
-                modificador:
-                  personalizavelId: 1 # Linka com o grupo "Adicionais"
-                  nome: 'Bacon Extra'
-                  ordemVisualizacao: 1
-              - valorAdicionalCobrado: 0.00
-                modificador:
-                  personalizavelId: 2 # Linka com o grupo "Ponto da Carne"
-                  nome: 'Ao Ponto'
-                  ordemVisualizacao: 2
-          - id: 51 # ID do ItemPedido
-            produtoId: 20
-            qtdProduto: 2
-            valorUnitarioProduto: 5.00 # Preço base "congelado" do Refrigerante
-            produto:
-              nome: 'Refrigerante Lata'
-              imagemUrl: 'http://example.com/soda.jpg'
-              categoria: { nome: 'Bebidas' }
-              personalizacao: [] # Este produto não tem personalização
-            modificadoresSelecionados: [] # Nenhuma opção escolhida
 
-    # --- Schemas de Resposta (Lista) ---
     Paginacao:
       type: object
       properties:
@@ -126,13 +101,8 @@ components:
         itensPorPagina: { type: integer }
         paginaAtual: { type: integer }
         totalPaginas: { type: integer }
-      example:
-        totalItens: 25
-        itensPorPagina: 10
-        paginaAtual: 0
-        totalPaginas: 3
 
-    PedidoParaLista: # Schema simplificado para listagem
+    PedidoParaLista:
       type: object
       properties:
         id: { type: integer }
@@ -144,28 +114,15 @@ components:
         status: { $ref: '#/components/schemas/StatusPedido' }
         createdAt: { type: string, format: date-time }
         loja:
-          {
-            type: object,
-            properties: { nome: { type: string } },
-            nullable: true,
-          }
+          type: object
+          nullable: true
+          properties:
+            nome: { type: string }
         cliente:
-          {
-            type: object,
-            properties: { nome: { type: string } },
-            nullable: true,
-          }
-      example:
-        id: 1
-        clienteId: 'f47ac10b-...'
-        lojaId: 1
-        dataHora: '2025-10-30T10:00:00Z'
-        valorCobrado: 32.00
-        tipo: 'ENTREGA'
-        status: 'EM_PREPARO'
-        createdAt: '2025-10-30T10:00:00Z'
-        loja: { nome: 'Loja Central' }
-        cliente: { nome: 'João da Silva' }
+          type: object
+          nullable: true
+          properties:
+            nome: { type: string }
 
     ListaPedidosResponse:
       type: object
@@ -178,18 +135,13 @@ components:
           $ref: '#/components/schemas/Paginacao'
 
     # --- Schemas de Input (Requisição) ---
-    ItemCarrinhoMockadoInput: # Usado para criar pedido anônimo
+    ItemCarrinhoMockadoInput:
       type: object
       required: [produtoId, qtdProduto, valorUnitarioProduto]
       properties:
         produtoId: { type: integer }
         qtdProduto: { type: integer, minimum: 1 }
-        valorUnitarioProduto:
-          {
-            type: number,
-            format: float,
-            description: "Preço 'congelado' do item base",
-          }
+        valorUnitarioProduto: { type: number, format: float }
         modificadoresSelecionados:
           type: array
           items:
@@ -199,7 +151,7 @@ components:
               modificadorId: { type: integer }
               valorAdicionalCobrado: { type: number, format: float }
 
-    CarrinhoMockadoInput: # Usado para criar pedido anônimo
+    CarrinhoMockadoInput:
       type: object
       required: [lojaId, tipo, itensNoCarrinho]
       properties:
@@ -209,6 +161,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ItemCarrinhoMockadoInput'
+        enderecoEntrega:
+          $ref: '#/components/schemas/EnderecoInput'
+          nullable: true
 
     CriarPedidoInput:
       type: object
@@ -216,14 +171,10 @@ components:
         codCupom: { type: string, nullable: true }
         observacoes: { type: string, nullable: true }
         carrinho:
-          {
-            $ref: '#/components/schemas/CarrinhoMockadoInput',
-            description: 'Obrigatório se o usuário não estiver logado. Se logado, o carrinho do banco é usado.',
-          }
-      example:
-        codCupom: 'PROMO10'
-        observacoes: 'Sem cebola no X-Bacon.'
-        # 'carrinho' seria enviado apenas se anônimo
+          $ref: '#/components/schemas/CarrinhoMockadoInput'
+        enderecoEntrega:
+          $ref: '#/components/schemas/EnderecoInput'
+          nullable: true
 
     AtualizarStatusPedidoInput:
       type: object

@@ -29,6 +29,7 @@ export const includeDetalhesPedido = {
   cupom: { select: { codCupom: true } },
   loja: { select: { nome: true } },
   cliente: { select: { nome: true } },
+  endereco: true,
   itensNoPedido: {
     include: {
       produto: {
@@ -53,6 +54,32 @@ export const includeDetalhesPedido = {
               ordemVisualizacao: true,
             },
           },
+        },
+      },
+    },
+  },
+};
+
+/**
+ * Define uma estrutura de 'include' MAIS LEVE para listagens.
+ * Usado em: Listar Meus Pedidos.
+ * Traz apenas o essencial para exibir o "Card" do pedido no histórico.
+ */
+export const includeListagemPedidos = {
+  loja: {
+    select: {
+      id: true,
+      nome: true,
+    },
+  },
+  // Trazemos apenas o nome e quantidade dos produtos para resumo (ex: "2x X-Burger...")
+  itensNoPedido: {
+    select: {
+      qtdProduto: true,
+      produto: {
+        select: {
+          nome: true,
+          imagemUrl: true, // Útil para mostrar a foto no histórico
         },
       },
     },

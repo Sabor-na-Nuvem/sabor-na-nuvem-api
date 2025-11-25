@@ -71,6 +71,7 @@ let modValido;
 let cupomValido;
 let carrinho;
 let itemCarrinho;
+let dadosEnderecoInput;
 // ---------------------------------------------------------------------
 
 describe('Fluxo de Integração: Criar Pedido', () => {
@@ -196,6 +197,17 @@ describe('Fluxo de Integração: Criar Pedido', () => {
       },
     });
 
+    dadosEnderecoInput = {
+      cep: '99999-999',
+      estado: 'SP',
+      cidade: 'São Paulo',
+      bairro: 'Jardins',
+      logradouro: 'Rua da Entrega',
+      numero: '100',
+      complemento: 'Apto 10',
+      pontoReferencia: '',
+    };
+
     // --- Fim da Semeadura ---
     // Valor Base Esperado = (30.00 [prod] + 5.00 [mod]) * 2 [qtd] = 70.00
     // Valor Cobrado Esperado = 70.00 - 10.00 [cupom] = 60.00
@@ -213,6 +225,7 @@ describe('Fluxo de Integração: Criar Pedido', () => {
     const dadosInput = {
       codCupom: cupomValido.codCupom, // "DEZREAIS"
       observacoes: 'Teste de integração',
+      enderecoEntrega: dadosEnderecoInput,
     };
 
     // Verifica o estado ANTES da chamada
@@ -272,7 +285,10 @@ describe('Fluxo de Integração: Criar Pedido', () => {
 
   it('deve falhar (400) se o cupom for inválido', async () => {
     // --- Arrange ---
-    const dadosInput = { codCupom: 'CUPOM-FALSO' };
+    const dadosInput = {
+      codCupom: 'CUPOM-FALSO',
+      enderecoEntrega: dadosEnderecoInput,
+    };
 
     // --- Act ---
     const response = await request
