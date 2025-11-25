@@ -14,6 +14,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api.git"

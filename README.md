@@ -81,6 +81,14 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
    docker compose exec api npx prisma migrate dev --name init
    ```
 
+6. (Opcional) Popular o banco de dados:
+
+    ```bash
+    docker compose exec api npx prisma db seed
+    ```
+
+    > **Nota:** Isso vai rodar o script, limpar o banco e criar dados base prontos para serem consumidos pelo frontend.
+
 Pronto! Sua API está rodando e acessível em `http://localhost:3000`
 
 ### Swagger
