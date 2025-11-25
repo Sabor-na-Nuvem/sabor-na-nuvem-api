@@ -96,14 +96,13 @@ const authModule = createAuthModule({
  * Apenas injeta req.user se for bem-sucedido.
  */
 const authenticateOptional = async (req, res, next) => {
-  try {
-    // eslint-disable-next-line no-unused-vars
-    await authModule.authMiddleware.ensureAuthenticated(req, res, (err) => {
-      next();
-    });
-  } catch (error) {
-    next();
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return next();
   }
+
+  return authModule.authMiddleware.ensureAuthenticated(req, res, next);
 };
 
 export const { authRoutes, authMiddleware, authService } = authModule;
