@@ -112,7 +112,6 @@ describe('Fluxo de Integração: Adicionar Item ao Carrinho', () => {
         },
         horarioFuncionamento: '08:00-18:00',
         ofereceDelivery: true,
-        carrinhoId: 'dummy-carrinho-id',
       },
     });
 

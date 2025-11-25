@@ -115,7 +115,6 @@ describe('Fluxo de Integração: Criar Pedido', () => {
         },
         horarioFuncionamento: '08:00-18:00',
         ofereceDelivery: true,
-        carrinhoId: 'dummy-carrinho-id', // (Obrigatório do schema)
       },
     });
 

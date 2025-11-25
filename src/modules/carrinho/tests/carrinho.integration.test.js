@@ -115,7 +115,6 @@ describe('Fluxo de Integração: Mudar de Loja no Carrinho', () => {
         },
         horarioFuncionamento: '10:00-20:00',
         ofereceDelivery: true,
-        carrinhoId: 'dummy1',
       },
     });
     lojaB = await prismaTestClient.loja.create({
@@ -134,7 +133,6 @@ describe('Fluxo de Integração: Mudar de Loja no Carrinho', () => {
         },
         horarioFuncionamento: '10:00-20:00',
         ofereceDelivery: true,
-        carrinhoId: 'dummy2',
       },
     });
 

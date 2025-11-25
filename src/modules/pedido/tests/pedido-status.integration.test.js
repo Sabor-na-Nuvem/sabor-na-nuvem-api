@@ -119,7 +119,6 @@ describe('Fluxo de Integração: Atualizar Status do Pedido (Fidelidade)', () =>
         },
         horarioFuncionamento: '10:00-20:00',
         ofereceDelivery: true,
-        carrinhoId: 'dummy-carrinho-id',
       },
     });
 
