@@ -85,3 +85,7 @@ tags:
 
   - name: Enderecos (Loja)
     description: Gerenciamento de endereços associados a lojas.
+
+  - name: Geocoding
+    description: Serviços de localização e mapas.
+
