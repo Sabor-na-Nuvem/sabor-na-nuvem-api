@@ -59,12 +59,10 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
 
    > [!IMPORTANT]
    > Este projeto depende de um pacote NPM privado (`@joaoschmitz/express-prisma-auth`) hospedado no GitHub Packages. Para que o `npm install` (localmente ou no Docker) possa baixá-lo, você precisa se autenticar.
-   1. **Crie um arquivo `.npmrc`** na raiz do projeto (este arquivo já está no `.gitignore`).
-   2. **Adicione o seguinte conteúdo** a este arquivo, substituindo `SEU_TOKEN_PESSOAL` pelo Token de Acesso Pessoal (PAT) que você gerou nos pré-requisitos:
+   1. **Utilize seu token:** atualize o `.env` com seu [Personal Access Token (Classic)](https://github.com/settings/tokens/new?scopes=read:packages) com o escopo `read:packages`, colando o valor na variável `GITHUB_TOKEN`.
 
-   ```.npmrc
-   @joaoschmitz:registry=https://npm.pkg.github.com
-   //npm.pkg.github.com/:_authToken=SEU_TOKEN_PESSOAL
+   ```.env
+   GITHUB_TOKEN="ghp_SeuTokenPessoalAqui..."
    ```
 
 4. Construa as imagens e inicie os containers:
@@ -200,6 +198,49 @@ npm run test:integration
 ```
 
 > 📝 Nota: O script de teste irá se conectar ao `sabor_na_nuvem_test`, aplicar todas as migrações (via `prisma migrate deploy`) e limpar todas as tabelas após cada teste para garantir o isolamento.
+
+## 🚀 Manutenção do Banco em Produção (Neon)
+
+A arquitetura de produção utiliza o **Neon** (Serverless Postgres) para o banco de dados e o **Render** para a API.
+
+Para realizar manutenções no banco de produção (como rodar migrações ou popular dados iniciais) sem precisar acessar o servidor remoto, utilizamos o Docker localmente como um "executor", conectando-se remotamente ao Neon.
+
+### Pré-requisitos de Produção
+
+1.  **Arquivo de Configuração Seguro:**
+    Crie um arquivo `.env.prod` na raiz do projeto (este arquivo é ignorado pelo Git).
+
+    ```bash
+    cp .env.prod.example .env.prod
+    ```
+
+2.  **Variáveis:**
+    Adicione a variável `DATABASE_URL` fornecida pelo Neon neste arquivo:
+
+    ```env
+    # .env.prod
+    DATABASE_URL="postgresql://user:pass@ep-xyz.aws.neon.tech/neondb?sslmode=require"
+    ```
+
+### Comandos de Manutenção
+
+Com o arquivo configurado, utilize os comandos abaixo. Eles sobem um container temporário da API, executam o comando do Prisma apontando para a nuvem e se encerram automaticamente.
+
+#### 1. Aplicar Migrações (Schema Update)
+Atualiza a estrutura do banco de dados na Neon de acordo com seu `schema.prisma`.
+
+```bash
+ENV_FILE=.env.prod docker compose --env-file .env.prod run --rm--no-deps api npx prisma migrate deploy
+```
+
+#### 2. Popular o Banco (Seed)
+Roda o script de seed para criar os dados iniciais (loja, produtos, etc.) no ambiente de produção.
+
+```bash
+ENV_FILE=.env.prod docker compose --env-file .env.prod run --rm --no-deps api npx prisma db seed
+```
+
+> **Nota:** A flag `--no-deps` garante que o Docker não suba o banco de dados local desnecessariamente, já que a conexão será feita via internet com o Neon.
 
 ## 📄 Licença
 

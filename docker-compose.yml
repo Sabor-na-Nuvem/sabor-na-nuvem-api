@@ -11,7 +11,7 @@ services:
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -29,7 +29,7 @@ services:
       - "${PORT}:3000"
       - "5555:5555"
     env_file:
-      - .env
+      - ${ENV_FILE:-.env}
     volumes:
       - ./src:/app/src
       - ./prisma:/app/prisma
