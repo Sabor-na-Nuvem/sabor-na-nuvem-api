@@ -37,6 +37,11 @@ app.use(express.json());
 
 // --- ROTAS AUXILIARES ---
 
+// Health Check para monitoramento do Render
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.get('/api/auth/redirect-success', (req, res) => {
   return res
     .status(200)
