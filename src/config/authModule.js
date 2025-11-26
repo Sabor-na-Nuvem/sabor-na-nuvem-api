@@ -10,8 +10,8 @@ const API_URL = process.env.API_URL || `http://localhost:${process.env.PORT}`;
 // --- CONFIGURAÇÃO DO TRANSPORTER DE EMAIL ---
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false, // true para port 465, false para outras
+  port: Number(process.env.SMTP_PORT) || 465,
+  secure: true, // true para port 465, false para outras
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
