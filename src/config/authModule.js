@@ -1,6 +1,6 @@
 import { createAuthModule } from '@joaoschmitz/express-prisma-auth';
 import { RoleUsuario } from '@prisma/client';
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import prisma from './prisma.js';
 
 // --- CONFIGURAÇÃO DE AMBIENTE ---
@@ -8,30 +8,29 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const API_URL = process.env.API_URL || `http://localhost:${process.env.PORT}`;
 
 // --- CONFIGURAÇÃO DO TRANSPORTER DE EMAIL ---
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 465,
-  secure: true, // true para port 465, false para outras
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Função auxiliar para enviar email
 const sendMail = async (to, subject, html) => {
-  // Em PROD envia de verdade, em DEV apenas loga (ou envia também, se preferir)
+  const msg = {
+    to,
+    from: process.env.SMTP_FROM || 'App <noreply@app.com>',
+    subject,
+    html,
+  };
+
+  // Sua lógica de ambiente (PROD vs DEV) permanece ótima
   if (process.env.NODE_ENV === 'production' || process.env.FORCE_EMAIL) {
     try {
-      await transporter.sendMail({
-        from: process.env.SMTP_FROM || 'App <noreply@app.com>',
-        to,
-        subject,
-        html,
-      });
-      console.log(`[EMAIL ENVIADO] Para: ${to}`);
+      const [response] = await sgMail.send(msg);
+
+      // O SendGrid retorna um código 202 para sucesso
+      console.log(
+        `[EMAIL ENVIADO - SG] Para: ${to} | Status: ${response.statusCode}`,
+      );
     } catch (error) {
-      console.error('[ERRO EMAIL]', error);
+      // Tratamento de erro específico do SendGrid (pode incluir mais detalhes no body)
+      console.error('[ERRO EMAIL - SG]', error.response?.body || error);
     }
   } else {
     // Log de desenvolvimento
