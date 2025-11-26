@@ -1,64 +1,130 @@
 import { createAuthModule } from '@joaoschmitz/express-prisma-auth';
 import { RoleUsuario } from '@prisma/client';
+import nodemailer from 'nodemailer';
 import prisma from './prisma.js';
 
-// TODO: implementar um serviço de email real
+// --- CONFIGURAÇÃO DE AMBIENTE ---
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const API_URL = process.env.API_URL || `http://localhost:${process.env.PORT}`;
+
+// --- CONFIGURAÇÃO DO TRANSPORTER DE EMAIL ---
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // true para port 465, false para outras
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// Função auxiliar para enviar email
+const sendMail = async (to, subject, html) => {
+  // Em PROD envia de verdade, em DEV apenas loga (ou envia também, se preferir)
+  if (process.env.NODE_ENV === 'production' || process.env.FORCE_EMAIL) {
+    try {
+      await transporter.sendMail({
+        from: process.env.SMTP_FROM || 'App <noreply@app.com>',
+        to,
+        subject,
+        html,
+      });
+      console.log(`[EMAIL ENVIADO] Para: ${to}`);
+    } catch (error) {
+      console.error('[ERRO EMAIL]', error);
+    }
+  } else {
+    // Log de desenvolvimento
+    console.log(`[DEV EMAIL MOCK] Para: ${to} | Assunto: ${subject}`);
+    console.log(html);
+  }
+};
+
 const emailService = {
   sendVerificationEmail: async (to, token) => {
-    const url = `http://localhost:${process.env.PORT}/api/auth/verify-email?token=${token}`;
-    console.log(`[MOCK EMAIL] Para: ${to} | Verifique em: ${url}`);
+    // Backend valida o email
+    const url = `${API_URL}/api/auth/verify-email?token=${token}`;
+    await sendMail(
+      to,
+      'Verifique seu e-mail',
+      `<p>Bem-vindo! Clique no link para verificar sua conta:</p>
+       <a href="${url}">${url}</a>`,
+    );
   },
+
   sendPasswordResetEmail: async (to, token) => {
-    const url = `http://localhost:3001/reset-password?token=${token}`; // URL do Frontend
-    console.log(`[MOCK EMAIL] Para: ${to} | Redefina em: ${url}`);
+    // Frontend reseta a senha
+    const url = `${FRONTEND_URL}/reset-password?token=${token}`;
+    await sendMail(
+      to,
+      'Redefinição de Senha',
+      `<p>Você solicitou a troca de senha. Clique abaixo para alterar:</p>
+       <a href="${url}">Redefinir Senha</a>`,
+    );
   },
+
   sendUpdateEmailConfirmation: async (to, token) => {
-    const url = `http://localhost:${process.env.PORT}/api/auth/verify-email-update?token=${token}`;
-    console.log(`[MOCK EMAIL] Para: ${to} | Confirme o novo email em: ${url}`);
+    // Backend confirma a troca
+    const url = `${API_URL}/api/auth/verify-email-update?token=${token}`;
+    await sendMail(
+      to,
+      'Confirme seu novo e-mail',
+      `<p>Clique no link para confirmar a alteração do seu e-mail:</p>
+       <a href="${url}">${url}</a>`,
+    );
   },
 };
 
-// URLs para onde o usuário será redirecionado pelo pacote
 const authRedirectUrls = {
-  emailVerifySuccess: 'http://localhost:3001/login?message=email-verificado',
-  emailVerifyError: 'http://localhost:3001/login?error=verificacao-falhou',
-  passwordResetSuccess: 'http://localhost:3001/login?message=senha-redefinida',
-  passwordResetError:
-    'http://localhost:3001/reset-password?error=token-invalido',
-  emailUpdateSuccess: 'http://localhost:3001/perfil?message=email-atualizado',
-  emailUpdateError:
-    'http://localhost:3001/perfil?error=email-atualizacao-falhou',
+  // Redireciona para o Front após verificar email
+  emailVerifySuccess: `${FRONTEND_URL}/login?message=email-verificado`,
+  emailVerifyError: `${FRONTEND_URL}/login?error=verificacao-falhou`,
+
+  // Redireciona para a própria API (que retorna JSON) após resetar senha
+  passwordResetSuccess: `${API_URL}/api/auth/redirect-success`,
+  passwordResetError: `${API_URL}/api/auth/redirect-error`,
+
+  // Redireciona para o Front (Perfil) após atualizar email
+  emailUpdateSuccess: `${FRONTEND_URL}/minha-conta/info?message=email-atualizado`,
+  emailUpdateError: `${FRONTEND_URL}/minha-conta/info?error=email-atualizacao-falhou`,
 };
 
 const hookPosRegistro = async (tx, novoUsuario, dadosExtras) => {
   // Cria o relatório (obrigatório)
-  await tx.relatorioUsuario.create({
-    data: {
-      usuarioId: novoUsuario.id,
-    },
-  });
+  if (!dadosExtras?.userExists) {
+    await tx.relatorioUsuario.create({
+      data: {
+        usuarioId: novoUsuario.id,
+      },
+    });
+  }
 
   // Verifica e cria Endereço (se enviado pelo frontend)
   if (dadosExtras?.endereco) {
+    const dadosEndereco = {
+      cep: dadosExtras.endereco.cep,
+      estado: dadosExtras.endereco.estado,
+      cidade: dadosExtras.endereco.cidade,
+      bairro: dadosExtras.endereco.bairro,
+      logradouro: dadosExtras.endereco.logradouro,
+      numero: dadosExtras.endereco.numero,
+      complemento: dadosExtras.endereco.complemento || null,
+      pontoReferencia: dadosExtras.endereco.pontoReferencia || null,
+      latitude: dadosExtras.endereco.latitude
+        ? Number(dadosExtras.endereco.latitude)
+        : null,
+      longitude: dadosExtras.endereco.longitude
+        ? Number(dadosExtras.endereco.longitude)
+        : null,
+    };
+
     await tx.usuario.update({
       where: { id: novoUsuario.id },
       data: {
         endereco: {
-          create: {
-            cep: dadosExtras.endereco.cep,
-            estado: dadosExtras.endereco.estado,
-            cidade: dadosExtras.endereco.cidade,
-            bairro: dadosExtras.endereco.bairro,
-            logradouro: dadosExtras.endereco.logradouro,
-            numero: dadosExtras.endereco.numero,
-            complemento: dadosExtras.endereco.complemento || null,
-            pontoReferencia: dadosExtras.endereco.pontoReferencia || null,
-            latitude: dadosExtras.endereco.latitude
-              ? Number(dadosExtras.endereco.latitude)
-              : null,
-            longitude: dadosExtras.endereco.longitude
-              ? Number(dadosExtras.endereco.longitude)
-              : null,
+          upsert: {
+            create: dadosEndereco,
+            update: dadosEndereco,
           },
         },
       },
@@ -67,17 +133,22 @@ const hookPosRegistro = async (tx, novoUsuario, dadosExtras) => {
 
   // Verifica e cria Telefones (se enviado pelo frontend)
   if (dadosExtras?.telefones && Array.isArray(dadosExtras.telefones)) {
-    await Promise.all(
-      dadosExtras.telefones.map((tel) =>
-        tx.telefone.create({
-          data: {
-            ddd: tel.ddd,
-            numero: tel.numero,
-            usuarioId: novoUsuario.id,
-          },
-        }),
-      ),
-    );
+    // SE O USUÁRIO JÁ EXISTIA: Limpa os telefones antigos para não duplicar
+    if (dadosExtras.userExists) {
+      await tx.telefone.deleteMany({
+        where: { usuarioId: novoUsuario.id },
+      });
+    }
+    // Cria os novos telefones
+    if (dadosExtras.telefones.length > 0) {
+      await tx.telefone.createMany({
+        data: dadosExtras.telefones.map((tel) => ({
+          ddd: tel.ddd,
+          numero: tel.numero,
+          usuarioId: novoUsuario.id,
+        })),
+      });
+    }
   }
 };
 

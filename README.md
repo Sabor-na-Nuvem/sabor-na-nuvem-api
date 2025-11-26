@@ -45,47 +45,57 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
 1. **Realize o clone do projeto e entre na pasta criada**
 
    ```bash
-   git clone [https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api.git](https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api.git)
+   git clone https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api.git
    cd sabor-na-nuvem-api
    ```
 
-2. **Crie e configure o seu `.env` seguindo o padrão mostrado em `.env.example`**
+2. **Crie e configure o seu `.env`**
+
+   Crie o arquivo `.env` a partir do exemplo:
 
    ```bash
    cp .env.example .env
    ```
 
-3. **Configure a autenticação do GitHub Packages**
+3. **Configure a autenticação do GitHub Packages (Obrigatório)**
 
-   > [!IMPORTANT]
-   > Este projeto depende de um pacote NPM privado (`@joaoschmitz/express-prisma-auth`) hospedado no GitHub Packages. Para que o `npm install` (localmente ou no Docker) possa baixá-lo, você precisa se autenticar.
-   1. **Utilize seu token:** atualize o `.env` com seu [Personal Access Token (Classic)](https://github.com/settings/tokens/new?scopes=read:packages) com o escopo `read:packages`, colando o valor na variável `GITHUB_TOKEN`.
+   Este projeto utiliza um pacote privado (`@joaoschmitz/express-prisma-auth`). Para que o Docker consiga baixá-lo, é necessário criar um arquivo de configuração com seu token de acesso.
 
-   ```.env
-   GITHUB_TOKEN="ghp_SeuTokenPessoalAqui..."
+   1. Gere um **Personal Access Token (Classic)** no GitHub [neste link](https://github.com/settings/tokens/new?scopes=read:packages) e marque o escopo `read:packages`.
+   2. Na raiz do projeto, crie um arquivo chamado **`.npmrc.docker`**.
+   3. Cole o conteúdo abaixo dentro dele, substituindo `SEU_TOKEN` pelo token que você gerou (começa com `ghp_...`):
+
+   ```ini
+   @joaoschmitz:registry=[https://npm.pkg.github.com](https://npm.pkg.github.com)
+   //npm.pkg.github.com/:_authToken=ghp_SEU_TOKEN_AQUI_123456
    ```
 
-4. Construa as imagens e inicie os containers:
+   > [!WARNING]
+   > **Não coloque seu token no arquivo `.npmrc` por engano**, ele é visível para todos no Github.
+
+   *(Opcional: Para rodar `npm install` localmente fora do Docker, você pode rodar o comando `GITHUB_TOKEN=seu_token npm install` no Linux/macOS ou `$env:GITHUB_TOKEN="seu_token"; npm install` no Powershell do Windows).*
+
+4. **Construa as imagens e inicie os containers**
+
+   Certifique-se de que seu `docker-compose.yml` esteja apontando para o arquivo `.npmrc.docker` na seção de secrets, e então rode:
 
    ```bash
    docker compose up --build
    ```
 
-   > **Nota:** O `docker-compose.yml` está configurado para usar o seu arquivo `.npmrc` local como um "segredo" (secret) durante o build, garantindo que seu token seja usado com segurança sem ser salvo na imagem do Docker.
-
-5. Execute as migrações do banco de dados:
+5. **Execute as migrações do banco de dados**
 
    ```bash
    docker compose exec api npx prisma migrate dev --name init
    ```
 
-6. (Opcional) Popular o banco de dados:
+6. **(Opcional) Popular o banco de dados**
 
-    ```bash
-    docker compose exec api npx prisma db seed
-    ```
+   ```bash
+   docker compose exec api npx prisma db seed
+   ```
 
-    > **Nota:** Isso vai rodar o script, limpar o banco e criar dados base prontos para serem consumidos pelo frontend.
+   > Isso vai limpar o banco e criar dados base prontos para serem consumidos pelo frontend.
 
 Pronto! Sua API está rodando e acessível em `http://localhost:3000`
 

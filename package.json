@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/Sabor-na-Nuvem/sabor-na-nuvem-api#readme",
   "dependencies": {
-    "@joaoschmitz/express-prisma-auth": "^1.0.0",
+    "@joaoschmitz/express-prisma-auth": "^1.0.3",
     "@prisma/client": "^6.16.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
@@ -49,6 +49,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.10",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },

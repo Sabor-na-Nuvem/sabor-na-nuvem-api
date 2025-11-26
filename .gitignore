@@ -20,3 +20,5 @@ pnpm-debug.log
 *.sublime-workspace
 
 /src/generated/prisma
+
+.npmrc.docker

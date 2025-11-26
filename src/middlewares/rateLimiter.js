@@ -1,5 +1,7 @@
 import rateLimit from 'express-rate-limit';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 /**
  * Limitador específico para rotas de Geocodificação.
  */
@@ -19,7 +21,9 @@ export const geocodingLimiter = rateLimit({
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 20, // 20 tentativas por IP
+  max: isProduction ? 20 : 1000, // 20 tentativas por IP
+  standardHeaders: true,
+  legacyHeaders: false,
   message: {
     message:
       'Muitas tentativas de login/registro. Tente novamente em 15 minutos.',

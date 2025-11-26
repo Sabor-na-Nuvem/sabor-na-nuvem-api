@@ -42,4 +42,4 @@ volumes:
 
 secrets:
   npmrc:
-    file: .npmrc
+    file: .npmrc.docker

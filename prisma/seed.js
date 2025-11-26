@@ -58,8 +58,8 @@ const produtosSeed = [
     preco: 42.9,
     categoria: 'Destaques do Dia',
     imagemUrl:
-      'https://img.freepik.com/fotos-gratis/saboroso-hamburguer-de-carne-com-queijo-e-salada-de-frente_23-2148868221.jpg',
-    personalizavel: true, // ADD: Personalização de ponto e retirar itens
+      'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=1000&auto=format&fit=crop',
+    personalizavel: true,
   },
   {
     nome: 'Combo Casal',
@@ -67,7 +67,8 @@ const produtosSeed = [
       '2 X-Saladas Clássicos + 2 Batatas Médias + 2 Refrigerantes Lata.',
     preco: 69.9,
     categoria: 'Destaques do Dia',
-    // Sem personalização complexa neste seed para simplificar combos
+    imagemUrl:
+      'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Milkshake de Nutella (500ml)',
@@ -75,7 +76,9 @@ const produtosSeed = [
       'O favorito da casa! Sorvete de baunilha batido com muita Nutella e chantilly.',
     preco: 24.9,
     categoria: 'Destaques do Dia',
-    personalizavel: true, // ADD: Personalização de adicionais
+    imagemUrl:
+      'https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=1000&auto=format&fit=crop',
+    personalizavel: true,
   },
 
   // --- 2. HAMBÚRGUERES ---
@@ -85,6 +88,8 @@ const produtosSeed = [
       'Pão brioche, carne 150g, queijo prato, alface americana, tomate e maionese verde.',
     preco: 28.0,
     categoria: 'Hambúrgueres',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1000&auto=format&fit=crop',
     personalizavel: true,
   },
   {
@@ -93,7 +98,9 @@ const produtosSeed = [
       'Pão australiano, carne 180g e muito creme de cheddar com cebola ao shoyu.',
     preco: 32.5,
     categoria: 'Hambúrgueres',
-    personalizavel: true, // ADD: Ponto da carne
+    imagemUrl:
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1000&auto=format&fit=crop',
+    personalizavel: true,
   },
   {
     nome: 'Smash Burger Duplo',
@@ -101,7 +108,8 @@ const produtosSeed = [
       'Dois smash burgers de 90g prensados na chapa, queijo americano e molho da casa.',
     preco: 26.0,
     categoria: 'Hambúrgueres',
-    // Sem ponto da carne (smash é sempre bem passado por padrão)
+    imagemUrl:
+      'https://images.unsplash.com/photo-1553979459-d2229ba7433b?q=80&w=1000&auto=format&fit=crop',
   },
 
   // --- 3. COMBOS & OFERTAS ---
@@ -110,6 +118,8 @@ const produtosSeed = [
     descricao: '1 Cheddar Melt + 1 Batata com Cheddar e Bacon + 1 Refri 500ml.',
     preco: 49.9,
     categoria: 'Combos & Ofertas',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1596662951482-0c4ba74a6df6?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Box da Galera',
@@ -117,6 +127,8 @@ const produtosSeed = [
       '4 Cheeseburgers simples + 4 Batatas P + 1 Refrigerante 2 Litros.',
     preco: 99.9,
     categoria: 'Combos & Ofertas',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=1000&auto=format&fit=crop',
   },
 
   // --- 4. LANCHES DE FRANGO ---
@@ -126,7 +138,9 @@ const produtosSeed = [
       'Filé de peito de frango empanado super crocante, alface e maionese no pão com gergelim.',
     preco: 25.9,
     categoria: 'Lanches de Frango',
-    personalizavel: true, // ADD: Molho extra
+    imagemUrl:
+      'https://images.unsplash.com/photo-1615557960916-5f4791effe9d?q=80&w=1000&auto=format&fit=crop',
+    personalizavel: true,
   },
   {
     nome: 'Nuggets (10 unidades)',
@@ -134,6 +148,8 @@ const produtosSeed = [
       'Pedaços de frango macios por dentro e crocantes por fora. Acompanha molho barbecue.',
     preco: 18.9,
     categoria: 'Lanches de Frango',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=1000&auto=format&fit=crop',
   },
 
   // --- 5. ACOMPANHAMENTOS ---
@@ -142,13 +158,17 @@ const produtosSeed = [
     descricao: 'Nossas batatas tradicionais, sequinhas e crocantes.',
     preco: 14.9,
     categoria: 'Acompanhamentos',
-    personalizavel: true, // ADD: Molhos
+    imagemUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/French_Fries.JPG/250px-French_Fries.JPG',
+    personalizavel: true,
   },
   {
     nome: 'Onion Rings',
     descricao: 'Anéis de cebola empanados e dourados. Porção com 12 unidades.',
     preco: 16.9,
     categoria: 'Acompanhamentos',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1639024471283-03518883512d?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Batata Rústica',
@@ -156,6 +176,8 @@ const produtosSeed = [
       'Batatas cortadas em gomos com casca, temperadas com alecrim e páprica.',
     preco: 18.9,
     categoria: 'Acompanhamentos',
+    imagemUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Potato_wedges_at_Mensa_Paderborn_%2811956794164%29.jpg/250px-Potato_wedges_at_Mensa_Paderborn_%2811956794164%29.jpg',
   },
 
   // --- 6. VEGETARIANOS & LEVES ---
@@ -165,6 +187,8 @@ const produtosSeed = [
       'Hambúrguer de grão de bico e cogumelos, rúcula, tomate seco e maionese vegana.',
     preco: 31.0,
     categoria: 'Vegetarianos & Leves',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1550317138-10000687a72b?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Wrap de Frango Grelhado',
@@ -172,6 +196,8 @@ const produtosSeed = [
       'Tortilha leve, tiras de frango grelhado, mix de folhas e molho de iogurte.',
     preco: 22.9,
     categoria: 'Vegetarianos & Leves',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?q=80&w=1000&auto=format&fit=crop',
   },
 
   // --- 7. BEBIDAS ---
@@ -180,24 +206,32 @@ const produtosSeed = [
     descricao: 'Sabor original.',
     preco: 6.0,
     categoria: 'Bebidas',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Guaraná Antarctica 350ml',
     descricao: 'O original do Brasil.',
     preco: 6.0,
     categoria: 'Bebidas',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Suco de Laranja Natural (500ml)',
     descricao: 'Feito na hora, sem adição de açúcar.',
     preco: 12.0,
     categoria: 'Bebidas',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Água Mineral sem Gás',
     descricao: 'Garrafa 500ml.',
     preco: 4.0,
     categoria: 'Bebidas',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1560693225-b8507d6f3aa9?q=80&w=1000&auto=format&fit=crop',
   },
 
   // --- 8. SOBREMESAS & SHAKES ---
@@ -207,7 +241,9 @@ const produtosSeed = [
       'Clássico e cremoso, feito com sorvete de morango e calda da fruta.',
     preco: 18.9,
     categoria: 'Sobremesas & Shakes',
-    personalizavel: true, // ADD: Chantilly
+    imagemUrl:
+      'https://images.unsplash.com/photo-1579954115563-e72bf1381629?q=80&w=1000&auto=format&fit=crop',
+    personalizavel: true,
   },
   {
     nome: 'Sundae de Chocolate',
@@ -215,12 +251,16 @@ const produtosSeed = [
       'Sorvete de baunilha com muita calda quente de chocolate e amendoim.',
     preco: 14.5,
     categoria: 'Sobremesas & Shakes',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Torta de Limão',
     descricao: 'Fatia de torta com massa crocante e merengue maçaricado.',
     preco: 12.9,
     categoria: 'Sobremesas & Shakes',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?q=80&w=1000&auto=format&fit=crop',
   },
 
   // --- 9. MENU KIDS ---
@@ -229,6 +269,8 @@ const produtosSeed = [
     descricao: 'Pão, carne e queijo. Simples e delicioso para os pequenos.',
     preco: 19.9,
     categoria: 'Menu Kids',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1000&auto=format&fit=crop',
   },
   {
     nome: 'Combo Aventurinha',
@@ -236,6 +278,8 @@ const produtosSeed = [
       '4 Nuggets, Batata Sorriso e um Suco de Caixinha + Brinde Surpresa.',
     preco: 28.9,
     categoria: 'Menu Kids',
+    imagemUrl:
+      'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?q=80&w=1000&auto=format&fit=crop',
   },
 ];
 
@@ -306,6 +350,7 @@ async function main() {
 
   const loja = await prisma.loja.create({
     data: {
+      id: 1,
       nome: 'Sabor na Nuvem',
       cnpj: '12345678000199',
       horarioFuncionamento: '10:00 - 22:00',

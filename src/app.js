@@ -35,6 +35,19 @@ app.use(
 );
 app.use(express.json());
 
+// --- ROTAS AUXILIARES ---
+
+app.get('/api/auth/redirect-success', (req, res) => {
+  return res
+    .status(200)
+    .json({ success: true, message: 'Operação concluída com sucesso.' });
+});
+
+app.get('/api/auth/redirect-error', (req, res) => {
+  const errorMessage = req.query.error || 'Operação falhou.';
+  return res.status(400).json({ success: false, message: errorMessage });
+});
+
 // --- ROTAS DA APLICACAO ---
 
 // Rotas de autenticação (ex: /login, /register)
