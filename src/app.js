@@ -26,6 +26,7 @@ import categoriaProdutoRouter from './modules/categoria-produto/categoria-produt
 
 // --- CONFIGURAÇÃO DO APP ---
 const app = express();
+app.set('trust proxy', 1);
 // --- CONFIGURAÇÃO DO CORS ---
 const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
 app.use(
