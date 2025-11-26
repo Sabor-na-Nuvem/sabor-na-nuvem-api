@@ -97,9 +97,9 @@ jobs:
     # ⚠️ Condição: Só roda quando o push é feito diretamente na branch 'main'
     if: github.ref == 'refs/heads/main' 
     
+    env:
+      RENDER_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+
     steps:
       - name: Trigger Render Deploy Hook
-        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
-        env:
-          # Permite que o curl funcione em caso de redirecionamento ou problemas de SSL
-          CURL_OPTIONS: "-f -X POST"
+        run: curl -f -X POST $RENDER_HOOK
