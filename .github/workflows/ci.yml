@@ -20,7 +20,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/sabor_na_nuvem_test?schema=public
       JWT_SECRET: ${{ secrets.JWT_SECRET }} 
       NODE_ENV: test
-      NPM_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      NPM_GH_TOKEN: ${{ secrets.GH_READ_PACKAGES_TOKEN }} 
 
     services:
       postgres:
@@ -52,7 +52,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@joaoschmitz'
           cache: 'npm' # Habilita o cache para o npm
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_READ_PACKAGES_TOKEN }}
 
       # 3. Instala as dependências de forma otimizada para CI
       - name: Install dependencies
