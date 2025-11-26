@@ -66,14 +66,14 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
    3. Cole o conteúdo abaixo dentro dele, substituindo `SEU_TOKEN` pelo token que você gerou (começa com `ghp_...`):
 
    ```ini
-   @joaoschmitz:registry=[https://npm.pkg.github.com](https://npm.pkg.github.com)
+   @joaoschmitz:registry=https://npm.pkg.github.com
    //npm.pkg.github.com/:_authToken=ghp_SEU_TOKEN_AQUI_123456
    ```
 
    > [!WARNING]
    > **Não coloque seu token no arquivo `.npmrc` por engano**, ele é visível para todos no Github.
 
-   *(Opcional: Para rodar `npm install` localmente fora do Docker, você pode rodar o comando `GITHUB_TOKEN=seu_token npm install` no Linux/macOS ou `$env:GITHUB_TOKEN="seu_token"; npm install` no Powershell do Windows).*
+   *(Opcional: Para rodar `npm install` localmente fora do Docker, você pode rodar o comando `NPM_GH_TOKEN=seu_token npm install` no Linux/macOS ou `$env:NPM_GH_TOKEN="seu_token"; npm install` no Powershell do Windows).*
 
 4. **Construa as imagens e inicie os containers**
 
