@@ -27,9 +27,10 @@ import categoriaProdutoRouter from './modules/categoria-produto/categoria-produt
 // --- CONFIGURAÇÃO DO APP ---
 const app = express();
 // --- CONFIGURAÇÃO DO CORS ---
+const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
 app.use(
   cors({
-    origin: 'http://localhost:5173', // URL do Frontend
+    origin: allowedOrigin, // URL do Frontend
     credentials: true, // IMPORTANTE: Permite enviar/receber Cookies (Refresh Token)
   }),
 );
