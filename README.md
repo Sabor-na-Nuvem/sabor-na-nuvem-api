@@ -26,6 +26,40 @@ Este repositório contém o código-fonte da API. Ele segue uma arquitetura modu
 
 - **Testes:** Jest (Testes de unidade & integração), Supertest (Testes de API HTTP)
 
+---
+
+## 🔗 Links de Acesso Rápido (Deploy)
+
+A API do projeto está implantada no **Render** e acessível publicamente para testes e avaliação:
+
+| Recurso | URL | Observação |
+| :--- | :--- | :--- |
+| **API Base URL** | `https://sabor-na-nuvem-api.onrender.com` | Servidor Node.js (Pode ter "cold start" inicial). |
+| **Documentação (Swagger)** | `https://sabor-na-nuvem-api.onrender.com/api-docs` | Interface para testar todas as rotas da API. Para ver mais sobre como o Swagger funciona, veja a seção **Swagger**. |
+
+---
+
+## ☁️ Arquitetura de Deploy (Produção)
+
+Este projeto segue uma arquitetura moderna e desagregada para máxima performance e custo-efetividade (Plano Gratuito), utilizando um modelo de **Continuous Deployment (CD)**.
+
+| Componente | Plataforma | Finalidade | Status de Atividade |
+| :--- | :--- | :--- | :--- |
+| **Backend (API)** | **Render** | Serviço Node.js/Express. | Dorme após 15 min de inatividade (Plano Gratuito). |
+| **Banco de Dados** | **Neon** | PostgreSQL geoespacial (PostGIS). | Sempre ativo e com conexões otimizadas. |
+| **Frontend** | **Vercel** | Frontend React (SPA). | CDN global e rápido. |
+
+### Fluxo de Continuous Deployment (CD)
+
+O deploy é inteiramente controlado pelo **GitHub Actions** para garantir que a API só vá para produção se estiver estável. 
+
+1.  **Push para `main`:** O commit aciona o workflow CI/CD no GitHub.
+2.  **CI (Testes):** A pipeline roda testes unitários e de integração (usando um banco de teste em memória).
+3.  **CD (Deploy):** Se todos os testes passarem, a pipeline dispara o **Render Deploy Hook** (via `curl`).
+4.  **Build Final:** O Render faz o build do Node.js (`npm install && npx prisma generate`) e coloca a API no ar.
+
+---
+
 ## ⚙️ Como rodar o ambiente de desenvolvimento
 
 Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento localmente.
@@ -71,9 +105,7 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
    ```
 
    > [!WARNING]
-   > **Não coloque seu token no arquivo `.npmrc` por engano**, ele é visível para todos no Github.
-
-   *(Opcional: Para rodar `npm install` localmente fora do Docker, você pode rodar o comando `NPM_GH_TOKEN=seu_token npm install` no Linux/macOS ou `$env:NPM_GH_TOKEN="seu_token"; npm install` no Powershell do Windows).*
+   > **Não coloque seu token no arquivo `.npmrc` por engano**, ele é visível para todos no Github e deve ser mantido do modo que está.
 
 4. **Construa as imagens e inicie os containers**
 
@@ -112,6 +144,9 @@ Como a maioria das rotas da API é protegida, você precisará de um `accessToke
     - Clique em "Try it out" e preencha o JSON com um email e senha de teste.
     - Clique em "Execute".
 
+    > [!WARNING]
+    > O usuário criado tem o cargo **CLIENTE**. Para testar rotas de Admin, você precisará modificar o cargo diretamente no banco de dados (veja a seção **Gerenciando o Banco de Dados**).
+
 2.  **Verifique seu Email (no Console):**
     - Como estamos em desenvolvimento, o serviço de email está mockado para imprimir no console.
     - Vá até o terminal onde seu `docker compose` está rodando.
@@ -124,15 +159,13 @@ Como a maioria das rotas da API é protegida, você precisará de um `accessToke
     - Ele irá redirecionar para uma URL de sucesso (ex: `.../login?message=email-verificado`).
 
 > [!WARNING]
-> **Comportamento Esperado:** O Swagger irá mostrar um erro `Undocumented / Failed to fetch / CORS`. **Isso é normal.**
+> **Comportamento Esperado:** O servidor deve te redirecionar para a página de login do frontend, caso este esteja rodando.
 >
-> **Por quê?** O servidor está (corretamente) tentando redirecionar seu navegador para a URL de frontend (`http://localhost:3001/...`), mas o navegador bloqueia esse redirecionamento entre origens diferentes (CORS).
+> **Como verificar se funcionou:** Se o frontend não estiver rodando, é possível ver se a operação teve ou não sucesso ao olhar no seu console onde o Docker está rodando. Se funcionou, você deve ver um log parecido com esse: `prisma:query UPDATE "public"."usuario" SET "emailVerificado" = $1, ...`.
 >
-> **Como verificar se funcionou:** Embora o Swagger mostre um erro, é possível ver se a operação teve ou não sucesso ao olhar no seu console onde o Docker está rodando. Se funcionou, você deve ver um log parecido com esse: `prisma:query UPDATE "public"."usuario" SET "emailVerificado" = $1, ...`.
->
-> **Alternativa:** Para verificar o email, **copie o link de verificação completo** do console do Docker e **cole-o diretamente na barra de endereço do seu navegador**. Se funcionou, você deverá ser redirecionado para uma página inexistente com a URL apontando se funcionou (`.../login?message=email-verificado`).
+> **Alternativa:** Para verificar o email, **copie o link de verificação completo** do console do Docker e **cole-o diretamente na barra de endereço do seu navegador**. Se funcionou, você deverá ser redirecionado para o frontend.
 
-4.  **Faça o Login para Obter o Token:**
+1.  **Faça o Login para Obter o Token:**
     - Vá para a rota `POST /api/auth/login`.
     - Clique em "Try it out" e preencha com o email e senha que você acabou de registrar.
     - Execute. A resposta `Response body` será:
@@ -143,13 +176,15 @@ Como a maioria das rotas da API é protegida, você precisará de um `accessToke
       ```
     - **Copie o `accessToken` completo.**
 
-5.  **Autorize o Swagger:**
+2.  **Autorize o Swagger:**
     - No topo da página do Swagger, clique no botão verde **"Authorize"** (com um ícone de cadeado).
     - Um modal "Available authorizations" aparecerá.
     - No campo "value" da seção `bearerAuth`, cole **apenas o token** (a string `ey...`). O Swagger adicionará o prefixo `Bearer ` automaticamente.
     - Clique em "Authorize" e depois em "Close".
 
 Os cadeados em todas as rotas protegidas agora devem aparecer como "fechados". Você está autenticado e pode testar qualquer rota da API que o cargo do seu usuário tem acesso (como `GET /api/pedidos/me` ou `POST /api/usuarios/me/carrinho/itens`).
+
+---
 
 ## 🗄️ Gerenciando o Banco de Dados (Prisma Studio)
 
@@ -164,6 +199,8 @@ docker compose exec api npx prisma studio
 ```
 
 O terminal ficará aguardando conexões. Abra seu navegador e acesse **[http://localhost:5555](http://localhost:5555)** para visualizar seus dados.
+
+---
 
 ## 🧪 Rodando os Testes
 
@@ -209,6 +246,8 @@ npm run test:integration
 
 > 📝 Nota: O script de teste irá se conectar ao `sabor_na_nuvem_test`, aplicar todas as migrações (via `prisma migrate deploy`) e limpar todas as tabelas após cada teste para garantir o isolamento.
 
+---
+
 ## 🚀 Manutenção do Banco em Produção (Neon)
 
 A arquitetura de produção utiliza o **Neon** (Serverless Postgres) para o banco de dados e o **Render** para a API.
@@ -251,6 +290,8 @@ ENV_FILE=.env.prod docker compose --env-file .env.prod run --rm --no-deps api np
 ```
 
 > **Nota:** A flag `--no-deps` garante que o Docker não suba o banco de dados local desnecessariamente, já que a conexão será feita via internet com o Neon.
+
+--- 
 
 ## 📄 Licença
 

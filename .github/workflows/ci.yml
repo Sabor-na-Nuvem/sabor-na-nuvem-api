@@ -1,8 +1,12 @@
 # Nome do workflow
-name: CI - API Sabor na Nuvem
+name: CI/CD - API Sabor na Nuvem
 
 # Define os gatilhos para rodar este workflow
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "main" ] # Roda CI e CD
+  pull_request:
+    branches: [ "main" ] # Roda apenas CI/Testes
 
 # Define as permissões da CI
 permissions:
@@ -11,7 +15,9 @@ permissions:
 
 # Define os trabalhos (jobs) que serão executados
 jobs:
-  # Nome do nosso job principal
+  # -------------------------------------------------------------------
+  # 🧪 JOB 1: BUILD E TESTES (CI)
+  # -------------------------------------------------------------------
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -79,3 +85,21 @@ jobs:
       # 7. Roda os testes de integração
       - name: Run integration tests
         run: npm run test:integration
+
+  # -------------------------------------------------------------------
+  # 🚀 JOB 2: DEPLOY (CD)
+  # -------------------------------------------------------------------
+  deploy:
+    # ⚠️ Dependência: Só roda se o job de testes passar
+    needs: build-and-test 
+    runs-on: ubuntu-latest
+    
+    # ⚠️ Condição: Só roda quando o push é feito diretamente na branch 'main'
+    if: github.ref == 'refs/heads/main' 
+    
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+        env:
+          # Permite que o curl funcione em caso de redirecionamento ou problemas de SSL
+          CURL_OPTIONS: "-f -X POST"
